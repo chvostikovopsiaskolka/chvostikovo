@@ -1,3 +1,5 @@
+import { EnglishInquiryForm } from "./EnglishInquiryForm";
+import { HOME_PRIMARY_FAQ_EN } from "@/content/home-faq-en";
 import { useState } from "react";
 import { Syringe, PawPrint, Droplets, HeartPulse, Check, Plus, Minus, Car } from "lucide-react";
 import { FormDialog } from "./FormDialog";
@@ -52,7 +54,7 @@ export function DaycareEarlyFaq() {
 
 const reqIcons = [Syringe, PawPrint, Droplets, HeartPulse];
 
-export function Requirements({ id = "podmienky", showContextFaq = false, ariaPreview = false, hideEyebrow = false, embedded = false, title = "Čo musí psík spĺňať" }: { id?: string; showContextFaq?: boolean; ariaPreview?: boolean; hideEyebrow?: boolean; embedded?: boolean; title?: string } = {}) {
+export function Requirements({ id = "podmienky", showContextFaq = false, ariaPreview = false, hideEyebrow = false, embedded = false, title = "Čo musí psík spĺňať", language = "sk" }: { id?: string; showContextFaq?: boolean; ariaPreview?: boolean; hideEyebrow?: boolean; embedded?: boolean; title?: string; language?: "sk" | "en" } = {}) {
   const Container = embedded ? "div" : "section";
   const Heading = embedded ? "h3" : "h2";
   return (
@@ -60,14 +62,14 @@ export function Requirements({ id = "podmienky", showContextFaq = false, ariaPre
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
-          {!hideEyebrow && <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Podmienky prijatia</span>}
+          {!hideEyebrow && <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">{language === "en" ? "Admission requirements" : "Podmienky prijatia"}</span>}
           <Heading className={"section-title text-3xl sm:text-4xl " + (hideEyebrow ? "" : "mt-2")}>{title}</Heading>
-          <p className="mt-3 text-sm text-forest/65 sm:hidden">Potiahnite do strany a pozrite si všetky podmienky.</p>
+          <p className="mt-3 text-sm text-forest/65 sm:hidden">{language === "en" ? "Swipe to see all requirements." : "Potiahnite do strany a pozrite si všetky podmienky."}</p>
         </div>
 
         {/* All conditions remain visible and swipeable on mobile; two-column grid from sm upwards. */}
-        <div role="region" aria-label="Podmienky prijatia – posúvajte do strany" tabIndex={0} className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:mt-10 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0">
-          {(ariaPreview ? ARIA_PREVIEW_REQUIREMENTS : REQUIREMENTS).map((r, i) => {
+        <div role="region" aria-label={language === "en" ? "Admission requirements – swipe sideways" : "Podmienky prijatia – posúvajte do strany"} tabIndex={0} className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:mt-10 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0">
+          {(language === "en" ? [{title:"Vaccination and prevention",text:"A valid vaccination record covering rabies, distemper, parvovirus, parainfluenza, infectious hepatitis, leptospirosis and kennel cough is required. Dogs must be regularly dewormed and protected from external parasites."},{title:"Behaviour",text:"Dogs must be non-aggressive towards people and other dogs. We cannot accept aggressive dogs, unsuitable behaviour or dogs considered dangerous or difficult to manage in a group."},{title:"Hygiene",text:"Dogs need basic indoor toilet habits, taking puppies’ age and development into account. Owners must walk their dog before arrival. Dogs have regular toilet breaks according to their needs."},{title:"Health",text:"Dogs must be clinically healthy, without acute or infectious illnesses. Please inform us of chronic conditions in advance so we can assess individual needs and safety. Female dogs cannot attend while in heat."}] : ariaPreview ? ARIA_PREVIEW_REQUIREMENTS : REQUIREMENTS).map((r, i) => {
             const Icon = reqIcons[i]!;
             return (
               <article key={r.title} className="w-[86%] shrink-0 snap-start rounded-3xl border border-forest/10 bg-card p-6 shadow-card sm:w-auto sm:shrink sm:p-7">
@@ -85,7 +87,7 @@ export function Requirements({ id = "podmienky", showContextFaq = false, ariaPre
         {showContextFaq && <div className="mx-auto mt-6 max-w-3xl">
           <ContextFaq question="Prijímate aj šteniatka?" label="Čo ak chcete prihlásiť šteniatko?" source="home_requirements_puppy">
             <a href="#aria-puppy-check" onClick={() => void trackCookielessInteraction("explore_daycare", "home_requirements_puppy_checker")}
-              className="btn-coral mt-4 inline-flex min-h-11 items-center justify-center px-5 py-3 text-center text-sm font-bold text-white shadow-card">Overiť pripravenosť šteniatka</a>
+              className="btn-coral mt-4 inline-flex min-h-11 items-center justify-center px-5 py-3 text-center text-sm font-bold text-white shadow-card">{language === "en" ? "Check puppy readiness" : "Overiť pripravenosť šteniatka"}</a>
           </ContextFaq>
         </div>}
       </div>
@@ -111,26 +113,26 @@ export const FIRST_VISIT_STEPS = [
   },
 ];
 
-export function FirstVisit({ inlineForm = false, leadStyle = false }: { inlineForm?: boolean; leadStyle?: boolean } = {}) {
+export function FirstVisit({ inlineForm = false, leadStyle = false, language = "sk" }: { inlineForm?: boolean; leadStyle?: boolean; language?: "sk" | "en" } = {}) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-    <section id="prva-navsteva" className={"relative scroll-mt-24 overflow-hidden py-10 sm:py-14 " + (leadStyle ? "bg-[#91406b] text-white" : "")}>
+    <section id={language === "en" ? "en-first-visit" : "prva-navsteva"} className={"relative scroll-mt-24 overflow-hidden py-10 sm:py-14 " + (leadStyle ? "bg-[#91406b] text-white" : "")}>
       <SectionAmbientPaws tone={leadStyle ? "dark" : "light"} />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
           <span className={"font-display text-sm font-semibold tracking-wide uppercase " + (leadStyle ? "text-coral-soft" : "text-coral")}>
-            Ako to funguje
+            {language === "en" ? "How it works" : "Ako to funguje"}
           </span>
-          <h2 className={"mt-2 text-3xl sm:text-4xl " + (leadStyle ? "text-white" : "section-title")}>Prvá návšteva v 3 krokoch</h2>
-          <p className={"mt-3 " + (leadStyle ? "text-white/80" : "text-forest/80")}>Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.</p>
+          <h2 className={"mt-2 text-3xl sm:text-4xl " + (leadStyle ? "text-white" : "section-title")}>{language === "en" ? "Your first visit in 3 steps" : "Prvá návšteva v 3 krokoch"}</h2>
+          <p className={"mt-3 " + (leadStyle ? "text-white/80" : "text-forest/80")}>{language === "en" ? "We get to know each other and find out whether your dog will feel comfortable with us." : "Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre."}</p>
         </div>
 
         <ol className="mx-auto mt-10 grid max-w-5xl gap-9 text-center md:grid-cols-3 md:gap-8">
-          {FIRST_VISIT_STEPS.map((s, i) => (
+          {(language === "en" ? [{ title:"Tell us about your dog",content:<>Every new dog has an <strong>introductory visit</strong> before starting daycare. Contact us, tell us about your dog’s temperament, needs and experiences, and arrange a date.</>, note:undefined },{title:"Come and meet us",content:<>We gradually get to know your dog and observe responses to the environment, people and other dogs. <strong>Every dog adapts at a different pace.</strong> Puppies and shy dogs may benefit from 2–3 shorter visits with their owner or a short stay without them.</>,note:"Free introductory visit"},{title:"Agree on the next steps",content:<>Please <strong>tell us everything about your dog honestly</strong>, not just the good things. We decide on the next steps according to temperament, behaviour and adjustment. If the group is suitable, we arrange the first stay and send photos or videos during the day.</>,note:undefined}]:FIRST_VISIT_STEPS).map((s, i) => (
             <li key={s.title} data-first-visit-step={i + 1} className="min-w-0">
-              <FirstVisitPhoto number={i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
+              <FirstVisitPhoto language={language} number={i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
               <h3 className={"font-display text-lg font-bold leading-snug " + (leadStyle ? "text-white" : "text-forest")}>{s.title}</h3>
               <p className={"mt-2 text-sm leading-relaxed " + (leadStyle ? "text-white/85" : "text-forest/80")}>{s.content}</p>
               {s.note && <p data-home-free-visit className={"mt-3 inline-flex items-center justify-center rounded-2xl px-4 py-3 text-sm font-bold shadow-card " + (leadStyle ? "bg-[#ffa414] text-[#26322b]" : "bg-secondary text-forest")}>{s.note}</p>}
@@ -164,7 +166,7 @@ export function FirstVisit({ inlineForm = false, leadStyle = false }: { inlineFo
       </FormDialog>
     </section>
     {inlineForm && <div className="bg-card pt-8">
-      <InquirySection allScreens matchHero id="prva-navsteva-form" trackingSource="home_first_visit_interest" title="Máte záujem o prvú návštevu?" />
+      {language === "en" ? <InquirySection allScreens matchHero language="en" id="prva-navsteva-form" trackingSource="en_first_visit" title="Interested in a first visit?" subtitle="Fill in a short, no-obligation enquiry. We will be in touch." /> : <InquirySection allScreens matchHero id="prva-navsteva-form" trackingSource="home_first_visit_interest" title="Máte záujem o prvú návštevu?" />}
     </div>}
     </>
   );
@@ -205,7 +207,7 @@ export function Pricing({ interestMode = false, homeLayout = false, language = "
           <div data-home-included className="col-span-2 min-w-0 rounded-3xl bg-card p-4 shadow-card sm:p-6 lg:p-8">
             <h3 className="text-center font-display text-base font-bold text-forest sm:text-xl">{language === "en" ? "Included with every visit" : "Čo je v cene zahrnuté"}</h3>
             <ul className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-xs leading-relaxed sm:gap-x-6 sm:text-base">
-              {(language === "en" ? ["Supervised daycare", "Heated indoor spaces", "Outdoor run", "Activities and play with friends", "Rest and individual care"] : INCLUDED.filter(item => item !== "Fotky a videá z priebehu dňa")).map(item => <li key={item} className="flex min-w-0 gap-1.5 sm:gap-2.5"><Check className="mt-1 size-3 shrink-0 text-green-700 sm:size-4" aria-hidden="true" /><strong className="min-w-0 font-bold text-forest/85">{item}</strong></li>)}
+              {(language === "en" ? ["Professional and safe daytime care", "Walks and outdoor run of up to 80 m²", "An active day, games and fun with friends", "A family environment and all-day supervision", "Individual attention for every dog", "Drinking water and healthy treats"] : INCLUDED.filter(item => item !== "Fotky a videá z priebehu dňa")).map(item => <li key={item} className="flex min-w-0 gap-1.5 sm:gap-2.5"><Check className="mt-1 size-3 shrink-0 text-green-700 sm:size-4" aria-hidden="true" /><strong className="min-w-0 font-bold text-forest/85">{item}</strong></li>)}
             </ul>
           </div>
           <DaycareTaxiNote language={language} />
@@ -319,7 +321,7 @@ const PRIMARY_FAQ = FAQ.filter((item) => PRIMARY_FAQ_QUESTIONS.has(item.q));
 
 const PRACTICAL_FAQ = FAQ.filter((item) => !PRIMARY_FAQ_QUESTIONS.has(item.q));
 
-export function FaqList({ items, source, homeLayout = false, campaign = false }: { items: ReadonlyArray<(typeof FAQ)[number] & { trackingId?: number; id?: string; href?: string; linkLabel?: string }>; source: string; homeLayout?: boolean; campaign?: boolean }) {
+export function FaqList({ items, source, homeLayout = false, campaign = false, language = "sk" }: { items: ReadonlyArray<(typeof FAQ)[number] & { trackingId?: number; id?: string; href?: string; linkLabel?: string }>; source: string; homeLayout?: boolean; campaign?: boolean; language?: "sk" | "en" }) {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
@@ -330,7 +332,7 @@ export function FaqList({ items, source, homeLayout = false, campaign = false }:
             type="button"
             aria-expanded={open === i}
             onClick={() => {
-              if (!campaign && open !== i) void trackCookielessInteraction("explore_daycare", `faq_${source}_${f.trackingId ?? i + 1}`);
+              if (!campaign && open !== i) void trackCookielessInteraction("explore_daycare", `faq_${source}_${f.trackingId ?? i + 1}`, language);
               setOpen(open === i ? null : i);
             }}
             className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left font-display text-[1.05rem] font-bold leading-snug text-forest sm:px-6 sm:py-5 sm:text-lg"
@@ -344,10 +346,10 @@ export function FaqList({ items, source, homeLayout = false, campaign = false }:
             <div className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed text-forest/80 sm:px-6 sm:pb-6">
               <FaqAnswer question={f.q} answer={f.a} />
               {campaign && f.href && <a href={f.href} className={"mt-4 inline-flex min-h-11 items-center justify-center text-center font-semibold " + (f.id === "puppies" ? "btn-coral w-full px-4 py-3" : "text-coral-dark underline underline-offset-2")}>{f.linkLabel}</a>}
-              {homeLayout && f.q === "Prijímate aj šteniatka?" && (
-                <a href="#aria-puppy-check" onClick={() => void trackCookielessInteraction("explore_daycare", "home_requirements_puppy_checker")} className="btn-coral mt-4 flex w-fit min-h-11 items-center justify-center px-5 py-3 text-center text-sm font-bold text-white">Overiť pripravenosť šteniatka</a>
+              {homeLayout && (f.q === "Prijímate aj šteniatka?" || language === "en" && f.trackingId === 6) && (
+                <a href="#aria-puppy-check" onClick={() => void trackCookielessInteraction("explore_daycare", "home_requirements_puppy_checker", language)} className="btn-coral mt-4 flex w-fit min-h-11 items-center justify-center px-5 py-3 text-center text-sm font-bold text-white">Overiť pripravenosť šteniatka</a>
               )}
-              {!campaign && f.q === "Prijímate aj šteniatka?" && (
+              {!campaign && language === "sk" && f.q === "Prijímate aj šteniatka?" && (
                 <a
                   href="/psia-skolka-pre-steniatka"
                   className="mt-4 inline-flex font-display text-sm font-semibold text-coral underline-offset-4 hover:underline"
@@ -355,12 +357,12 @@ export function FaqList({ items, source, homeLayout = false, campaign = false }:
                   Viac o psej škôlke pre šteniatka →
                 </a>
               )}
-              {(f.q === "Aký je cenník služieb?" || f.q === HOME_PRICE_QUESTION) && (
+              {(f.q === "Aký je cenník služieb?" || f.q === HOME_PRICE_QUESTION || language === "en" && f.trackingId === 8) && (
                 <a
-                  href="/#cennik"
+                  href={language === "en" ? "#pricing" : "/#cennik"}
                   className="mt-4 inline-flex font-display text-sm font-semibold text-coral underline-offset-4 hover:underline"
                 >
-                  Prejsť na cenník →
+                  {language === "en" ? "View prices →" : "Prejsť na cenník →"}
                 </a>
               )}
             </div>
@@ -371,21 +373,21 @@ export function FaqList({ items, source, homeLayout = false, campaign = false }:
   );
 }
 
-export function Faq({ homeLayout = false }: { homeLayout?: boolean } = {}) {
+export function Faq({ homeLayout = false, language = "sk" }: { homeLayout?: boolean; language?: "sk" | "en" } = {}) {
   return (
     <section id="faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 pt-16 pb-12 sm:pt-20 sm:pb-14">
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-4xl px-4">
-        <h2 className="section-title text-center text-3xl sm:text-4xl">Časté otázky</h2>
-        <FaqList items={homeLayout ? HOME_PRIMARY_FAQ : PRIMARY_FAQ} source="home" homeLayout={homeLayout} />
+        <h2 className="section-title text-center text-3xl sm:text-4xl">{language === "en" ? "Frequently asked questions" : "Časté otázky"}</h2>
+        <FaqList items={language === "en" ? HOME_PRIMARY_FAQ_EN : homeLayout ? HOME_PRIMARY_FAQ : PRIMARY_FAQ} source="home" homeLayout={homeLayout} language={language} />
         {!homeLayout && <div className="mt-7 flex justify-center">
           <a href="/#faq" className="btn-coral">
             Viac častých otázok
           </a>
         </div>}
         {homeLayout && <div id="faq-kontakt" data-home-faq-contact className="form-liquid-surface mx-auto mt-8 w-full max-w-lg rounded-3xl bg-card p-4 shadow-card sm:mt-10 sm:p-6 lg:max-w-none lg:p-8">
-          <h3 className="mb-4 text-center font-display text-xl font-bold leading-snug text-forest sm:text-2xl">Nenašli ste odpoveď? Opýtajte sa nás.</h3>
-          <HomeFaqContactForm />
+          <h3 className="mb-4 text-center font-display text-xl font-bold leading-snug text-forest sm:text-2xl">{language === "en" ? "Didn’t find the answer? Ask us." : "Nenašli ste odpoveď? Opýtajte sa nás."}</h3>
+          <HomeFaqContactForm language={language} />
         </div>}
       </div>
     </section>

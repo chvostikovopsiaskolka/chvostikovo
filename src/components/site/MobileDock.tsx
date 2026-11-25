@@ -1,3 +1,4 @@
+import { LanguageSwitch } from "./LanguageSwitch";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { ArrowUp, Facebook, FilePenLine, Heart, House, Instagram, Menu, Package, Phone, Tag, Users, X } from "lucide-react";
@@ -49,10 +50,10 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
        { id: "interest", label: "Mám záujem o škôlku", icon: FilePenLine },
        { id: "dog-sitting-pricing", label: "Cenník", icon: Tag }]
     : english
-    ? [{ id: "en-benefits", label: "Why us?", icon: Heart },
+    ? [{ id: "about", label: "About", icon: Users },
        { id: "pricing", label: "Prices", icon: Tag },
-       { id: "interest", label: "Interested in daycare", icon: FilePenLine },
-       { id: "en-first-visit", label: "First visit", icon: House }]
+       { id: "requirements", label: "Rules", icon: Heart },
+       { id: "interest", label: "Apply", icon: FilePenLine }]
     : [{ id: "o-nas", label: "O nás", icon: Users },
        { id: "cennik", label: "Cenník", icon: Tag },
        { id: "podmienky", label: "Podmienky", icon: Heart },
@@ -65,7 +66,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     let idleTimer = 0;
     let anchorY = Math.max(0, window.scrollY);
     const updateActiveSection = () => {
-      if (window.location.pathname !== homePath) {
+      if (window.location.pathname.replace(/\/$/, "") !== homePath.replace(/\/$/, "")) {
         setActiveSection("");
         return;
       }
@@ -85,7 +86,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
       frame = 0;
       const y = Math.max(0, window.scrollY); // iOS overscroll cannot trigger the arrow
       const delta = y - anchorY;
-      const eligible = window.location.pathname === homePath &&
+      const eligible = window.location.pathname.replace(/\/$/, "") === homePath.replace(/\/$/, "") &&
         y > Math.max(420, window.innerHeight * 0.75) &&
         !document.querySelector('[data-form-dialog], [role="dialog"][data-state="open"]');
       if (Math.abs(delta) >= 6) {
@@ -149,7 +150,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     }
     const execute = () => {
       const destination = new URL(href, window.location.href);
-      if (destination.pathname !== window.location.pathname || destination.search !== window.location.search) {
+      if (destination.pathname.replace(/\/$/, "") !== window.location.pathname.replace(/\/$/, "") || destination.search !== window.location.search) {
         window.location.assign(destination.pathname + destination.search + destination.hash);
         return;
       }
@@ -182,7 +183,10 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
 
   const openApplication = () => {
     if (menuOpen) setMenuOpen(false);
-    if (marketing) {
+    if (english && onApplicationOpen) {
+      void trackCookielessInteraction("nav_click", "mobile_dock_en_application", language);
+      onApplicationOpen();
+    } else if (marketing) {
       // SK landing pages already track enquiries in their route callback.
       if (english) void trackCookielessInteraction("inquiry_cta", "en_mobile_dock", "en");
       onInterestOpen?.();
@@ -203,14 +207,14 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
 
   const menuEntries = english
     ? [
-        ...(marketing ? marketingExtra : [{ label: "Reviews", href: homePath + "#reviews" }]),
-        ...(!marketing ? [{ label: "Why Chvostíkovo", href: homePath + "#why-daycare" }] : []),
+        { label: "Reviews", href: homePath + "#reviews" },
+        { label: "Why Chvostíkovo", href: homePath + "#en-benefits" },
+        { label: "Prices", href: homePath + "#pricing" },
+        { label: "First visit", href: homePath + "#en-first-visit" },
         { label: "Requirements", href: homePath + "#requirements" },
         { label: "FAQ", href: homePath + "#faq" },
         { label: "About us", href: homePath + "#about" },
-        { label: "Products", href: "/produkty" },
         { label: "Contact", href: homePath + "#contact" },
-        { label: "Puppy daycare", href: "/psia-skolka-pre-steniatka" },
       ]
     : [
         ...(marketing ? marketingExtra : [
@@ -325,17 +329,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
                   >
                     <Phone aria-hidden="true" size={20} />
                   </a>
-                  <a
-                    href={english ? "/" : "/en/dog-daycare-kosice"}
-                    lang={english ? "sk" : "en"}
-                    aria-label={english ? "Slovak version" : "English version"}
-                    title={english ? "Slovak version" : "English version"}
-                    onClick={() => {
-                      void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_language", language);
-                    }}
-                  >
-                    <span aria-hidden="true">{english ? "SK" : "EN"}</span>
-                  </a>
+                  <LanguageSwitch language={language} source={"mobile_menu_" + variant + "_language"} onNavigate={() => { navigatingRef.current = true; setMenuOpen(false); }} />
                   <a
                     href={INSTAGRAM}
                     target="_blank"
@@ -361,7 +355,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
                     <Facebook aria-hidden="true" size={20} />
                   </a>
                 </div>
-                <a href="/" aria-label="Chvostíkovo" className="mobile-dock-menu-logo" onClick={() => { void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_top", language); }}>
+                <a href={homePath} aria-label="Chvostíkovo" className="mobile-dock-menu-logo" onClick={() => { void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_top", language); }}>
                   <img src={logo} alt="Chvostíkovo" />
                 </a>
               </DialogPrimitive.Content>

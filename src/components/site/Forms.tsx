@@ -241,13 +241,15 @@ export function ShortForm({
 
 /** Shared two-step contact question for homepage and Aria, never a paid Lead conversion. */
 export function HomeFaqContactForm({
-  source = HOME_FAQ_CONTACT_SOURCE, compact = false, onStarted, onSent,
+  source = HOME_FAQ_CONTACT_SOURCE, compact = false, onStarted, onSent, language = "sk",
 }: {
   source?: typeof HOME_FAQ_CONTACT_SOURCE | "aria_preview_chat_other" | "lead_landing_aria_chat_other";
   compact?: boolean;
+  language?: "sk" | "en";
   onStarted?: () => void;
   onSent?: () => void;
 }) {
+  const t = (sk: string, en: string) => language === "en" ? en : sk;
   const isAria = source !== HOME_FAQ_CONTACT_SOURCE;
   const formRef = useRef<HTMLFormElement>(null);
   const id = useId();
@@ -275,13 +277,13 @@ export function HomeFaqContactForm({
       if (source === "lead_landing_aria_chat_other") trackAriaChatAction("form_start", "other");
       onStarted?.();
     }
-    else void trackCookielessInteraction("explore_daycare", source + "_started");
+    else void trackCookielessInteraction("explore_daycare", source + "_started", language);
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (step === 1) {
       if (question.trim().length < 5 || question.trim().length > 600) {
-        setError("Napíšte otázku v dĺžke 5 až 600 znakov.");
+        setError(t("Napíšte otázku v dĺžke 5 až 600 znakov.", "Enter a question of 5 to 600 characters."));
         return;
       }
       trackStart();
@@ -296,7 +298,7 @@ export function HomeFaqContactForm({
     const name = String(data.get("meno") ?? "").trim();
     const email = String(data.get("email") ?? "").trim();
     if (!name || !email || question.trim().length < 5) {
-      setError("Vyplňte otázku a všetky kontaktné údaje.");
+      setError(t("Vyplňte otázku a všetky kontaktné údaje.", "Complete the question and all contact details."));
       return;
     }
     inFlight.current = true;
@@ -304,9 +306,9 @@ export function HomeFaqContactForm({
     setError(null);
     let attemptId: string | undefined;
     try {
-      if (source === "lead_landing_aria_chat_other") attemptId = startFormAttempt(source);
+      if (source === "lead_landing_aria_chat_other") attemptId = startFormAttempt(source, language);
       const phone = phoneFromForm(form, id + "-tel");
-      if (source !== "lead_landing_aria_chat_other") attemptId = startFormAttempt(source);
+      if (source !== "lead_landing_aria_chat_other") attemptId = startFormAttempt(source, language);
       await submitInquiry({
         typ: "informacie", consent: true,
         source_ref: sourceRef(), ...attributionPayload(), cta_source: source,
@@ -320,16 +322,16 @@ export function HomeFaqContactForm({
           trackAriaQuestionSubmit(source);
           onSent?.();
         } else {
-          void trackCookielessInteraction("explore_daycare", source + "_submitted", "sk", attemptId);
+          void trackCookielessInteraction("explore_daycare", source + "_submitted", language, attemptId);
           trackFaqContactSubmit(source);
         }
       });
     } catch (cause) {
       const diagnostic = reportInquiryError(cause);
-      void trackCookielessInteraction("form_error", source + ":" + diagnostic.stage + inquiryDiagnosticSuffix(diagnostic), "sk", attemptId);
+      void trackCookielessInteraction("form_error", source + ":" + diagnostic.stage + inquiryDiagnosticSuffix(diagnostic), language, attemptId);
       setError(cause instanceof InquirySubmissionError && cause.stage === "phone_normalization"
-        ? "Skontrolujte telefónne číslo."
-        : "Správu sa nepodarilo odoslať. Skúste to znova alebo nám zavolajte.");
+        ? t("Skontrolujte telefónne číslo.", "Check your phone number.")
+        : t("Správu sa nepodarilo odoslať. Skúste to znova alebo nám zavolajte.", "We couldn’t send your message. Please try again or call us."));
     } finally {
       inFlight.current = false;
       setLoading(false);
@@ -338,8 +340,8 @@ export function HomeFaqContactForm({
   if (sent) return (
     <div data-home-faq-contact-success role="status" className="py-5 text-center">
       <Check className="mx-auto mb-3 size-8 text-forest" aria-hidden="true" />
-      <h3 className="font-display text-xl font-bold text-forest">Ďakujeme!</h3>
-      <p className="mt-2 text-sm leading-relaxed text-forest/80">Vašu správu sme prijali a odpovieme vám čo najskôr, ako to bude možné.</p>
+      <h3 className="font-display text-xl font-bold text-forest">{t("Ďakujeme!", "Thank you!")}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-forest/80">{t("Vašu správu sme prijali a odpovieme vám čo najskôr, ako to bude možné.", "We have received your message and will reply as soon as possible.")}</p>
     </div>
   );
   return (
@@ -347,32 +349,32 @@ export function HomeFaqContactForm({
       data-step={step} onSubmit={submit}
       className={compact ? "space-y-3 text-left" : "space-y-4 text-left"}>
       <div>
-        <p className="mb-2 text-xs font-semibold text-forest/75">Krok {step} z 2</p>
-        <div role="progressbar" aria-label="Postup kontaktného formulára" aria-valuemin={1} aria-valuemax={2} aria-valuenow={step} className="h-1.5 overflow-hidden rounded-full bg-forest/10">
+        <p className="mb-2 text-xs font-semibold text-forest/75">{language === "en" ? `Step ${step} of 2` : `Krok ${step} z 2`}</p>
+        <div role="progressbar" aria-label={t("Postup kontaktného formulára", "Contact form progress")} aria-valuemin={1} aria-valuemax={2} aria-valuenow={step} className="h-1.5 overflow-hidden rounded-full bg-forest/10">
           <div className={"h-full rounded-full bg-coral " + (step === 1 ? "w-1/2" : "w-full")} />
         </div>
       </div>
       <fieldset hidden={step !== 1} disabled={step !== 1} className="min-w-0 space-y-3">
-        <label className="label-sm" htmlFor={id + "-question"}>Vaša otázka *</label>
+        <label className="label-sm" htmlFor={id + "-question"}>{t("Vaša otázka *", "Your question *")}</label>
         <textarea id={id + "-question"} name="otazka" value={question} onChange={event => { setQuestion(event.target.value); trackStart(); }}
-          rows={compact ? 3 : 4} required minLength={5} maxLength={600} className="field w-full resize-y" placeholder="Napíšte nám, čo vás zaujíma…" />
-        <button type="submit" className="btn-coral min-h-12 w-full px-4 py-3 font-bold">Pokračovať</button>
+          rows={compact ? 3 : 4} required minLength={5} maxLength={600} className="field w-full resize-y" placeholder={t("Napíšte nám, čo vás zaujíma…", "Tell us what you would like to know…")} />
+        <button type="submit" className="btn-coral min-h-12 w-full px-4 py-3 font-bold">{t("Pokračovať", "Continue")}</button>
       </fieldset>
       <fieldset hidden={step !== 2} disabled={step !== 2 || loading} className="min-w-0 space-y-3">
-        <h4 className="font-display font-bold text-forest">Kontaktné údaje</h4>
+        <h4 className="font-display font-bold text-forest">{t("Kontaktné údaje", "Contact details")}</h4>
         <div>
-          <label className="label-sm" htmlFor={id + "-name"}>Meno *</label>
-          <input id={id + "-name"} name="meno" required maxLength={200} autoComplete="name" className="field" placeholder="Vaše meno" />
+          <label className="label-sm" htmlFor={id + "-name"}>{t("Meno *", "Name *")}</label>
+          <input id={id + "-name"} name="meno" required maxLength={200} autoComplete="name" className="field" placeholder={t("Vaše meno", "Your name")} />
         </div>
-        <PhoneField id={id + "-tel"} name="telefon" />
+        <PhoneField id={id + "-tel"} name="telefon" language={language} label={t("Telefón *", "Phone *")} />
         <div>
-          <label className="label-sm" htmlFor={id + "-email"}>E-mail *</label>
-          <input id={id + "-email"} name="email" type="email" required maxLength={254} autoComplete="email" className="field" placeholder="vas@email.sk" />
+          <label className="label-sm" htmlFor={id + "-email"}>{t("E-mail *", "Email *")}</label>
+          <input id={id + "-email"} name="email" type="email" required maxLength={254} autoComplete="email" className="field" placeholder={t("vas@email.sk", "you@example.com")} />
         </div>
-        <PrivacyConsentCheckbox />
+        <PrivacyConsentCheckbox language={language} />
         <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
-          <button type="button" onClick={() => { setStep(1); setError(null); }} className="min-h-12 rounded-full border border-forest/20 px-4 font-semibold text-forest">Späť</button>
-          <button type="submit" disabled={loading} className="btn-coral min-h-12 min-w-0 px-4 py-3 font-bold disabled:opacity-60">{loading ? "Odosielam…" : "Poslať"}</button>
+          <button type="button" onClick={() => { setStep(1); setError(null); }} className="min-h-12 rounded-full border border-forest/20 px-4 font-semibold text-forest">{t("Späť", "Back")}</button>
+          <button type="submit" disabled={loading} className="btn-coral min-h-12 min-w-0 px-4 py-3 font-bold disabled:opacity-60">{loading ? t("Odosielam…", "Sending…") : t("Poslať", "Send")}</button>
         </div>
       </fieldset>
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}

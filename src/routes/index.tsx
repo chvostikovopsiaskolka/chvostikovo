@@ -1,4 +1,3 @@
-import { MobileLanguageHeader } from "@/components/site/LanguageSwitch";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Header } from "@/components/site/Header";
@@ -41,7 +40,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:description", content: description },
       { name: "twitter:image", content: OG_IMAGE },
     ],
-    links: [{ rel: "canonical", href: `${BASE_URL}/` }],
+    links: [{ rel: "canonical", href: `${BASE_URL}/` }, { rel: "alternate", hrefLang: "sk", href: `${BASE_URL}/` }, { rel: "alternate", hrefLang: "en", href: `${BASE_URL}/en/dog-daycare-kosice` }, { rel: "alternate", hrefLang: "x-default", href: `${BASE_URL}/` }],
     scripts: [
       {
         type: "application/ld+json",
@@ -88,7 +87,6 @@ function Index() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <MobileLanguageHeader language="sk" />
       <main>
         <Hero onMobileInquiryOpen={openHeroInquiry} mobileInquiryOpen={heroInquiryOpen} />
         {heroInquiryOpen && (

@@ -72,7 +72,7 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
     { title: "Celodenná starostlivosť a dohľad", text: "Kým pracujete alebo si vybavujete povinnosti, váš psík nie je sám. Počas celého pobytu naňho dohliadajú **minimálne dvaja opatrovatelia**." },
     { title: "Individuálny prístup", text: "Každý psík má svoje tempo. Spoznávame jeho **povahu, zvyky a potreby**, aby sme mu dopriali bezpečný a príjemný deň v kolektíve." },
   ];
-  const items = isEnglish ? careEn : homeCombined ? CARE.map((item, index) => ({ ...item, ...combinedCopy[index]! })) : CARE;
+  const items = isEnglish ? (homeCombined ? careEn.map((item,i) => ({ ...item, title:["An active day with friends","All-day care and supervision","Individual care"][i]!, text:["Even if your dog has **energy to spare**, they enjoy movement, games, new experiences and other dogs. We alternate activities with **rest**.","While you work or take care of your responsibilities, your dog is not alone. **At least two caregivers** supervise them throughout the stay.","Every dog has their own pace. We get to know their **temperament, habits and needs** to give them a safe, enjoyable day with the group."][i]! })) : careEn) : homeCombined ? CARE.map((item, index) => ({ ...item, ...combinedCopy[index]! })) : CARE;
   const mobilePhotos = [
     {
       src: CARE[0]!.img,
@@ -443,13 +443,13 @@ const PARTNERS = [
   { name: "Lolkio – tréner psov", logo: lolkio, href: null },
 ];
 
-export function Partners() {
+export function Partners({ language = "sk" }: { language?: "sk" | "en" } = {}) {
   return (
     <section className="relative overflow-hidden py-10 sm:py-14">
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <h2 className="text-center font-display text-base font-semibold tracking-widest text-forest/60 uppercase sm:text-lg">
-          Spolupracujeme
+          {language === "en" ? "Our partners" : "Spolupracujeme"}
         </h2>
         <div className="mt-6 grid grid-cols-2 gap-4 sm:flex sm:flex-nowrap sm:items-center sm:justify-center sm:gap-4 lg:gap-5">
           {PARTNERS.map((p) => {
