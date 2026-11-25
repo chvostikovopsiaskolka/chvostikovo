@@ -105,9 +105,9 @@ function Index() {
         <ReviewReasons variant="home" withVideo showCta={false} />
         <About homeLayout />
         <DaycarePhotoCarousel />
+        <HomePuppyChecker />
         <Pricing interestMode homeLayout />
         <FriendshipApplication />
-        <HomePuppyChecker />
         <Requirements />
         <Care showEmbeddedFriendship={false} showInterest={false} showContextFaq={false} homeCombined />
         <Gallery homeMosaic />

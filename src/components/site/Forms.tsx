@@ -548,7 +548,7 @@ export function LongForm({ onSent, collapsible = false, onExpand, language = "sk
     );
   }
 
-  const details = (
+  const identity = (
     <>
       {dogCount === 2 && <h4 className="mt-4 border-b border-coral/20 pb-2 text-base font-bold text-forest">{t("1. psík", "Dog 1")}</h4>}
       <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="identity">
@@ -571,6 +571,10 @@ export function LongForm({ onSent, collapsible = false, onExpand, language = "sk
           />
         </div>
       </div>
+    </>
+  );
+  const details = (
+    <>
       <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="age-weight">
         <div className="min-w-0">
           <label className="label-sm" htmlFor={`l-${formId}-vek`}>
@@ -674,17 +678,7 @@ export function LongForm({ onSent, collapsible = false, onExpand, language = "sk
 
   return (
     <form noValidate data-application-form data-application-step={step} onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="@container min-w-0 space-y-3 text-left sm:space-y-3.5">
-      {collapsible && (
-        <button id="home-friendship-application" type="button"
-          aria-expanded={expanded} aria-controls={`l-${formId}-details`}
-          className="btn-coral w-full" onClick={() => {
-            if (!expanded) onExpand?.();
-            setExpanded(!expanded);
-          }}>
-          {expanded ? t("Zobraziť menej", "Show less") : t("Zobraziť celú prihlášku", "Show full application")}
-        </button>
-      )}
-      <fieldset id={`l-${formId}-details`} hidden={!expanded} disabled={!expanded} className="min-w-0 space-y-3.5 border-0 p-0">
+      <div id={`l-${formId}-details`} className="min-w-0 space-y-3.5">
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs font-semibold text-forest/75">
             <span>{t("Prihláška do škôlky", "Daycare application")}</span><span>{language === "en" ? `Step ${step} of 2` : `Krok ${step} z 2`}</span>
@@ -707,10 +701,13 @@ export function LongForm({ onSent, collapsible = false, onExpand, language = "sk
           ))}
         </div>
       </fieldset>
-          {details}
-          <button type="submit" className="btn-coral w-full">{t("Pokračovať", "Continue")}</button>
+          {identity}
+          <fieldset data-application-expanded-fields hidden={!expanded} disabled={!expanded} className="min-w-0 space-y-3.5 border-0 p-0">
+            {details}
+            <button type="submit" className="btn-coral w-full">{t("Pokračovať", "Continue")}</button>
+          </fieldset>
         </div>
-        <div data-application-owner-step hidden={step !== 2} className="space-y-3.5">
+        <fieldset data-application-owner-step hidden={!expanded || step !== 2} disabled={!expanded} className="min-w-0 space-y-3.5 border-0 p-0">
       <div className="grid gap-3 sm:grid-cols-2 sm:gap-3.5">
         <div>
           <label className="label-sm" htmlFor={`l-${formId}-meno`}>
@@ -726,8 +723,19 @@ export function LongForm({ onSent, collapsible = false, onExpand, language = "sk
         {loading ? t("Odosielam…", "Sending…") : t("Prihlásiť psíka", "Submit application")}
       </button>
           <button type="button" disabled={loading} onClick={() => goToStep(1)} className="min-h-11 w-full rounded-full border border-forest/20 px-4 font-semibold text-forest hover:bg-secondary/50">{t("Späť", "Back")}</button>
-        </div>
-      </fieldset>
+        </fieldset>
+      </div>
+      {collapsible && (
+        <button id="home-friendship-application" type="button"
+          aria-expanded={expanded} aria-controls={`l-${formId}-details`}
+          className="btn-coral w-full" onClick={() => {
+            if (!expanded) onExpand?.();
+            if (expanded) setStep(1);
+            setExpanded(!expanded);
+          }}>
+          {expanded ? t("Zobraziť menej", "Show less") : t("Zobraziť celú prihlášku", "Show full application")}
+        </button>
+      )}
     </form>
   );
 }

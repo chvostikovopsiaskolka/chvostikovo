@@ -144,9 +144,9 @@ function EnglishDogDaycarePage() {
       <ReviewReasons variant="home" withVideo showCta={false} language="en" />
       <About language="en" homeLayout />
       <DaycarePhotoCarousel language="en" />
+      <HomePuppyChecker language="en" />
       <Pricing interestMode homeLayout language="en" />
       <FriendshipApplication language="en" />
-      <HomePuppyChecker language="en" />
       <Requirements id="requirements" language="en" title="What your dog needs before daycare" />
       <Care language="en" showEmbeddedFriendship={false} showInterest={false} showContextFaq={false} homeCombined />
       <Gallery language="en" homeMosaic />

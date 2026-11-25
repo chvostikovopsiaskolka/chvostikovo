@@ -1,7 +1,7 @@
 import { LanguageSwitch } from "./LanguageSwitch";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { ArrowUp, Facebook, FilePenLine, Heart, House, Instagram, Menu, MessageCircle, Package, Phone, Tag, Users, X } from "lucide-react";
+import { ArrowUp, Dog, Facebook, FilePenLine, Heart, House, Instagram, Menu, MessageCircle, Package, Phone, Tag, Users, X } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { PHONE, INSTAGRAM, FACEBOOK } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -52,9 +52,11 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
        { id: "dog-sitting-pricing", label: "Cenník", icon: Tag }]
     : english
     ? [{ id: "top", label: "Home", icon: House },
+       { id: "about", label: "About", icon: Users },
        { id: "pricing", label: "Prices", icon: Tag },
        { id: "requirements", label: "Rules", icon: Heart }]
     : [{ id: "top", label: "Domov", icon: House },
+       { id: "o-nas", label: "O nás", icon: Users },
        { id: "cennik", label: "Cenník", icon: Tag },
        { id: "podmienky", label: "Podmienky", icon: Heart },
        { id: "produkty", label: "Produkty", icon: Package }];
@@ -209,14 +211,9 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     : [{ label: "First visit", href: homePath + "#en-first-visit" }];
 
   // Keep the main menu short; no duplicated dock links or footer actions.
-  const homeMenuEntries = english ? [
-    {label:"About us", icon:Users, href:homePath+"#about"},
-    {label:"FAQ", icon:MessageCircle, href:homePath+"#faq"},
-    {label:"Why Chvostíkovo?", icon:Heart, href:homePath+"#en-benefits"},
-  ] : [
-    {label:"O nás", icon:Users, href:"/#o-nas"},
-    {label:"FAQ", icon:MessageCircle, href:"/#faq"},
-    {label:"Prečo Chvostíkovo", icon:Heart, href:"/#preco-chvostikovo"},
+  const homeMenuEntries = [
+    {label:english ? "Have a puppy?" : "Máte šteniatko?", icon:Dog, href:homePath+"#aria-puppy-check"},
+    {label:english ? "FAQ" : "Časté otázky", icon:MessageCircle, href:homePath+"#faq"},
   ];
   const menuEntries = [
     ...marketingExtra,
@@ -244,6 +241,13 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
             <ArrowUp aria-hidden="true" size={21} strokeWidth={2.1} />
           </button>}
         <div className="mobile-dock-bar">
+          {homeDock && <div className="mobile-dock-compact-menu" data-home-menu>
+            <div className="mobile-dock-compact-links">
+              {homeMenuEntries.map(({href,label,icon:Icon}) => <a key={href} href={href} onClick={event => go(event, href)}><Icon size={17} strokeWidth={1.9} aria-hidden="true" /><span>{label}</span></a>)}
+            </div>
+            <a data-home-dock-phone className="mobile-dock-compact-phone" href={"tel:" + PHONE} aria-label={english ? "Call Chvostíkovo" : "Zavolať do Chvostíkova"} data-tracking-source={english ? "en_mobile_dock_phone" : "home_mobile_dock_phone"} onClick={() => void trackCookielessInteraction("phone_click", english ? "en_mobile_dock_phone" : "home_mobile_dock_phone", language)}><Phone size={19} strokeWidth={1.9} aria-hidden="true" /></a>
+            <LanguageSwitch language={language} source={"mobile_dock_" + variant + "_language"} />
+          </div>}
           {sections.map(({ id, icon: Icon, label }) => id === "interest" ? (
             <button key={id} type="button" className="mobile-dock-item mobile-dock-apply" onClick={openApplication}>
               <Icon aria-hidden="true" size={19} strokeWidth={2} />
@@ -275,30 +279,17 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
               <span>{english ? "Apply" : "Prihláška"}</span>
             </button>
           )}
-          <DialogPrimitive.Root modal={!homeDock} open={menuOpen} onOpenChange={(open) => { if (open) navigatingRef.current = false; setMenuOpen(open); }}>
+          {!homeDock && <DialogPrimitive.Root open={menuOpen} onOpenChange={(open) => { if (open) navigatingRef.current = false; setMenuOpen(open); }}>
             <DialogPrimitive.Trigger asChild>
-              <button ref={menuButtonRef} type="button" aria-label={homeDock && menuOpen ? (english ? "Close menu" : "Zavrieť menu") : (english ? "Open menu" : "Otvoriť menu")} className={"mobile-dock-item" + (menuOpen ? " is-active" : "")} aria-expanded={menuOpen}
+              <button ref={menuButtonRef} type="button" aria-label={english ? "Open menu" : "Otvoriť menu"} className={"mobile-dock-item" + (menuOpen ? " is-active" : "")} aria-expanded={menuOpen}
                   onClick={() => {
                     if (!menuOpen) void trackCookielessInteraction("nav_click", `mobile_dock_${variant}_menu_open`, language);
                   }}>
-                {homeDock && menuOpen ? <X aria-hidden="true" size={19} strokeWidth={2} /> : <Menu aria-hidden="true" size={19} strokeWidth={2} />}
+                <Menu aria-hidden="true" size={19} strokeWidth={2} />
                 <span>{english ? "Menu" : "Menu"}</span>
               </button>
             </DialogPrimitive.Trigger>
-            {homeDock ? (
-              <DialogPrimitive.Content className="mobile-dock-menu mobile-dock-compact-menu" data-home-menu
-                onOpenAutoFocus={(event) => event.preventDefault()}
-                onCloseAutoFocus={(event) => { if (navigatingRef.current) event.preventDefault(); }}>
-                <DialogPrimitive.Title className="sr-only">{english ? "Chvostíkovo menu" : "Menu Chvostíkova"}</DialogPrimitive.Title>
-                <DialogPrimitive.Description className="sr-only">{english ? "Additional navigation" : "Ďalšie sekcie webu"}</DialogPrimitive.Description>
-                <div className="mobile-dock-compact-links">
-                  {homeMenuEntries.map(({href,label,icon:Icon}) => <a key={href} href={href} onClick={event => go(event, href, true)}>
-                    <Icon size={17} strokeWidth={1.9} aria-hidden="true" /><span>{label}</span>
-                  </a>)}
-                </div>
-                <LanguageSwitch language={language} source={"mobile_menu_" + variant + "_language"} onNavigate={() => { navigatingRef.current = true; setMenuOpen(false); }} />
-              </DialogPrimitive.Content>
-            ) : <DialogPrimitive.Portal>
+            <DialogPrimitive.Portal>
               <DialogPrimitive.Overlay className="mobile-dock-overlay" />
               <DialogPrimitive.Content
                 className="mobile-dock-menu"
@@ -365,8 +356,8 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
                   <img src={logo} alt="Chvostíkovo" />
                 </a>
               </DialogPrimitive.Content>
-            </DialogPrimitive.Portal>}
-          </DialogPrimitive.Root>
+            </DialogPrimitive.Portal>
+          </DialogPrimitive.Root>}
         </div>
       </nav>
     </>

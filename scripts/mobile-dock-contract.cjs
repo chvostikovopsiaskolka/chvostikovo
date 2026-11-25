@@ -16,7 +16,7 @@ for (const value of ["Produkty", "Podmienky", "Cenník", "O nás", "Prihláška"
 }
 // The main SK order and route-local landing sequences are intentionally distinct.
 const mainDock = dock.slice(dock.indexOf('    : [{ id: "top", label: "Domov"'), dock.indexOf("// Return arrow: hide while moving down; show on upward scroll or after stopping."));
-assert(mainDock.includes('{ id: "top", label: "Domov"') && !mainDock.includes('id: "o-nas"'), "Main dock restores Home and moves About into the compact menu");
+assert(mainDock.includes('{ id: "top", label: "Domov"') && mainDock.includes('id: "o-nas"'), "Main dock retains Home and About");
 assert(mainDock.indexOf('id: "top"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "podmienky"') && mainDock.indexOf('id: "podmienky"') < mainDock.indexOf('id: "produkty"'), "Main dock order");
 assert(dock.includes('{!homeDock && <button') && dock.includes('const eligible = !homeDock'), "Return arrow stays on other landing pages only");
 assert(dock.includes('{!marketing && (') && dock.includes('mobile-dock-item mobile-dock-apply') && read("src/routes/index.tsx").includes("<Header />"), "Homepage retains the dedicated application shortcut");
@@ -385,11 +385,11 @@ assert.deepStrictEqual(ARIA_ROUTES,['/psia-skolka-kosice/','/test-aria/','/psia-
 assert(english.includes('<Hero language="en"') && english.includes('<FirstVisit inlineForm leadStyle language="en"') && english.includes('<Pricing interestMode homeLayout language="en"') && english.includes('<HomePuppyChecker language="en"') && english.includes('<Faq homeLayout language="en"'), "EN must reuse homepage components");
 assert(!english.includes('/produkty') && !english.includes('/psia-skolka-pre-steniatka') && !english.includes('MobileLanguageHeader'), "Untranslated destinations and standalone mobile header must not return");
 const compactEntries=dock.slice(dock.indexOf("const homeMenuEntries"),dock.indexOf("const menuEntries ="));
-assert((compactEntries.match(/icon:/g)||[]).length===6 && !compactEntries.includes("description:") && !compactEntries.includes("#kontakt") && !compactEntries.includes("#contact") && !compactEntries.includes('/produkty') && !compactEntries.includes('/psia-skolka-pre-steniatka'), "Three localized icon links without descriptions or contact");
-const compactPanel=dock.slice(dock.indexOf('{homeDock ? ('),dock.indexOf(') : <DialogPrimitive.Portal>'));
-assert(compactPanel.includes('data-home-menu') && compactPanel.includes('homeMenuEntries.map') && compactPanel.includes('<LanguageSwitch') && !/href=\{"tel:|INSTAGRAM|FACEBOOK|<img/.test(compactPanel), "Compact home panel contains only secondary links, language and close");
-assert(dock.includes('modal={!homeDock}') && css.includes('bottom: calc(100% + 5px)') && css.includes('flex-direction: row; align-items: center'), "Compact nonmodal panel anchored above dock");
-assert(hero.includes('data-home-hero-phone') && hero.includes('href={"tel:" + PHONE}') && hero.includes('trackCookielessInteraction("phone_click", t("home_hero_phone", "en_hero_phone"), language)') && !hero.includes('trackMarketingInteraction("phone_click"'), "Hero phone uses existing delegated consented Pixel handler once");
+assert(compactEntries.includes('icon:Dog') && compactEntries.includes('#aria-puppy-check') && compactEntries.includes('Časté otázky') && !compactEntries.includes('Prečo Chvostíkovo'), "Puppy shortcut and localized FAQ");
+const compactPanel=dock.slice(dock.indexOf('{homeDock && <div className="mobile-dock-compact-menu"'),dock.indexOf('{sections.map'));
+assert(compactPanel.includes('data-home-menu') && compactPanel.includes('homeMenuEntries.map') && compactPanel.includes('<LanguageSwitch') && compactPanel.includes('data-home-dock-phone'), "Permanent top row includes call and language");
+assert(dock.includes('{!homeDock && <DialogPrimitive.Root') && css.includes('grid-column: 1 / -1') && css.includes('padding-bottom: calc(136px'), "Home dock has no menu dialog and reserves its height");
+assert(!hero.includes('data-home-hero-phone') && dock.includes('trackCookielessInteraction("phone_click", english ? "en_mobile_dock_phone" : "home_mobile_dock_phone", language)') && !hero.includes('trackMarketingInteraction("phone_click"'), "Mobile call moved to dock, delegated Pixel remains single");
 const switchSource = read("src/components/site/LanguageSwitch.tsx");
 assert(switchSource.includes('Link') && switchSource.includes('preload="intent"') && switchSource.includes('hrefLang={code}'), "Language switch must preserve accessible router links");
 

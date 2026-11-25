@@ -580,22 +580,18 @@ async function assertCompactHomeMenu(page,en) {
   const state=await menu.evaluate(el=>{
     const bar=el.closest('.mobile-dock-bar'),nav=bar.closest('.mobile-dock'),p=el.getBoundingClientRect(),d=bar.getBoundingClientRect();
     const links=[...el.querySelectorAll('.mobile-dock-compact-links a')];
-    const close=bar.querySelector('button[aria-expanded="true"]');
-    return {hrefs:links.map(a=>new URL(a.href).hash),inline:links.every(a=>{const i=a.querySelector('svg').getBoundingClientRect(),s=a.querySelector('span').getBoundingClientRect();return s.left>=i.right-1 && Math.abs((i.top+i.bottom-s.top-s.bottom)/2)<3;}),
-      targets:links.every(a=>a.getBoundingClientRect().height>=44&&a.scrollWidth<=a.clientWidth+1),
-      height:p.height,gap:d.top-p.bottom,inside:p.left>=0&&p.right<=innerWidth+1&&p.top>=0,
-      noOverflow:el.scrollWidth<=el.clientWidth+1,arrow:!!nav.querySelector('.mobile-dock-back-top'),
-      toggleClose:!!close?.querySelector('svg.lucide-x'),extra:el.querySelectorAll('img,a[href^="tel:"],a[href*="instagram.com"],a[href*="facebook.com"]').length,
-      labels:[...bar.children].filter(a=>a.matches('a,button')).map(a=>a.textContent.trim())};
+    const phone=el.querySelector('[data-home-dock-phone]');
+    return {hrefs:links.map(a=>new URL(a.href).hash),labels:links.map(a=>a.textContent.trim()),
+      targets:[...links,phone,...el.querySelectorAll('[data-language-switch] a')].every(a=>a&&a.getBoundingClientRect().height>=44&&a.scrollWidth<=a.clientWidth+1),
+      height:p.height,total:d.height,inside:d.left>=0&&d.right<=innerWidth+1&&d.top>=0&&d.bottom<=innerHeight+1,
+      noOverflow:el.scrollWidth<=el.clientWidth+1,arrow:!!nav.querySelector('.mobile-dock-back-top'),phone:phone?.getAttribute('href'),
+      main:[...bar.children].filter(a=>a.matches('a,button')).map(a=>a.textContent.trim()),
+      dialog:!!nav.querySelector('button[aria-haspopup="dialog"]'),reserve:parseFloat(getComputedStyle(document.body).paddingBottom)};
   });
-  const expected=en?['#about','#faq','#en-benefits']:['#o-nas','#faq','#preco-chvostikovo'];
-  const labels=en?['Home','Prices','Rules','Apply','Menu']:['Domov','Cenník','Podmienky','Produkty','Prihláška','Menu'];
-  if(JSON.stringify(state.hrefs)!==JSON.stringify(expected)||JSON.stringify(state.labels)!==JSON.stringify(labels)||!state.inline||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.extra||state.gap<5||state.gap>12||state.height>68||!state.toggleClose)throw new Error('Compact home navigation '+JSON.stringify(state));
-  const phone=await page.locator('[data-home-hero-phone]').evaluate(el=>{
-    const a=el.getBoundingClientRect(),b=el.parentElement.querySelector('[data-home-hero-interest-cta]').getBoundingClientRect();
-    return {href:el.getAttribute('href'),sameRow:Math.abs((a.top+a.bottom-b.top-b.bottom)/2)<3,separate:a.left>=b.right+4,width:a.width,height:a.height,inside:a.right<=innerWidth&&b.left>=0};
-  });
-  if(!phone.href?.startsWith('tel:')||!phone.sameRow||!phone.separate||phone.width<44||phone.height<44||!phone.inside)throw new Error('Hero phone geometry '+JSON.stringify(phone));
+  const main=en?['Home','About','Prices','Rules','Apply']:['Domov','O nás','Cenník','Podmienky','Produkty','Prihláška'];
+  if(JSON.stringify(state.hrefs)!==JSON.stringify(['#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['Have a puppy?','FAQ']:['Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>60||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
+  if(await page.locator('[data-home-hero-phone]').count())throw new Error('Duplicate mobile Hero phone');
+  if(!await page.evaluate(()=>!!(document.querySelector('[data-home-puppy-checker]')?.compareDocumentPosition(document.querySelector('[data-home-pricing-columns]'))&Node.DOCUMENT_POSITION_FOLLOWING)))throw new Error('Puppy checker must precede pricing');
 }
 
 async function assertBilingualNavigation(browser,engine) {
@@ -623,23 +619,20 @@ async function assertBilingualNavigation(browser,engine) {
     const doc=await page.evaluate(()=>window.__bilingualDocument);
     for(const width of [320,375,390,430]){
       await page.setViewportSize({width,height:844});
-      await page.locator('.mobile-dock').getByRole('button',{name:'Otvoriť menu'}).click();
       await assertCompactHomeMenu(page,false);
       await page.screenshot({path:path.join(out,'compact-sk-menu-'+engine+'-'+width+'.png')});
-      await page.getByRole('button',{name:'Zavrieť menu'}).click();
-      await page.locator('[data-home-menu]').waitFor({state:'hidden'});
     }
-    await page.locator('.mobile-dock').getByRole('button',{name:'Otvoriť menu'}).click();
+    await page.locator('[data-home-menu] a[href="/#aria-puppy-check"]').click();
+    await page.waitForFunction(()=>location.hash==='#aria-puppy-check');
     await page.locator('[data-home-menu] a[href="/#faq"]').click();
     await page.waitForFunction(()=>location.hash==='#faq');
     await page.locator('.mobile-dock').getByRole('link',{name:'Domov',exact:true}).click();
     await page.waitForFunction(()=>scrollY<5&&!location.hash&&location.search.includes('utm_campaign=bilingual'));
     if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Home must scroll without reload or attribution loss');
-    await page.evaluate(()=>document.addEventListener('click',e=>{if(e.target.closest?.('[data-home-hero-phone]'))e.preventDefault();},true));
-    await activateFixtureControl(page.locator('[data-home-hero-phone]'));
+    await page.evaluate(()=>document.addEventListener('click',e=>{if(e.target.closest?.('[data-home-dock-phone]'))e.preventDefault();},true));
+    await activateFixtureControl(page.locator('[data-home-dock-phone]'));
     if(await page.evaluate(()=>window.__bilingualPixel.some(a=>a[0]==='track'&&a[1]==='Contact')))throw new Error('Unconsented phone Pixel');
-    await page.locator('.mobile-dock').getByRole('button',{name:'Otvoriť menu'}).click();
-    await page.locator('.mobile-dock-menu [data-language-switch] a[lang="en"]').click();
+    await page.locator('[data-home-menu] [data-language-switch] a[lang="en"]').click();
     await page.waitForURL(/\/en\/dog-daycare-kosice\/?$/);
     await page.waitForFunction(()=>document.documentElement.lang==='en');
     if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Language switch reloaded document');
@@ -650,8 +643,7 @@ async function assertBilingualNavigation(browser,engine) {
       const ok=await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1);
       if(!ok)throw new Error('EN overflow at '+width);
       if(width<1024){
-        await page.locator('.mobile-dock').getByRole('button',{name:'Open menu'}).click();
-        const menu=page.locator('.mobile-dock-menu');
+        const menu=page.locator('[data-home-menu]');
         await menu.waitFor({state:'visible'});
         const selected=menu.locator('[data-language-switch] a[lang="en"]');
         if(await selected.getAttribute('aria-current')!=='page')throw new Error('EN active state missing');
@@ -659,8 +651,6 @@ async function assertBilingualNavigation(browser,engine) {
         const buttons=await menu.locator('[data-language-switch] a').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
         if(buttons.some(b=>b.width<44||b.height<44))throw new Error('Language target too small');
         await page.screenshot({path:path.join(out,'bilingual-menu-'+engine+'-'+width+'.png')});
-        await page.getByRole('button',{name:'Close menu'}).click();
-        await menu.waitFor({state:'hidden'});
       }else{
         const desktopPhone=await page.locator('[data-home-hero-desktop-phone]').evaluate(el=>{
           const p=el.getBoundingClientRect(),a=el.parentElement.querySelector('#home-hero-learn-more').getBoundingClientRect();
@@ -673,10 +663,10 @@ async function assertBilingualNavigation(browser,engine) {
     await page.evaluate(()=>{const c=JSON.parse(localStorage.getItem('chvostikovo-cookies'));c.marketing=true;c.analytics=true;localStorage.setItem('chvostikovo-cookies',JSON.stringify(c));window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed',{detail:c}));});
     await page.waitForFunction(()=>window.__bilingualPixel.some(a=>a[0]==='track'&&a[1]==='PageView'));
     await page.setViewportSize({width:390,height:844});
-    await activateFixtureControl(page.locator('[data-home-hero-phone]'));
-    await page.waitForFunction(()=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='Contact'&&a[2]?.source==='en_hero_phone').length===1);
-    if(await page.evaluate(()=>window.__bilingualGa.filter(a=>a[0]==='event'&&a[1]==='phone_click'&&a[2]?.cta_source==='en_hero_phone').length)!==1)throw new Error('EN phone GA4 must emit once');
-    if(!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='home_hero_phone')||!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='en_hero_phone'))throw new Error('Cookieless phone sources missing');
+    await activateFixtureControl(page.locator('[data-home-dock-phone]'));
+    await page.waitForFunction(()=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='Contact'&&a[2]?.source==='en_mobile_dock_phone').length===1);
+    if(await page.evaluate(()=>window.__bilingualGa.filter(a=>a[0]==='event'&&a[1]==='phone_click'&&a[2]?.cta_source==='en_mobile_dock_phone').length)!==1)throw new Error('EN phone GA4 must emit once');
+    if(!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='home_mobile_dock_phone')||!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='en_mobile_dock_phone'))throw new Error('Cookieless phone sources missing');
     await page.setViewportSize({width:1440,height:900});
     const pv=await page.evaluate(()=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='PageView').length);
     await page.locator('header [data-language-switch] a[lang="sk"]').click();
@@ -2900,7 +2890,7 @@ async function assertBilingualNavigation(browser,engine) {
                 if (width >= 1024 && !await hero.locator('[data-lead-step-form]:visible').first().isVisible())
                   throw new Error('Desktop home guided form missing');
                 const layout = await page.evaluate(() => {
-                  const ids=['top','preco-chvostikovo','o-nas','cennik','psie-priatelstva','aria-puppy-check','podmienky','starostlivost','preco','priestory','prva-navsteva','prva-navsteva-form','faq','informujte-sa'];
+                  const ids=['top','preco-chvostikovo','o-nas','aria-puppy-check','cennik','psie-priatelstva','podmienky','starostlivost','preco','priestory','prva-navsteva','prva-navsteva-form','faq','informujte-sa'];
                   const nodes=ids.map(id=>document.getElementById(id));
                   const photo=document.querySelector('#o-nas img'), benefits=document.querySelector('#o-nas [data-hero-benefits]');
                   const cutout=document.querySelector('[data-schoolmates-cutout]');
@@ -2989,10 +2979,10 @@ async function assertBilingualNavigation(browser,engine) {
                     centeredFullWidthTaxi:Math.abs((taxi.getBoundingClientRect().left+taxi.getBoundingClientRect().right-included.left-prices.right)/2)<3,
                     faqContactResponsiveWidth:(()=>{const card=faq.querySelector('[data-home-faq-contact]'), question=faq.querySelector('button[aria-expanded]');if(!card||!question)return false;const c=card.getBoundingClientRect(),q=question.getBoundingClientRect();return c.width<=q.width+2 && (innerWidth>=1024?Math.abs(c.width-q.width)<2:c.width<=512+2) && card.scrollWidth<=card.clientWidth+2 && getComputedStyle(card).backgroundColor==='rgba(255, 252, 248, 0.94)';})(),
                     singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===8 && !faq.querySelector('a[href="/caste-otazky"]') && !!faq.querySelector('[data-home-faq-contact]') && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
-                    applicationAfterPricing:document.getElementById('cennik').nextElementSibling?.id==='psie-priatelstva' && document.getElementById('psie-priatelstva').nextElementSibling?.matches('[data-home-puppy-checker]') && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
+                    applicationAfterPricing:document.getElementById('cennik').nextElementSibling?.id==='psie-priatelstva' && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='cennik' && document.getElementById('psie-priatelstva').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
                     flatMainDock:getComputedStyle(dock.querySelector('.mobile-dock-bar')).boxShadow==='none',
-                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/|/#cennik|/#podmienky|/produkty' && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
+                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/|/#o-nas|/#cennik|/#podmienky|/produkty' && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2 &&
                       (() => {
@@ -3079,7 +3069,7 @@ async function assertBilingualNavigation(browser,engine) {
                   await page.locator('#top #recenzie').scrollIntoViewIfNeeded();
                   const narrow=await page.evaluate(()=>{
                     const review=document.querySelector('#top #recenzie [data-review-card]')?.getBoundingClientRect();
-                    const dock=document.querySelector('.mobile-dock[data-variant="main"] .mobile-dock-bar')?.getBoundingClientRect();
+                    const dock=document.querySelector('.mobile-dock[data-variant="main"]')?.getBoundingClientRect();
                     const item=document.querySelector('.mobile-dock[data-variant="main"] .mobile-dock-item')?.getBoundingClientRect();
                     return {visible:review&&dock?Math.min(review.bottom,dock.top)-review.top:0, buttonHeight:item?.height};
                   });
@@ -3213,13 +3203,13 @@ async function assertBilingualNavigation(browser,engine) {
               const application=page.locator('[data-home-friendship-form]');
               const toggle=application.locator('#home-friendship-application');
               const owner=application.locator('input[name="meno"]');
-              if(await owner.isVisible() || await application.locator('input[name="pes"]').isVisible()) throw new Error('Collapsed application must not show either step');
+              if(await owner.isVisible() || !await application.locator('input[name="pes"]').isVisible() || !await application.locator('input[name="plemeno"]').isVisible() || await application.locator('input[name="vek"]').isVisible()) throw new Error('Collapsed application must show only count and first identity fields');
               await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
               if(await owner.isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await page.getByRole('dialog').count()) throw new Error('Inline application did not open dog step');
               if(brandPreviewCandidate)await assertApplicationDogLayout(application,engine,'inline');
               await activateFixtureControl(toggle);
-              await application.locator('input[name="pes"]').waitFor({state:'hidden',timeout:5000});
+              await application.locator('input[name="vek"]').waitFor({state:'hidden',timeout:5000});
               if(await owner.isVisible()) throw new Error('Inline application collapse exposed owner step');
               await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
             }
@@ -3452,7 +3442,7 @@ async function assertBilingualNavigation(browser,engine) {
               const fits=await application.evaluate(el=>{const b=el.getBoundingClientRect();return b.width<=innerWidth-16 && el.scrollWidth<=el.clientWidth+2 && (innerWidth<1024 || b.width>=800);});
               if(!fits)throw new Error('Inline application responsive width incorrect');
               await activateFixtureControl(toggle);
-              await application.locator('input[name="pes"]').waitFor({state:'hidden',timeout:5000});
+              await application.locator('input[name="vek"]').waitFor({state:'hidden',timeout:5000});
             }
           }
           if (errors.length) throw new Error(errors.join('; '));
@@ -4165,12 +4155,7 @@ async function assertBilingualNavigation(browser,engine) {
               if (!hours.social || hours.social.y <= hours.day.y) throw new Error('Desktop footer socials must be below opening hours '+JSON.stringify(hours));
             }
             if (width === 390) {
-              await productPage.locator('.mobile-dock').getByRole('button', { name: 'Otvoriť menu' }).click();
-              const menu = productPage.locator('.mobile-dock-menu');
-              await menu.waitFor({ state: 'visible' });
               await assertCompactHomeMenu(productPage,false);
-              await productPage.getByRole('button', { name: 'Zavrieť menu' }).click();
-              await menu.waitFor({ state: 'hidden' });
             }
             const sectionOrder = await productPage.evaluate(() => {
               const faq = document.querySelector('main #faq');
@@ -4313,9 +4298,7 @@ async function assertBilingualNavigation(browser,engine) {
               const englishFooterSocial = productPage.locator('footer [data-social-links="footer"]:visible');
               await englishFooterSocial.waitFor({ state: 'visible' });
               if (await englishFooterSocial.locator('a').count() !== 2) throw new Error('English footer social buttons missing');
-              await productPage.locator('.mobile-dock').getByRole('button', { name: 'Open menu' }).click();
               await assertCompactHomeMenu(productPage,true);
-              await productPage.getByRole('button',{name:'Close menu'}).click();
 
             }
             for (const legacy of ['/kosik/', '/objednavka/']) {
