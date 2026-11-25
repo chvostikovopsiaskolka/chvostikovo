@@ -6,11 +6,12 @@ const path = require('node:path');
 const bellaris = process.env.WEB_SITE === 'bellaris';
 const { ARIA_ROUTES } = require('./public-web-impact.cjs');
 const runtimeScope = process.env.WEB_RUNTIME_SCOPE || 'full';
-if(!['full','aria'].includes(runtimeScope)||bellaris&&runtimeScope!=='full')throw new Error('Invalid public web runtime scope');
+if(!['full','aria','aria-visual'].includes(runtimeScope)||bellaris&&runtimeScope!=='full')throw new Error('Invalid public web runtime scope');
 const base = process.env.WEB_BASE_URL || (bellaris ? 'https://bellaris.sk' : 'https://chvostikovo.sk');
 const fullRoutes = bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/', '/test-aria/'];
-const urls = (runtimeScope === 'aria' ? ARIA_ROUTES : fullRoutes).map(route => new URL(route, base));
+const urls = (runtimeScope === 'aria-visual' ? ['/psia-skolka-kosice/'] : runtimeScope === 'aria' ? ARIA_ROUTES : fullRoutes).map(route => new URL(route, base));
 const brandPreviewCandidate = new URL(base).hostname === '127.0.0.1';
+if(runtimeScope==='aria-visual'&&!brandPreviewCandidate)throw new Error('Visual assertions require a freshly built local candidate');
 const out = process.env.RUNTIME_REPORT_DIR || 'runtime-report';
 fs.mkdirSync(out, { recursive: true });
 const results = [];
@@ -159,7 +160,7 @@ async function assertCookieChoices(page) {
 // Campaign content-flow contract: preserve the shared cookie/funnel/widget checks,
 // replace only the superseded section-order and hidden-form assertions below.
 // Reuse the TEST chat on paid LEAD; verify only the new route wiring with isolated transports.
-async function assertPaidAriaChat(page) {
+async function assertPaidAriaChat(page, {visualOnly=false}={}) {
   const posted=[];
   let failNext=false;
   const handler=async route=>{
@@ -170,9 +171,9 @@ async function assertPaidAriaChat(page) {
     if(failNext && data.cta_source){failNext=false;await route.fulfill({status:500,contentType:'application/json',headers,body:'{"ok":false}'});return;}
     await route.fulfill({status:200,contentType:'application/json',headers,body:'{"ok":true}'});
   };
-  await page.route('**/functions/v1/web-form-submit',handler);
+  if(!visualOnly)await page.route('**/functions/v1/web-form-submit',handler);
   try {
-    const marketingAllowed=await page.evaluate(()=>{
+    const marketingAllowed=!visualOnly && await page.evaluate(()=>{
       let consent=null,storageAvailable=false;
       try { consent=localStorage.getItem('chvostikovo-cookies');storageAvailable=true; } catch { /* Preserve the blocked-storage scenario. */ }
       window.__ariaMetaAudit={consent,storageAvailable,fbq:window.fbq,calls:[]};
@@ -206,6 +207,10 @@ async function assertPaidAriaChat(page) {
     await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'detached'});
     await chat.locator('[data-aria-chat-questions]').waitFor({state:'visible',timeout:20000});
     if(await chat.locator('[data-aria-chat-question]').count()!==4||!(await chat.innerText()).includes('20 €/deň'))throw new Error('Paid chat must reuse pricing answer and refill four FAQ');
+    if(visualOnly){
+      await chat.getByRole('button',{name:'Close',exact:true}).click();
+      await chat.waitFor({state:'hidden'});return;
+    }
     await chat.locator('[data-aria-chat-other-cta]').click();
     const other=chat.locator('[data-aria-chat-other]');
     const question=other.locator('textarea[name="otazka"]');
@@ -259,7 +264,7 @@ async function assertPaidAriaChat(page) {
     await chat.getByRole('button',{name:'Close',exact:true}).click();
     await chat.waitFor({state:'hidden'});
   } finally {
-    await page.unroute('**/functions/v1/web-form-submit',handler);
+    if(!visualOnly)await page.unroute('**/functions/v1/web-form-submit',handler);
     await page.evaluate(()=>{
       const audit=window.__ariaMetaAudit;if(!audit)return;
       if(audit.storageAvailable){
@@ -271,7 +276,7 @@ async function assertPaidAriaChat(page) {
   }
 }
 
-async function assertCampaignContentFlow(page) {
+async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
   await page.locator('[data-aria-lead-chat] img[alt^="Aria"]').evaluate(async image=>{
     await image.decode();
     if(image.naturalWidth<400||image.naturalHeight<400)throw new Error("Paid Aria must use the approved high-resolution head");
@@ -305,7 +310,7 @@ async function assertCampaignContentFlow(page) {
       const elements=[title,pills,photos,cta,proof];
       return {overflow:document.documentElement.scrollWidth>innerWidth+1,
         visible:elements.every(r=>r&&r.width>0&&r.top>=0&&r.bottom<=Math.min(aria.top,face.top,dock.top)+1),
-        desktop:(()=>{if(innerWidth<1024)return true;const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect());const service=box('[data-aria-service-group]');const seam=(images[0].bottom+images[1].top)/2;return photos.left>title.right&&Math.abs(photos.top-service.top)<2&&Math.abs(images[1].bottom-cta.bottom)<2&&Math.abs((title.top+title.bottom)/2-seam)<=36&&service.bottom<title.top&&title.bottom<=pills.top&&pills.bottom<=cta.top&&photos.height>=448&&Math.abs(images[0].left-images[1].left)<2&&images[0].bottom<images[1].top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;})(),
+        desktop:(()=>{if(innerWidth<1024)return true;const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect());const service=box('[data-aria-service-group]');const seam=(images[0].bottom+images[1].top)/2;return photos.left>title.right&&title.top-service.bottom>=8&&title.top-service.bottom<=20&&Math.abs(images[1].bottom-cta.bottom)<2&&Math.abs((title.top+title.bottom)/2-seam)<=36&&service.bottom<title.top&&title.bottom<=pills.top&&pills.bottom<=cta.top&&photos.height>=448&&Math.abs(images[0].left-images[1].left)<2&&images[0].bottom<images[1].top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;})(),
         mobileOrder:(()=>{if(innerWidth>=640)return true;const service=box('[data-aria-service-group]');return service.bottom<=title.top&&title.bottom<=pills.top&&pills.bottom<=photos.top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=10;})(),
         admissionClear:(()=>{const h=box('#lead-requirements h2');return [...document.querySelectorAll('#lead-requirements > [aria-hidden="true"] svg')].every(e=>{const p=e.getBoundingClientRect();return p.right<=h.left||p.left>=h.right||p.bottom<=h.top||p.top>=h.bottom;});})(),
         galleryEdge:(()=>{const r=box('#lead-photo-carousel [data-gesture-track="photos"]');return Math.abs(r.left)<2&&Math.abs(r.right-document.documentElement.offsetWidth)<2;})(),
@@ -337,6 +342,11 @@ async function assertCampaignContentFlow(page) {
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
   if(await page.locator('#lead-requirements h2').innerText()!=='Podmienky prijatia psíka')throw new Error('Campaign conditions heading differs');
+  if(visualOnly){
+    await page.setViewportSize({width:390,height:844});
+    await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+    await assertPaidAriaChat(page,{visualOnly:true});return;
+  }
   const inquiry=page.locator('[data-lead-faq-cta]');
   await centerFixtureControl(inquiry);await inquiry.hover();
   if(await inquiry.evaluate(el=>getComputedStyle(el).color)!=='rgb(255, 255, 255)')throw new Error('Rose inquiry hover needs white text');
@@ -704,7 +714,7 @@ async function assertBilingualNavigation(browser,engine) {
   for (const [engine, browserType] of selectedEngines) {
     const browser = await browserType.launch();
     if (!bellaris && brandPreviewCandidate && runtimeScope==='full') { await assertFooterMapGeometry(browser, engine); await assertBilingualNavigation(browser,engine); }
-    for (const restricted of [false, true]) {
+    for (const restricted of (runtimeScope==='aria-visual'?[false]:[false,true])) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
       // Each URL must start without a saved choice from the preceding URL.
       if (!restricted) await context.addInitScript(() => { localStorage.clear(); sessionStorage.clear(); });
@@ -875,6 +885,12 @@ async function assertBilingualNavigation(browser,engine) {
           await cookieButton.click();
           await page.waitForTimeout(300);
           if(brandPreviewCandidate&&!bellaris&&url.pathname==='/')await assertCookieChoices(page);
+          if(runtimeScope==='aria-visual'){
+            if(!revisedLead)throw new Error('Visual scope requires the current LEAD fixture');
+            await assertCampaignContentFlow(page,{visualOnly:true});
+            results.push({engine,restricted,route:url.pathname,scope:'aria-visual',status:'PASS'});
+            console.log('PASS LEAD visual geometry and chat surface '+engine);continue;
+          }
           if(revisedLead) await assertCampaignContentFlow(page);
           // Candidate-only regression for the three unified Chvostíkovo galleries.
           // Production-baseline CI keeps testing its already published version.
