@@ -3668,6 +3668,16 @@ async function assertFooterMapGeometry(browser, engine) {
             await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});
             const rehabConsent=productPage.getByRole('button',{name:'Len nevyhnutné',exact:true});
             if(await rehabConsent.isVisible())await rehabConsent.click();
+            const trainingGallery=productPage.locator('article section.flow-root').first().locator('[data-blog-training-gallery]');
+            const trainingPhotos=trainingGallery.locator('img');
+            if(await trainingPhotos.count()!==2)throw new Error('Rehab first section needs two training photos');
+            await trainingGallery.scrollIntoViewIfNeeded();
+            await trainingGallery.evaluate(async el=>{await Promise.all(Array.from(el.querySelectorAll('img')).map(img=>img.decode()));});
+            const trainingGeometry=await trainingGallery.evaluate(el=>{
+              const photos=Array.from(el.querySelectorAll('img')).map(img=>({fit:getComputedStyle(img).objectFit,rect:img.getBoundingClientRect().toJSON(),natural:img.naturalWidth>0}));
+              return {photos,overflow:document.documentElement.scrollWidth>innerWidth+1};
+            });
+            if(trainingGeometry.overflow||trainingGeometry.photos.some(photo=>photo.fit!=='contain'||!photo.natural)||Math.abs(trainingGeometry.photos[0].rect.y-trainingGeometry.photos[1].rect.y)>3||trainingGeometry.photos[1].rect.x<=trainingGeometry.photos[0].rect.x)throw new Error('Training photos must remain uncropped and side by side: '+JSON.stringify(trainingGeometry));
             const rehabGallery=productPage.locator('[data-blog-target-gallery]');
             if(await rehabGallery.locator('figure').count()!==3)throw new Error('Rehab article three photos missing');
             const rehabForm=productPage.locator('[data-blog-target-inquiry]');
