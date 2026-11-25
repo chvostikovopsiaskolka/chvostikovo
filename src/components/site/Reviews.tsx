@@ -312,7 +312,7 @@ export function VideoReasonsGrid({ items, language = "sk", homeMobileLayout = fa
       {homeMobileLayout && <div className="relative col-start-1 row-start-3 min-w-0 self-stretch sm:hidden"><img data-home-reason-photo src={happyDog} alt="Spokojný psík v Chvostíkove" loading="lazy" className="absolute inset-0 size-full rounded-3xl object-cover" /></div>}
       <div data-video-reasons-copy className="contents sm:flex sm:min-w-0 sm:flex-col sm:justify-around sm:rounded-3xl sm:bg-cream/10 sm:px-5 sm:shadow-card sm:ring-1 sm:ring-cream/20 sm:backdrop-blur-xl">
         {items.map(({ title, text, icon: Icon }) => (
-          <article key={title} className={homeMobileLayout ? (title === "Pekný deň aj pre vášho psíka" ? "col-start-2 row-start-3 min-w-0 text-cream sm:col-auto sm:rounded-none sm:border-0 sm:px-0 sm:py-4" : "col-start-2 min-w-0 text-cream sm:col-auto sm:py-4") : "min-w-0 px-1 py-3 text-cream sm:px-0 sm:py-4"}>
+          <article key={title} className={homeMobileLayout ? ((title === "Pekný deň aj pre vášho psíka" || title === "A lovely day for your dog") ? "col-start-2 row-start-3 min-w-0 text-cream sm:col-auto sm:rounded-none sm:border-0 sm:px-0 sm:py-4" : "col-start-2 min-w-0 text-cream sm:col-auto sm:py-4") : "min-w-0 px-1 py-3 text-cream sm:px-0 sm:py-4"}>
             <h3 className={"flex min-w-0 items-start gap-1.5 font-display font-bold leading-snug text-cream sm:gap-2 sm:text-lg lg:text-xl " +
               (homeMobileLayout ? "text-[12px] min-[390px]:text-[13px]" : "text-[13px] min-[390px]:text-[15px]")}>
               <span className={"grid shrink-0 place-items-center rounded-full bg-coral text-primary-foreground sm:size-9 " + (homeMobileLayout ? "size-5" : "size-6")}>
@@ -332,12 +332,14 @@ export function VideoReasonsGrid({ items, language = "sk", homeMobileLayout = fa
 }
 
 export function ReviewReasons({
+  language = "sk",
   ctaLabel = "Ako sa postaráme o vášho psíka",
   onCtaClick,
   variant = "default",
   withVideo = false,
   showCta = true,
 }: {
+  language?: "sk" | "en";
   ctaLabel?: string;
   onCtaClick?: () => void;
   variant?: "default" | "home";
@@ -345,18 +347,18 @@ export function ReviewReasons({
   showCta?: boolean;
 } = {}) {
   return (
-    <section id="preco-chvostikovo" className={"relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0 " + (variant === "home" ? "mt-20 sm:mt-0" : "")}>
+    <section id={language === "en" ? "en-benefits" : "preco-chvostikovo"} className={"relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0 " + (variant === "home" ? "mt-20 sm:mt-0" : "")}>
       <PawPrint aria-hidden="true" className="pointer-events-none absolute top-8 left-[6%] size-9 -rotate-12 text-cream/10 sm:size-12" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute top-[34%] right-[8%] size-7 rotate-[20deg] text-cream/10 sm:size-10" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute bottom-24 left-[14%] size-8 rotate-12 text-cream/10 sm:size-11" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute right-[18%] bottom-8 size-6 -rotate-[18deg] text-cream/10 sm:size-9" />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
-          <h2 className="font-display text-3xl text-cream sm:text-4xl">Prečo si vybrať Chvostíkovo?</h2>
+          <h2 className="font-display text-3xl text-cream sm:text-4xl">{language === "en" ? "Why choose Chvostíkovo?" : "Prečo si vybrať Chvostíkovo?"}</h2>
         </div>
 
         {withVideo ? (
-          <VideoReasonsGrid items={variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS} homeMobileLayout={variant === "home"} />
+          <VideoReasonsGrid items={language === "en" ? HOME_REVIEW_REASONS.map((item, i) => ({ ...item, title: ["A place they love", "Peace of mind for you", "A lovely day for your dog"][i]!, text: ["Our daycare dogs tell us the most when they greet us at the door and look forward to seeing their friends. Watch their joy in our videos and read owners’ experiences.", "Entrusting your dog to someone else is a big step. We want you to know the people caring for them and feel at ease throughout your day.", "While you take care of your responsibilities, your dog enjoys company, attention and activities. In the evening, you can enjoy time together after a day full of experiences."][i]! })) : variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS} language={language} homeMobileLayout={variant === "home"} />
         ) : (
           <div className="mt-7 overflow-hidden rounded-3xl bg-cream/10 px-5 text-cream shadow-card ring-1 ring-cream/20 backdrop-blur-xl md:grid md:grid-cols-3 md:px-3">
             {(variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS).map(({ title, text, icon: Icon }) => (

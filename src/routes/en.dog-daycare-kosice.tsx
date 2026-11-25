@@ -1,4 +1,6 @@
 import { LanguageSwitch, MobileLanguageHeader } from "@/components/site/LanguageSwitch";
+import { ReviewReasons } from "@/components/site/Reviews";
+import { Pricing } from "@/components/site/Info";
 import { Hero } from "@/components/site/Hero";
 import { LongForm } from "@/components/site/Forms";
 import { createFileRoute } from "@tanstack/react-router";
@@ -40,7 +42,7 @@ import { Gallery } from "@/components/site/Gallery";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { GoogleReviewMark, VideoReasonsGrid } from "@/components/site/Reviews";
 import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
-import { Care, About } from "@/components/site/Story";
+import { Care, About, FriendshipApplication } from "@/components/site/Story";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { EnglishContact, Footer } from "@/components/site/Contact";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -373,118 +375,13 @@ function EnglishDogDaycarePage() {
           </div>
         </section>}
 
-        <section id="en-benefits" className="relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0">
-          <SectionAmbientPaws tone="dark" />
-          <div className="relative z-10 mx-auto max-w-6xl px-4">
-            <h2 className="text-center font-display text-3xl text-cream sm:text-4xl">
-              Why choose Chvostíkovo?
-            </h2>
-
-            <div className="mt-7 grid gap-4 md:grid-cols-3 md:gap-5">
-              {[
-                [HeartHandshake, "People dogs can trust", "A kind, personal approach and a small enough daycare to genuinely know the dogs in our care."],
-                [ShieldCheck, "Supervised throughout the day", "Dogs are not simply left together. We watch interactions, play, rest and how each dog is feeling."],
-                [Sparkles, "Happy and pleasantly tired", "The day combines movement, enrichment, dog friends, calmer time and proper rest."],
-              ].map(([Icon, heading, copy]) => {
-                const CardIcon = Icon as typeof HeartHandshake;
-                return (
-                  <article key={String(heading)} className="flex items-start gap-3 rounded-2xl bg-cream/10 px-4 py-4 ring-1 ring-cream/15 md:block md:p-5">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-coral text-primary-foreground md:size-11">
-                      <CardIcon className="size-5" />
-                    </span>
-                    <div className="min-w-0 md:mt-3">
-                      <h3 className="font-display text-base font-bold text-cream md:text-lg">{String(heading)}</h3>
-                      <p className="mt-1 text-sm leading-relaxed text-cream/80">{String(copy)}</p>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-
-            <div className="relative z-20 mt-7 flex justify-center">
-              <button
-                type="button"
-                onClick={() => openInquiry("en_why_chvostikovo")}
-                className="btn-coral inline-flex items-center justify-center px-6 py-3 text-center"
-              >
-                This is what I'm looking for
-              </button>
-            </div>
-
-            <div className="mx-auto -mt-1 h-[138px] w-full max-w-[820px] overflow-hidden sm:mt-2 sm:h-[225px]" aria-hidden="true">
-              <img
-                src={schoolmatesLineup}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                width={1200}
-                height={630}
-                className="block h-full w-full scale-[1.08] object-cover object-bottom sm:scale-[1.04]"
-              />
-            </div>
-          </div>
-        </section>
-
+        <ReviewReasons variant="home" withVideo showCta={false} language="en" />
+        <About language="en" homeLayout />
         <DaycarePhotoCarousel language="en" />
-
-        <Care language="en" showEmbeddedFriendship={false} showInterest={false} />
-
-        <section id="pricing" className="relative scroll-mt-24 overflow-hidden py-14 sm:py-20">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-6xl px-4">
-            <div className="text-center">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Daycare prices</p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Our daycare prices</h2>
-              <p className="mt-3 text-forest/80">Every dog enjoys the same care — a pass simply offers better value.</p>
-            </div>
-
-            <div className="mx-auto mt-10 grid max-w-3xl gap-5 sm:grid-cols-2">
-              {[
-                { title: "Single visit", price: "25 €", highlight: false, detail: "" },
-                { title: "10-visit pass", price: "200 €", highlight: true, detail: "Save €50. Valid for 2 months." },
-              ].map((item) => (
-                <article
-                  key={item.title}
-                  className={`relative flex flex-col items-center rounded-3xl p-6 text-center shadow-card ${item.highlight ? "bg-forest text-cream ring-2 ring-coral" : "bg-card"}`}
-                >
-                  {item.highlight && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-coral px-4 py-1 font-display text-xs font-semibold whitespace-nowrap text-primary-foreground">
-                      Best value
-                    </span>
-                  )}
-                  <h3 className={`mt-2 text-lg ${item.highlight ? "text-cream" : "text-forest"}`}>{item.title}</h3>
-                  <p className={`mt-3 font-display text-4xl font-bold ${item.highlight ? "text-cream" : "text-coral"}`}>{item.price}</p>
-                  {item.detail && <p className="mt-2 text-sm font-semibold text-cream/85">{item.detail}</p>}
-                </article>
-              ))}
-            </div>
-
-            <div className="mt-6 rounded-4xl bg-card p-7 shadow-card sm:p-9">
-              <h3 className="text-center text-xl text-forest">Included with every visit</h3>
-              <ul className="mx-auto mt-6 grid max-w-3xl gap-3 text-left text-[0.95rem] sm:grid-cols-2">
-                {INCLUDED_EN.map((item) => (
-                  <li key={item} className="flex gap-2.5">
-                    <Check className="mt-0.5 size-4 shrink-0 text-coral" />
-                    <span className="text-forest/85">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-6 flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-secondary px-5 py-3 text-center font-display text-sm font-semibold text-forest">
-                <Car className="size-5 text-coral" /> Dog pick-up or drop-off: €5 per one-way journey
-              </p>
-              <div className="mt-7 flex justify-center">
-                <button type="button" onClick={() => openInquiry("en_pricing")} className="btn-coral">
-                  Enquire about daycare
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <FriendshipFeature language="en" applicationMode />
-        <section id="en-application" className="bg-card px-4 pb-10"><div data-home-friendship-form className="form-liquid-surface mx-auto max-w-4xl rounded-3xl bg-card p-4 shadow-card sm:p-6 lg:p-8"><h3 className="mb-5 text-center font-display text-xl font-bold text-forest sm:text-2xl">Daycare application</h3><LongForm language="en" collapsible onExpand={() => trackMarketingInteraction("inquiry_cta", "en_friendship_20261028")} /></div></section>
-
-        <Gallery language="en" />
+        <Pricing interestMode homeLayout language="en" />
+        <FriendshipApplication language="en" />
+        <Care language="en" showEmbeddedFriendship={false} showInterest={false} showContextFaq={false} homeCombined />
+        <Gallery language="en" homeMosaic />
 
         <section id="en-first-visit" className="relative scroll-mt-4 overflow-hidden py-14 sm:py-18">
           <SectionAmbientPaws />
@@ -603,7 +500,6 @@ function EnglishDogDaycarePage() {
 
 
 
-        <About language="en" />
         <PhotoStrip />
         <EnglishContact onEnquire={() => openInquiry("en_contact")} />
       </main>

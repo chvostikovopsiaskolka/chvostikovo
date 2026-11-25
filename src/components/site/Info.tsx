@@ -170,45 +170,45 @@ export function FirstVisit({ inlineForm = false, leadStyle = false }: { inlineFo
   );
 }
 
-export function DaycarePricingCards({ campaign = false }: { campaign?: boolean }) {
+export function DaycarePricingCards({ campaign = false, language = "sk" }: { campaign?: boolean; language?: "sk" | "en" }) {
   return (<div data-home-prices={campaign ? undefined : true} data-lead-prices={campaign || undefined} className="col-span-2 mb-2 grid min-w-0 grid-cols-2 items-stretch gap-3 sm:mb-3 sm:gap-5">
             {PRICING.map(item => <article key={item.name} data-home-price-card={campaign ? undefined : item.highlight ? "pass" : "single"} data-lead-price-card={campaign ? (item.highlight ? "pass" : "single") : undefined}
               className={"relative grid min-w-0 grid-rows-[auto_auto_auto] content-start items-center justify-items-center gap-1 rounded-3xl px-2 pb-5 pt-3 text-center shadow-card sm:px-4 sm:pb-6 sm:pt-4 " + (item.highlight ? "bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
-              <h3 className="whitespace-nowrap font-display text-[clamp(11px,3.3vw,15px)] font-bold leading-snug text-forest sm:text-xl">{item.name}</h3>
-              <p data-home-price={campaign ? undefined : true} data-lead-price={campaign || undefined} data-lead-price-per-day={campaign && item.highlight || undefined} className={"whitespace-nowrap font-display text-[clamp(22px,6vw,30px)] font-bold leading-tight sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-[#ffa414]")}>{item.highlight ? <>{Number.parseInt(item.price, 10) / 10}&nbsp;€</> : item.price.replace(" ", "\u00a0")}<span className="text-[0.55em]"> / deň</span></p>
+              <h3 className="whitespace-nowrap font-display text-[clamp(11px,3.3vw,15px)] font-bold leading-snug text-forest sm:text-xl">{language === "en" ? (item.highlight ? "10-visit pass" : "Single visit") : item.name}</h3>
+              <p data-home-price={campaign ? undefined : true} data-lead-price={campaign || undefined} data-lead-price-per-day={campaign && item.highlight || undefined} className={"whitespace-nowrap font-display text-[clamp(22px,6vw,30px)] font-bold leading-tight sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-[#ffa414]")}>{item.highlight ? <>{Number.parseInt(item.price, 10) / 10}&nbsp;€</> : item.price.replace(" ", "\u00a0")}<span className="text-[0.55em]">{language === "en" ? " / day" : " / deň"}</span></p>
               {item.highlight ? <>
-                <p data-home-pass-total={campaign ? undefined : true} data-lead-pass-total={campaign || undefined} className="whitespace-nowrap font-display text-[clamp(10px,3vw,14px)] font-semibold leading-snug text-forest sm:text-lg"><strong>{item.price.replace(" ", "\u00a0")}</strong> · 10 vstupov</p>
-                <span data-home-best-value={campaign ? undefined : true} data-lead-best-value={campaign || undefined} className="absolute bottom-0 left-1/2 inline-flex -translate-x-1/2 translate-y-1/2 items-center justify-center whitespace-nowrap rounded-full bg-coral px-1.5 py-1 font-display text-[clamp(8px,2.15vw,12px)] font-bold leading-tight tracking-[-0.025em] text-white shadow-sm">Najvýhodnejšie. Ušetríte 50&nbsp;€</span>
-              </> : <p data-home-opening-hours className="text-xs leading-snug text-forest/75 sm:text-sm">Pondelok – piatok<br />od 7:00 do 17:00</p>}
+                <p data-home-pass-total={campaign ? undefined : true} data-lead-pass-total={campaign || undefined} className="whitespace-nowrap font-display text-[clamp(10px,3vw,14px)] font-semibold leading-snug text-forest sm:text-lg"><strong>{item.price.replace(" ", "\u00a0")}</strong> · {language === "en" ? "10 visits" : "10 vstupov"}</p>
+                <span data-home-best-value={campaign ? undefined : true} data-lead-best-value={campaign || undefined} className="absolute bottom-0 left-1/2 inline-flex -translate-x-1/2 translate-y-1/2 items-center justify-center whitespace-nowrap rounded-full bg-coral px-1.5 py-1 font-display text-[clamp(8px,2.15vw,12px)] font-bold leading-tight tracking-[-0.025em] text-white shadow-sm">{language === "en" ? "Best value. Save €50" : "Najvýhodnejšie. Ušetríte 50 €"}</span>
+              </> : <p data-home-opening-hours className="text-xs leading-snug text-forest/75 sm:text-sm">{language === "en" ? "Monday – Friday" : "Pondelok – piatok"}<br />{language === "en" ? "7:00–17:00" : "od 7:00 do 17:00"}</p>}
             </article>)}
           </div>);
 }
 
-export function DaycareTaxiNote({ campaign = false }: { campaign?: boolean }) {
+export function DaycareTaxiNote({ campaign = false, language = "sk" }: { campaign?: boolean; language?: "sk" | "en" }) {
   return (<p data-home-taxi={campaign ? undefined : true} data-aria-taxi={campaign || undefined} className="col-span-2 flex min-w-0 items-center justify-center gap-1.5 rounded-2xl bg-[#c92c89] px-2 py-3 text-center text-[clamp(10px,3vw,14px)] font-semibold leading-snug text-white sm:gap-2 sm:text-sm">
             <Car className="size-4 shrink-0 text-white sm:size-5" aria-hidden="true" />
-            <span className="whitespace-nowrap">Odvoz a vyzdvihnutie: <strong>5&nbsp;€ / jazda</strong></span>
+            <span className="whitespace-nowrap">{language === "en" ? "Pick-up and drop-off: " : "Odvoz a vyzdvihnutie: "}<strong>{language === "en" ? "€5 / trip" : "5 € / jazda"}</strong></span>
           </p>);
 }
 
-export function Pricing({ interestMode = false, homeLayout = false }: { interestMode?: boolean; homeLayout?: boolean } = {}) {
+export function Pricing({ interestMode = false, homeLayout = false, language = "sk" }: { interestMode?: boolean; homeLayout?: boolean; language?: "sk" | "en" } = {}) {
   const [open, setOpen] = useState(false);
 
   if (homeLayout) return (
-    <section id="cennik" data-home-pricing className="relative scroll-mt-24 overflow-hidden bg-secondary py-10 sm:py-14">
+    <section id={language === "en" ? "pricing" : "cennik"} data-home-pricing className="relative scroll-mt-24 overflow-hidden bg-secondary py-10 sm:py-14">
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-5xl px-4">
-        <h2 className="section-title text-center text-3xl sm:text-4xl">Cenník našich služieb</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-forest/80 sm:text-base">V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je cenovo výhodnejšia. <strong data-pass-attendance className="mt-2 block font-bold text-forest">Podmienkou kúpy permanentky je pravidelná návšteva škôlky minimálne 2× týždenne.</strong></p>
+        <h2 className="section-title text-center text-3xl sm:text-4xl">{language === "en" ? "Our daycare prices" : "Cenník našich služieb"}</h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-forest/80 sm:text-base">{language === "en" ? "Every visit includes the same care. A pass simply offers better value. " : "V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je cenovo výhodnejšia. "}<strong data-pass-attendance className="mt-2 block font-bold text-forest">{language === "en" ? "A pass requires regular attendance at least twice a week." : "Podmienkou kúpy permanentky je pravidelná návšteva škôlky minimálne 2× týždenne."}</strong></p>
         <div data-home-pricing-columns className="mx-auto mt-7 grid max-w-3xl grid-cols-2 items-stretch gap-3 sm:gap-6">
-          <DaycarePricingCards />
+          <DaycarePricingCards language={language} />
           <div data-home-included className="col-span-2 min-w-0 rounded-3xl bg-card p-4 shadow-card sm:p-6 lg:p-8">
-            <h3 className="text-center font-display text-base font-bold text-forest sm:text-xl">Čo je v cene zahrnuté</h3>
+            <h3 className="text-center font-display text-base font-bold text-forest sm:text-xl">{language === "en" ? "Included with every visit" : "Čo je v cene zahrnuté"}</h3>
             <ul className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-xs leading-relaxed sm:gap-x-6 sm:text-base">
-              {INCLUDED.filter(item => item !== "Fotky a videá z priebehu dňa").map(item => <li key={item} className="flex min-w-0 gap-1.5 sm:gap-2.5"><Check className="mt-1 size-3 shrink-0 text-green-700 sm:size-4" aria-hidden="true" /><strong className="min-w-0 font-bold text-forest/85">{item}</strong></li>)}
+              {(language === "en" ? ["Supervised daycare", "Heated indoor spaces", "Outdoor run", "Activities and play with friends", "Rest and individual care"] : INCLUDED.filter(item => item !== "Fotky a videá z priebehu dňa")).map(item => <li key={item} className="flex min-w-0 gap-1.5 sm:gap-2.5"><Check className="mt-1 size-3 shrink-0 text-green-700 sm:size-4" aria-hidden="true" /><strong className="min-w-0 font-bold text-forest/85">{item}</strong></li>)}
             </ul>
           </div>
-          <DaycareTaxiNote />
+          <DaycareTaxiNote language={language} />
         </div>
       </div>
     </section>

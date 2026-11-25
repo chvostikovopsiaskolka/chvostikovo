@@ -24,14 +24,14 @@ export function FriendshipFeature({ language = "sk", embedded = false, ctaLabel,
       />
       <div className="px-6 py-7 text-center sm:px-9 sm:py-10 md:text-left lg:px-12">
         <p className="font-display text-xs font-bold uppercase tracking-[0.15em] text-coral-dark">
-          {applicationMode ? "Prihláška do škôlky" : isEnglish ? "More than playtime" : "Viac než len hra"}
+          {applicationMode ? (isEnglish ? "Daycare application" : "Prihláška do škôlky") : isEnglish ? "More than playtime" : "Viac než len hra"}
         </p>
         <h2 className="mt-3 font-display text-2xl font-bold leading-tight text-forest sm:text-3xl lg:text-4xl">
           {isEnglish ? "Where dog friendships begin." : "Miesto, kde vznikajú psie priateľstvá."}
         </h2>
         <p className="mt-4 text-[0.95rem] leading-relaxed text-forest/80 sm:text-base">
           {applicationMode
-            ? <>Plánujete so svojím psíkom navštevovať škôlku <strong>pravidelne</strong>? Vyplňte prihlášku, povedzte nám viac o svojom psíkovi a dohodneme sa na ďalšom postupe.</>
+            ? isEnglish ? <>Planning to visit daycare <strong>regularly</strong> with your dog? Fill in the application, tell us more about your dog and we will agree on the next steps.</> : <>Plánujete so svojím psíkom navštevovať škôlku <strong>pravidelne</strong>? Vyplňte prihlášku, povedzte nám viac o svojom psíkovi a dohodneme sa na ďalšom postupe.</>
             : isEnglish
             ? "After playtime with their dog friends, there is also time to rest. At Chvostíkovo, every dog has space to enjoy the day at their own pace."
             : "Po hrách a šantení s kamošmi prichádza aj čas na oddych. V Chvostíkove má každý psík priestor užiť si deň vlastným tempom."}
