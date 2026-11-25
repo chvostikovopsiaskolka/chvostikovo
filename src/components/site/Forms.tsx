@@ -428,7 +428,7 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
 
   function goToStep(next: 1 | 2) {
     setStep(next);
-    requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
       const heading = stepHeading.current;
       heading?.focus({ preventScroll: true });
       heading?.scrollIntoView({ block: "start", behavior: "instant" });
@@ -450,7 +450,7 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
     if (invalidDog) {
       if (step === 2) {
         setStep(1);
-        requestAnimationFrame(() => invalidDog.reportValidity());
+        window.requestAnimationFrame(() => invalidDog.reportValidity());
       } else invalidDog.reportValidity();
       return;
     }
