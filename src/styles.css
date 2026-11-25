@@ -1225,13 +1225,14 @@
 /* Paid lead hotfix: reviews and Aria belong to the first mobile screen.
    Scope to this landing; do not change the preview or organic puppy dock. */
 @media (max-width: 639px) {
-  /* Reserve the existing dock footprint using the small viewport and safe area. */
+  /* PR517 removed the navigation. Reserve the launcher, not an obsolete
+     second dock. On short screens keep the content in normal scroll flow. */
   .lead-brand-live .hero-safe-top {
-    --lead-hero-visible: calc(100svh - 50px - max(8px, env(safe-area-inset-bottom, 0px)));
-    --hero-content-top: clamp(28px, calc(10svh - 40px), 52px);
+    --lead-hero-visible: calc(100svh - 96px - max(8px, env(safe-area-inset-bottom, 0px)));
+    --hero-content-top: clamp(28px, calc(20svh - 104px), 66px);
     min-height: var(--lead-hero-visible);
     justify-content: flex-start;
-    padding-bottom: calc(50px + max(8px, env(safe-area-inset-bottom, 0px)));
+    padding-bottom: 0.75rem;
   }
   .lead-brand-live #recenzie { padding-bottom: 0.5rem; }
   /* The horizontal scroll container used to clip the card shadows at 4px.
@@ -1526,8 +1527,8 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
 
 /* Primary campaign orange CTA; keep its text, touch target and focus. */
 .lead-brand-live [data-aria-lead-hero-cta] {
-  color: #26322b;
-  background-color: #ffa414;
+  color: #fff;
+  background-color: #b85b00;
   background-image: none;
   border-color: rgb(190 117 42 / 29%);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 86%), 0 9px 22px -14px rgb(79 46 17 / 24%);
@@ -1535,8 +1536,8 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
   backdrop-filter: blur(14px) saturate(1.16);
 }
 .lead-brand-live [data-aria-lead-hero-cta]:is(:hover, :active) {
-  color: #26322b;
-  background-color: #f59a00;
+  color: #fff;
+  background-color: #a64d00;
   border-color: rgb(190 117 42 / 42%);
 }
 
@@ -1561,7 +1562,7 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
     background-image: none;
   }
   .lead-brand-live [data-aria-lead-hero-cta] {
-    background-color: #ffa414;
+    background-color: #b85b00;
     background-image: none;
   }
   .lead-brand-live [data-aria-dock] {
@@ -1651,7 +1652,13 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   padding-inline-end: 2rem;
 }
 
-/* Paid campaign content budget only: keep the existing fixed Aria/dock and motion intact. */
+/* Paid campaign content only: preserve the approved Aria launcher and
+   use the two original photos with a top-biased crop. */
+.lead-brand-live [data-lead-hero-pill] { font-weight: 700; }
+.lead-brand-live [data-lead-hero-photo] img { object-position: 50% 0%; }
+.lead-brand-live [data-lead-hero-photo]:hover img { transform: none; }
+.lead-brand-live [data-lead-hero-pills] { gap: clamp(5px, 1.6vw, 10px); }
+
 @media (max-width: 639px) {
 
   .lead-brand-live [data-lead-hero-grid] { display: grid; grid-template-areas: "service" "title" "pills" "photos" "action"; }
@@ -1659,12 +1666,12 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .lead-brand-live .hero-safe-top h1 { grid-area: title; margin-top: 0; }
   .lead-brand-live [data-aria-service-group] { grid-area: service; margin-top: 0; margin-bottom: 12px; }
   .lead-brand-live [data-aria-service-badge] { text-transform: none; font-size: 11px; letter-spacing: 0; padding-block: 6px; }
-  .lead-brand-live [data-lead-hero-pills] { grid-area: pills; margin-top: 10px; }
+  .lead-brand-live [data-lead-hero-pills] { grid-area: pills; margin-top: 12px; }
   .lead-brand-live [data-lead-hero-pill] { font-size: 10px; padding: 4px 7px; }
-  .lead-brand-live [data-lead-hero-photos] { grid-area: photos; margin-top: 16px; }
-  .lead-brand-live [data-lead-hero-photo] { height: clamp(120px, calc(0.35 * (var(--lead-hero-visible) - 350px)), 160px); }
-  .lead-brand-live [data-lead-hero-action] { grid-area: action; margin-top: 14px; }
-  .lead-brand-live [data-aria-lead-review-spacing] { margin-top: 20px; }
+  .lead-brand-live [data-lead-hero-photos] { grid-area: photos; margin-top: 18px; }
+  .lead-brand-live [data-lead-hero-photo] { height: clamp(120px, calc(0.35 * (var(--lead-hero-visible) - 285px)), 175px); }
+  .lead-brand-live [data-lead-hero-action] { grid-area: action; margin-top: 16px; }
+  .lead-brand-live [data-aria-lead-review-spacing] { margin-top: clamp(24px, calc(6svh - 16px), 34px); }
 }
 
 .lead-brand-live [data-lead-faq-cta] { background: #ffa414; color: #26322b; }
@@ -1675,29 +1682,36 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 .lead-brand-live #aria-caretakers [data-safety-diplomas] { max-width: 40rem; }
 .lead-brand-live #aria-caretakers [data-safety-diplomas] img { max-width: 12rem; }
 
-/* Paid desktop hero: both photos share the text column's outer edges. */
+/* Paid desktop hero: badge and action align to the outer photo edges;
+   the title and pills belong together in the central part of the column. */
 @media (min-width: 1024px) {
+  .lead-brand-live .hero-safe-top {
+    min-height: calc(100svh - 104px);
+    justify-content: center;
+    padding-bottom: 1rem;
+  }
   .lead-brand-live [data-lead-hero-grid] {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    grid-template-rows: auto minmax(0, 1fr) auto minmax(0, 1fr) auto;
     align-items: start;
-    grid-template-areas: "title photos" "service photos" "pills photos" "action photos";
+    grid-template-areas: "service photos" ". photos" "title photos" "pills photos" "action photos";
     column-gap: 3rem;
-    row-gap: 1rem;
+    row-gap: 0.75rem;
     text-align: left;
   }
   .lead-brand-live [data-aria-hero-heading-spacer] { display: none; }
   .lead-brand-live [data-lead-hero-grid] h1 { grid-area: title; margin: 0; font-size: clamp(2.25rem, calc(7svh - 12px), 3.25rem); }
   .lead-brand-live [data-aria-service-group] { grid-area: service; margin: 0; }
   .lead-brand-live [data-aria-service-badge] { font-size: 0.875rem; text-align: left; }
-  .lead-brand-live [data-lead-hero-pills] { grid-area: pills; margin: 0; max-width: none; justify-content: flex-start; gap: 0.5rem; }
+  .lead-brand-live [data-lead-hero-pills] { grid-area: pills; margin: 0; max-width: none; justify-content: flex-start; gap: 0.75rem; }
   .lead-brand-live [data-lead-hero-pill] { font-size: 0.875rem; padding: 0.5rem 0.75rem; }
-  .lead-brand-live [data-lead-hero-photos] { grid-area: photos; grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); margin: 0; min-height: 26rem; }
+  .lead-brand-live [data-lead-hero-photos] { grid-area: photos; grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); margin: 0; min-height: clamp(28rem, 58svh, 34rem); align-self: stretch; }
   .lead-brand-live [data-lead-hero-photo] { position: relative; height: auto; min-height: 0; }
   .lead-brand-live [data-lead-hero-photo] img { position: absolute; inset: 0; }
-  .lead-brand-live [data-lead-hero-action] { grid-area: action; margin: 0; max-width: 26rem; align-items: flex-start; }
+  .lead-brand-live [data-lead-hero-action] { grid-area: action; margin: 0; max-width: 26rem; align-items: flex-start; align-self: end; }
   .lead-brand-live [data-aria-lead-hero-cta] { font-size: 1rem; }
-  .lead-brand-live [data-aria-lead-review-spacing] { margin-top: 1.5rem; }
+  .lead-brand-live [data-aria-lead-review-spacing] { margin-top: 2rem; }
 }
 
 /* Keep decoration below the admission heading, and emphasize practical location facts. */
