@@ -240,9 +240,9 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
             <button type="button" onClick={() => setLegalDialog("operator")} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap underline underline-offset-4 hover:text-cream">
               {isEnglish ? "Operator details" : "Údaje prevádzkovateľa"}
             </button>
-            <button type="button" onClick={() => setLegalDialog("privacy")} aria-label={isEnglish ? "Privacy policy – GDPR" : "Ochrana osobných údajov – GDPR"} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap underline underline-offset-4 hover:text-cream">
+            <a href={isEnglish ? "/en/privacy" : "/ochrana-osobnych-udajov"} aria-label={isEnglish ? "Privacy policy – GDPR" : "Ochrana osobných údajov – GDPR"} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap underline underline-offset-4 hover:text-cream">
               GDPR
-            </button>
+            </a>
             <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap underline underline-offset-4 hover:text-cream">
               {isEnglish ? "Cookie settings" : "Nastavenia cookies"}
             </button>
@@ -275,7 +275,6 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
         onOpenChange={(open) => {
           if (!open) setLegalDialog(null);
         }}
-        onSelect={setLegalDialog}
         language={language}
       />
     </>

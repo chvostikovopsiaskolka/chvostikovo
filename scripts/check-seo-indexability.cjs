@@ -68,7 +68,7 @@ assert(footerContent.includes("flex-nowrap items-center justify-between"), "One-
 assert(footerContent.includes("whitespace-nowrap"), "Legal nav should not wrap");
 assert(footerContent.includes('setLegalDialog("cookies")'), "Cookies dialog missing");
 assert(footerContent.includes('setLegalDialog("operator")'), "Operator dialog missing");
-assert(footerContent.includes('setLegalDialog("privacy")'), "GDPR dialog missing");
+assert(footerContent.includes('href={isEnglish ? "/en/privacy" : "/ochrana-osobnych-udajov"}'), "Bilingual GDPR URL missing");
 assert(footerContent.includes("Ochrana osobných údajov – GDPR"), "Privacy accessible label missing");
 assert(footerContent.includes("chvostikovo-open-cookie-settings"), "Cookie settings must work");
 assert(footerContent.includes("mt-1 text-center"), "Copyright must be centered");

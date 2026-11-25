@@ -11,7 +11,7 @@ const nav=footer.slice(footer.indexOf("<nav"),footer.indexOf("</nav>"));
 assert.ok(nav.includes("flex-nowrap items-center justify-between"),"Four legal links must remain on one row");
 assert.ok(nav.includes("whitespace-nowrap"),"Legal links should not break");
 let previous=-1;
-for(const x of ['setLegalDialog("cookies")','setLegalDialog("operator")','setLegalDialog("privacy")',"chvostikovo-open-cookie-settings"]){
+for(const x of ['setLegalDialog("cookies")','setLegalDialog("operator")','href={isEnglish ? "/en/privacy" : "/ochrana-osobnych-udajov"}',"chvostikovo-open-cookie-settings"]){
  const pos=nav.indexOf(x,previous+1);
  assert.ok(pos>previous,"Missing or out of order legal action: "+x);
  previous=pos;
