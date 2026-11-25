@@ -178,7 +178,7 @@ function FunctionalMap({ language }: { language: "sk" | "en" }) {
   }
 
   return (
-    <div data-footer-map className={`overflow-hidden shadow-card ${footerMapRadius}`}>
+    <div data-footer-map className={`overflow-hidden shadow-card ${footerMapRadius} [clip-path:inset(0_round_max(0px,calc(var(--footer-card-radius)_-_var(--footer-card-padding))))]`}>
       <iframe
         title={isEnglish ? "Map – Chvostíkovo, Poľská 6, Košice" : "Mapa – Chvostíkovo, Poľská 6, Košice"}
         src="https://www.google.com/maps?gl=sk&hl=sk&output=embed&q=Chvost%C3%ADkovo+psia+%C5%A1k%C3%B4lka%2C+Po%C4%BEsk%C3%A1+6%2C+040+01+Ko%C5%A1ice&z=16"
