@@ -1673,9 +1673,9 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
      Rem limits preserve text resizing; enlarged text may naturally reflow. */
   .lead-brand-live [data-aria-guide] { padding-inline: 8px; }
   .lead-brand-live [data-aria-lead-chat] [data-aria-dock] { width: 100%; max-width: none; margin-inline: 0; }
-  .lead-brand-live [data-aria-lead-chat] [data-aria-chat-trigger] { left: 0; width: clamp(64px, 20vw, 84px); height: clamp(64px, 20vw, 84px); }
-  .lead-brand-live [data-aria-lead-chat] [data-aria-message] { left: 0; width: 100%; max-width: none; margin-inline: 0; padding-left: calc(clamp(64px, 20vw, 84px) + 4px); }
-  .lead-brand-live [data-aria-lead-chat] [data-aria-speech] { width: 100%; max-width: none; }
+  .lead-brand-live [data-aria-lead-chat] [data-aria-chat-trigger] { left: 0; width: clamp(60px, calc(20vw - 4px), 84px); height: clamp(60px, calc(20vw - 4px), 84px); }
+  .lead-brand-live [data-aria-lead-chat] [data-aria-message] { left: 0; width: 100%; max-width: none; margin-inline: 0; padding-left: calc(clamp(60px, calc(20vw - 4px), 84px) + 4px); }
+  .lead-brand-live [data-aria-lead-chat] [data-aria-speech] { width: 100%; max-width: none; padding-inline: 6px; }
   .lead-brand-live [data-aria-lead-chat] [data-aria-message] p { font-size: clamp(.625rem, .025rem + 2.8vw, .8125rem); }
 }
 .lead-brand-live [data-aria-lead-chat] [data-aria-message] p strong { font-size: inherit; line-height: inherit; }

@@ -281,7 +281,7 @@ async function assertCampaignContentFlow(page) {
         compactLauncher:(()=>{const b=box('[data-aria-bubble-chat-cta]'),s=box('[data-aria-speech]');const c=document.querySelector('[data-aria-bubble-chat-cta]'),pseudo=getComputedStyle(c,'::before');return Math.abs(b.width-(s.width-parseFloat(getComputedStyle(document.querySelector('[data-aria-speech]')).paddingLeft)-parseFloat(getComputedStyle(document.querySelector('[data-aria-speech]')).paddingRight)))<3&&b.height>=36&&b.height<=40&&parseFloat(pseudo.top)<=-4&&parseFloat(pseudo.bottom)<=-4;})(),
         dockInside:dock.top>=0&&dock.bottom<=innerHeight+1,
         ctaHeight:cta.height,proofBottom:proof.bottom,ariaTop:aria.top,faceWidth:face?.width,
-        widget:(()=>{const speech=box('[data-aria-speech]');const tail=document.querySelector('[data-aria-speech] [data-aria-tail]');return dock.height<=1&&Math.abs(face.width-(innerWidth>=640?104:Math.min(84,Math.max(64,innerWidth*.2))))<2&&
+        widget:(()=>{const speech=box('[data-aria-speech]');const tail=document.querySelector('[data-aria-speech] [data-aria-tail]');return dock.height<=1&&Math.abs(face.width-(innerWidth>=640?104:Math.min(84,Math.max(60,innerWidth*.2-4))))<2&&
           speech.left-face.right>=2&&speech.left-face.right<=5&&dock.top-speech.bottom>=8&&speech.left>=0&&speech.right<=innerWidth&&
           (innerWidth<1024||speech.width>=455&&speech.width<=482)&&!!tail&&Number(tail.dataset.tipX)<-8&&
           document.querySelectorAll('[data-aria-section-navigation]').length===0&&document.querySelectorAll('[data-aria-chat-trigger]').length===1&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
