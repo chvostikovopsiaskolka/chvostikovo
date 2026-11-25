@@ -1,0 +1,26 @@
+name: Aria live collector QA (analytics only)
+on:
+  push:
+    branches: [qa/aria-sql-release-20261125]
+permissions:
+  contents: read
+jobs:
+  collector:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send isolated QA chat observations, never forms or advertising
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, urllib.request
+          endpoint='https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/website-landing-event'
+          chat='a1100000-0000-4000-8000-000000000025'
+          visit='a1200000-0000-4000-8000-000000000025'
+          for seq,action,detail in [(1,'open',None),(2,'question','pricing'),(3,'question','pricing'),(4,'question','requirements'),(5,'close',None),(6,'reopen',None),(7,'leave',None)]:
+              event={'path':'/psia-skolka-kosice/','event_name':'aria_chat_event','event_source':'lead_landing_aria_chat_'+action+('_'+detail if detail else ''),'aria_environment':'qa','aria':{'chat_id':chat,'visit_id':visit,'sequence':seq,'action':action,'detail':detail,'form_attempt_id':None},'utm_source':'qa'}
+              request=urllib.request.Request(endpoint,data=json.dumps(event).encode(),headers={'Origin':'https://chvostikovo.sk','User-Agent':'Mozilla/5.0 QA analytics fixture','Content-Type':'application/json'})
+              with urllib.request.urlopen(request,timeout=15) as response:
+                  assert response.status==201 and json.load(response).get('ok') is True
+              print(seq,action,'QA collector accepted')
+          PY
