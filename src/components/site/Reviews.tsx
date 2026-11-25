@@ -348,7 +348,7 @@ export function ReviewReasons({
 } = {}) {
   return (
     <section id={language === "en" ? "en-benefits" : "preco-chvostikovo"} className={"relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0 " + (variant === "home" ? "mt-20 sm:mt-0" : "")}>
-      <PawPrint aria-hidden="true" className="pointer-events-none absolute top-8 left-[6%] size-9 -rotate-12 text-cream/10 sm:size-12" />
+      <PawPrint aria-hidden="true" data-reason-heading-paw className="pointer-events-none absolute top-0 left-[6%] size-6 -rotate-12 text-cream/10 sm:size-8" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute top-[34%] right-[8%] size-7 rotate-[20deg] text-cream/10 sm:size-10" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute bottom-24 left-[14%] size-8 rotate-12 text-cream/10 sm:size-11" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute right-[18%] bottom-8 size-6 -rotate-[18deg] text-cream/10 sm:size-9" />
