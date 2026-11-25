@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight, Clock3 } from "lucide-react";
 import { Header } from "./Header";
 import { Footer } from "./Contact";
 import { LeadStepForm } from "./LeadStepForm";
-import { BlogCard } from "./BlogCard";
+import { BlogCardCarousel } from "./BlogCardCarousel";
 import { StandGalleryLoop } from "./StandGalleryLoop";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
@@ -10,6 +10,11 @@ import { blogCards, blogPath, type BlogArticleData } from "@/content/blog";
 
 const SITE = "https://chvostikovo.sk";
 const BRAND = "Chvostíkovo";
+
+// Editorial emphasis is explicit **phrase** markup in article paragraphs; no raw HTML.
+function emphasizedText(value: string) {
+  return value.split(/(\*\*[^*]+\*\*)/g).map((part, index) => part.startsWith("**") && part.endsWith("**") ? <strong key={index} className="font-semibold text-forest">{part.slice(2, -2)}</strong> : part);
+}
 
 export function blogArticleHead(article: BlogArticleData) {
   const url = SITE + blogPath(article.slug);
@@ -52,16 +57,11 @@ export function blogArticleHead(article: BlogArticleData) {
 
 export function BlogArticle({ article }: { article: BlogArticleData }) {
   const trackingSource = "blog_" + article.slug.replaceAll("-", "_") + "_inquiry";
-  const related = blogCards.filter(card => card.id !== article.slug).slice(0, 3);
+  const related = blogCards.filter(card => card.id !== article.slug);
   const productGuide = Boolean(article.productPage);
   const standGuide = article.slug === "stojan-na-misky-pre-psa-vyhody-a-vyber";
   const workdayGuide = article.slug === "kam-so-psom-pocas-pracovneho-dna";
   const publishedLabel = new Intl.DateTimeFormat("sk-SK", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(article.publishedAt + "T12:00:00Z"));
-
-  function trackInquiryClick() {
-    trackMarketingInteraction("inquiry_cta", trackingSource);
-    void trackCookielessInteraction("inquiry_cta", trackingSource);
-  }
 
   function trackProductClick() {
     void trackCookielessInteraction("nav_click", "blog_" + article.slug.replaceAll("-", "_") + "_product", "sk");
@@ -82,7 +82,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks />
       <main>
-        <header className="relative overflow-hidden bg-secondary/65 px-4 pb-10 pt-10 sm:pb-14 sm:pt-14 lg:pt-32">
+        <header data-blog-article-header className="relative overflow-hidden bg-secondary/65 px-4 pb-6 pt-10 sm:pb-8 sm:pt-14 lg:pt-32">
           <div className="mx-auto max-w-5xl">
             <nav aria-label="Drobková navigácia" className="flex flex-wrap items-center gap-2 text-sm text-forest/70">
               <a href="/" className="underline-offset-4 hover:underline">Domov</a><span aria-hidden="true">/</span>
@@ -93,20 +93,6 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
               <span>Autor: {BRAND}</span><span aria-hidden="true">·</span>
               <time dateTime={article.publishedAt}>{publishedLabel}</time><span aria-hidden="true">·</span>
               <span className="inline-flex items-center gap-1"><Clock3 className="size-4" aria-hidden="true" />{article.readingMinutes} min čítania</span>
-            </div>
-            <p className="mt-6 max-w-3xl text-lg leading-relaxed text-forest/85">{article.intro}</p>
-            <div className="mt-7">
-              {article.productPage ? (
-                <a href={article.productPage.href} onClick={trackProductClick}
-                  className="btn-coral inline-flex min-h-11 items-center justify-center px-6 py-3 font-display font-semibold">
-                  {article.productPage.label}
-                </a>
-              ) : (
-                <a href="#zaujem" onClick={trackInquiryClick}
-                  className="btn-coral inline-flex min-h-11 items-center justify-center px-6 py-3 font-display font-semibold">
-                  Chcem sa informovať o škôlke
-                </a>
-              )}
             </div>
           </div>
         </header>
@@ -138,7 +124,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                   )}
                   <div className="min-w-0 space-y-4">
                     {section.paragraphs.map(paragraph => (
-                      <p key={paragraph} className="text-base leading-8 text-forest/85 sm:text-lg">{paragraph}</p>
+                      <p key={paragraph} className="text-base leading-8 text-forest/85 sm:text-lg">{emphasizedText(paragraph)}</p>
                     ))}
                     {section.points && (
                       <ul className="list-disc space-y-2 pl-6 text-base leading-relaxed text-forest/85">
@@ -172,16 +158,14 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                   className="scroll-mt-24 rounded-3xl bg-secondary p-6 shadow-soft sm:p-9">
                   <h2 id="blog-product-heading" className="font-display text-2xl text-forest sm:text-3xl">{standGuide ? "Pozrite si naše vyhotovenia" : "Pozrite si naše vyhotovenie"}</h2>
                   <p className="mt-3 max-w-2xl leading-relaxed text-forest/80">{article.productPage.description}</p>
-                  <div className="mt-6 flex flex-wrap gap-3">
+                  <div data-blog-cta-pair className="mt-6 grid grid-cols-2 gap-2 sm:gap-3">
                     <a href={article.productPage.href} onClick={trackProductClick}
-                      className="btn-coral inline-flex min-h-12 items-center justify-center gap-2 px-6 py-3 font-display font-semibold">
-                      {article.productPage.label} <ArrowRight aria-hidden="true" className="size-4" />
+                      className="btn-coral inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl px-2 py-2 text-center font-display text-xs font-semibold leading-tight sm:px-4 sm:text-sm">
+                      {article.productPage.label} <ArrowRight aria-hidden="true" className="size-3 shrink-0 sm:size-4" />
                     </a>
-                    {!standGuide && (
-                      <a href="/produkty" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-card px-5 py-3 font-display font-semibold text-forest shadow-sm transition hover:border-coral">
-                        Všetky produkty <ArrowRight aria-hidden="true" className="size-4" />
-                      </a>
-                    )}
+                    <a href="/produkty" className="border border-forest/15 bg-card text-forest shadow-sm transition hover:border-coral inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl px-2 py-2 text-center font-display text-xs font-semibold leading-tight sm:px-4 sm:text-sm">
+                      Všetky produkty <ArrowRight aria-hidden="true" className="size-3 shrink-0 sm:size-4" />
+                    </a>
                   </div>
                   {!standGuide && <p className="mt-4 text-sm text-forest/65">Ide o nezáväzný dopyt priamo na produktovej stránke, nie o platbu cez košík.</p>}
                 </section>
@@ -197,13 +181,13 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                 <div className="mt-6 rounded-2xl bg-card p-4 ring-1 ring-forest/10 sm:p-6">
                   <LeadStepForm trackingSource={trackingSource} />
                 </div>
-                <nav aria-label="Ďalšie informácie o škôlke" className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <nav aria-label="Ďalšie informácie o škôlke" data-blog-cta-pair className="mt-6 grid grid-cols-2 gap-2 sm:gap-3">
                   <a href="/#cennik" onClick={pricingClick}
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-card px-5 py-3 font-display font-semibold text-forest shadow-sm transition hover:border-coral focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral">
+                    className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-forest/15 bg-card px-2 py-2 text-center font-display text-xs font-semibold leading-tight text-forest shadow-sm transition hover:border-coral focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:px-4 sm:text-sm">
                     Cenník <ArrowRight aria-hidden="true" className="size-4" />
                   </a>
                   <a href="/#podmienky" onClick={conditionsClick}
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-card px-5 py-3 font-display font-semibold text-forest shadow-sm transition hover:border-coral focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral">
+                    className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-forest/15 bg-card px-2 py-2 text-center font-display text-xs font-semibold leading-tight text-forest shadow-sm transition hover:border-coral focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:px-4 sm:text-sm">
                     Podmienky škôlky <ArrowRight aria-hidden="true" className="size-4" />
                   </a>
                 </nav>
@@ -212,14 +196,12 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
           </div>
         </article>
         <section className="border-t border-forest/10 bg-secondary/40 px-4 py-12">
-          <div className="mx-auto max-w-5xl">
+          <div className="mx-auto max-w-6xl">
             <a href="/blog/" className="inline-flex items-center gap-2 text-sm font-semibold text-coral hover:underline">
               <ArrowLeft className="size-4" aria-hidden="true" /> Všetky články
             </a>
             <h2 className="mt-4 font-display text-2xl text-forest">Mohlo by vás zaujímať</h2>
-            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {related.map(card => <BlogCard key={card.id} card={card} />)}
-            </div>
+            <BlogCardCarousel cards={related} label="Mohlo by vás zaujímať – na mobile posúvajte do strany" />
           </div>
         </section>
       </main>
