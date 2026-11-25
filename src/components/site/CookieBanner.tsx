@@ -253,10 +253,10 @@ export function CookieBanner() {
             </p>
 
             {!showDetails && (
-              <p className="mt-0 max-w-3xl text-sm leading-relaxed text-forest/75 sm:text-base">
+              <p className={"mt-0 max-w-3xl text-sm leading-relaxed sm:text-base " + (isEnglish ? "text-forest/75" : "font-medium text-forest/90")}>
                 {isEnglish
                   ? "Necessary cookies keep the website working. With your consent, we also use functional, analytics and marketing cookies to improve the website and measure our advertising. "
-                  : "Som Aria a vítam ťa v Chvostíkove! Nevyhnutné cookies pomáhajú webu fungovať. O funkčných, analytických a marketingových cookies rozhoduješ ty. "}
+                  : <>Som Aria a vítam ťa v Chvostíkove! Nevyhnutné cookies pomáhajú webu fungovať.<br />O funkčných, analytických a marketingových cookies rozhoduješ ty.{" "}</>}
                 <a
                   href={isEnglish ? "/en/cookies" : "/cookies"}
                   target="_blank"
