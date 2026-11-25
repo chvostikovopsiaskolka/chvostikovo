@@ -510,14 +510,14 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
   const details = (
     <>
       {dogCount === 2 && <h4 className="mt-4 border-b border-coral/20 pb-2 text-base font-bold text-forest">1. psík</h4>}
-      <div>
+      <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="identity">
+        <div className="min-w-0">
           <label className="label-sm" htmlFor={`l-${formId}-pes`}>
             Meno psa *
           </label>
           <input id={`l-${formId}-pes`} name="pes" autoComplete="off" required className="field" placeholder="Rocky" />
       </div>
-      <div className="grid grid-cols-2 gap-3.5">
-        <div>
+        <div className="min-w-0">
           <label className="label-sm" htmlFor={`l-${formId}-plemeno`}>
             Plemeno *
           </label>
@@ -529,28 +529,29 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
             placeholder="Labrador"
           />
         </div>
-        <div>
-          <label className="label-sm" htmlFor={`l-${formId}-vaha`}>Váha psa *</label>
-          <input id={`l-${formId}-vaha`} name="vaha" inputMode="decimal" required className="field" placeholder="25 kg" />
-        </div>
       </div>
-      <div className="grid gap-3.5 sm:grid-cols-2">
-        <DogBinaryChoice label="Pohlavie psa" name="pohlavie" options={["Pes", "Suka"]} />
-        <div>
+      <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="age-weight">
+        <div className="min-w-0">
           <label className="label-sm" htmlFor={`l-${formId}-vek`}>
             Vek psa *
           </label>
           <input id={`l-${formId}-vek`} name="vek" required className="field" placeholder="2 roky" />
         </div>
+        <div className="min-w-0">
+          <label className="label-sm" htmlFor={`l-${formId}-vaha`}>Váha psa *</label>
+          <input id={`l-${formId}-vaha`} name="vaha" inputMode="decimal" required className="field" placeholder="25 kg" />
+        </div>
       </div>
-      <DogBinaryChoice label="Kastrovaný / sterilizovaná" name="kastrovana" options={["Áno", "Nie"]} />
+      <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="sex-neuter">
+        <DogBinaryChoice label="Pohlavie psa" name="pohlavie" options={["Pes", "Suka"]} />
+        <DogBinaryChoice label="Kastrovaný / sterilizovaná" name="kastrovana" options={["Áno", "Nie"]} />
+      </div>
       <fieldset className="min-w-0">
         <legend className="label-sm">Ako plánujete využívať škôlku? *</legend>
-        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {([
             { value: "Pravidelne – 1× alebo viackrát týždenne", lines: ["Pravidelne", "1× alebo viackrát", "týždenne"] },
             { value: "Občas podľa potreby", lines: ["Občas", "podľa potreby"] },
-            { value: "Jednorazové stráženie", lines: ["Jednorazové", "stráženie"] },
           ] as const).map((option) => (
             <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
               <input type="radio" name="duvod" value={option.value} aria-label={option.value} required className="peer sr-only" />
@@ -591,30 +592,32 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
         />
       </div>
       {dogCount === 2 && (
-        <section aria-label="Údaje druhého psíka" className="mt-5 space-y-3.5 rounded-2xl border border-coral/20 bg-card/60 p-3.5 sm:p-4">
+        <section aria-label="Údaje druhého psíka" className="@container mt-5 min-w-0 space-y-3.5 rounded-2xl border border-coral/20 bg-card/60 p-3.5 sm:p-4">
           <h4 className="border-b border-coral/20 pb-2 text-base font-bold text-forest">2. psík</h4>
-          <div>
+          <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="identity">
+            <div className="min-w-0">
             <label className="label-sm" htmlFor={`l-${formId}-pes2`}>Meno druhého psa *</label>
             <input id={`l-${formId}-pes2`} name="pes2" autoComplete="off" required maxLength={200} className="field" placeholder="Beny" />
           </div>
-          <div className="grid grid-cols-2 gap-3.5">
-            <div>
+            <div className="min-w-0">
               <label className="label-sm" htmlFor={`l-${formId}-plemeno2`}>Plemeno *</label>
               <input id={`l-${formId}-plemeno2`} name="plemeno2" required maxLength={200} className="field" placeholder="Zlatý retriever" />
             </div>
-            <div>
+          </div>
+          <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="age-weight">
+            <div className="min-w-0">
+              <label className="label-sm" htmlFor={`l-${formId}-vek2`}>Vek psa *</label>
+              <input id={`l-${formId}-vek2`} name="vek2" required maxLength={100} className="field" placeholder="3 roky" />
+            </div>
+            <div className="min-w-0">
               <label className="label-sm" htmlFor={`l-${formId}-vaha2`}>Váha psa *</label>
               <input id={`l-${formId}-vaha2`} name="vaha2" required inputMode="decimal" className="field" placeholder="25 kg" />
             </div>
           </div>
-          <div className="grid gap-3.5 sm:grid-cols-2">
+          <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="sex-neuter">
             <DogBinaryChoice label="Pohlavie psa" name="pohlavie2" options={["Pes", "Suka"]} />
-            <div>
-              <label className="label-sm" htmlFor={`l-${formId}-vek2`}>Vek psa *</label>
-              <input id={`l-${formId}-vek2`} name="vek2" required maxLength={100} className="field" placeholder="3 roky" />
-            </div>
+            <DogBinaryChoice label="Kastrovaný / sterilizovaná" name="kastrovana2" options={["Áno", "Nie"]} />
           </div>
-          <DogBinaryChoice label="Kastrovaný / sterilizovaná" name="kastrovana2" options={["Áno", "Nie"]} />
           <div>
             <label className="label-sm" htmlFor={`l-${formId}-alergie2`}>Alergie a zdravotné obmedzenia</label>
             <textarea id={`l-${formId}-alergie2`} name="alergie2" maxLength={3000} rows={3} className="field resize-none" placeholder="Alergie, lieky alebo zdravotné obmedzenia..." />
@@ -634,7 +637,7 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
   );
 
   return (
-    <form onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="space-y-3 text-left sm:space-y-3.5">
+    <form onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="@container min-w-0 space-y-3 text-left sm:space-y-3.5">
       <fieldset className="rounded-2xl border border-coral/25 bg-secondary/30 p-3.5">
         <legend className="px-1 text-sm font-bold text-forest">Koľkých psíkov chcete prihlásiť?</legend>
         <div className="mt-1 grid grid-cols-2 gap-2">
