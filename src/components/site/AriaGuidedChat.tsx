@@ -39,7 +39,7 @@ const chatQuestions: Question[] = [
       "Ak plánuješ pravidelné návštevy, odporúčame **10-vstupovú permanentku**, kde jeden vstup vychádza na **20 €/deň**. " +
       "Oproti jednorazovým vstupom tak **ušetríš 50 €**. Cena permanentky je **" + pricePass + "** a platí **2 mesiace**.\n\n" +
       "**Podmienkou kúpy permanentky je návšteva škôlky minimálne 2× týždenne.**\n\n" +
-      "**Ak máš záujem o škôlku pre svojho psíka, vyplň nezáväzný formulár a my sa ti ozveme späť.**",
+      "**Ak máš záujem o škôlku pre svojho psíka, vyplň nezáväzný formulár a moji rodičia sa ti ozvú späť.**",
   },
   {
     id: "requirements",
@@ -96,9 +96,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   const autoPricingAsked = useRef(false);
   useEffect(() => {
     if (!open) { setIntroLength(0); setIntroComposing(true); return; }
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setIntroLength(introText.length); setIntroComposing(false); return;
-    }
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     setIntroLength(0); setIntroComposing(true);
     let interval: number | undefined;
     // The direct pricing CTA gives the full greeting briefly before Aria
@@ -106,6 +104,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
     const preselected = initialQuestionId === "pricing";
     const delay = window.setTimeout(() => {
       setIntroComposing(false);
+      if (reduced) { setIntroLength(introText.length); return; }
       interval = window.setInterval(() => {
         setIntroLength(n => {
           const next = n + (preselected ? 3 : 2);
@@ -138,26 +137,24 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
     const text = messages.find(item => item.id === typingId)?.text;
     if (!text) { setTypingId(null); return; }
     const visibleTextLength = plainChatText(text).length;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setTypedLength(visibleTextLength);
-      setTypingId(null);
-      return;
-    }
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const words = plainChatText(text).match(/\S+\s*|\s+/g) ?? [];
     // Aria first pauses as if composing, then reveals the answer gradually.
     // One timer per active message; cleanup prevents late updates after closing.
     let count = 0;
+    let wordIndex = 0;
     let interval: number | undefined;
-    const mobile = window.matchMedia("(max-width: 639px)").matches;
     const delay = window.setTimeout(() => {
+      if (reduced) { setTypedLength(visibleTextLength); setTypingId(null); return; }
       interval = window.setInterval(() => {
-        count = Math.min(visibleTextLength, count + (mobile ? 3 : 2));
+        count = Math.min(visibleTextLength, count + (words[wordIndex++]?.length ?? visibleTextLength));
         setTypedLength(count);
         if (count >= visibleTextLength) {
           window.clearInterval(interval);
           setTypingId(null);
         }
-      }, mobile ? 28 : 32);
-    }, mobile ? 600 : 1100);
+      }, 95);
+    }, 1000);
     return () => {
       window.clearTimeout(delay);
       if (interval !== undefined) window.clearInterval(interval);
@@ -287,12 +284,12 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
         </header>
 
         <div ref={scrollRef} role="log" aria-label="Konverzácia s Ariou" aria-live="polite"
-          data-aria-chat-history className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain bg-[linear-gradient(145deg,rgba(255,240,213,.68),rgba(247,233,241,.55),rgba(237,248,240,.7))] backdrop-blur-xl px-3 py-4 sm:px-5">
+          data-aria-chat-history className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain [overflow-anchor:none] bg-[linear-gradient(145deg,rgba(255,240,213,.68),rgba(247,233,241,.55),rgba(237,248,240,.7))] backdrop-blur-xl px-3 py-4 sm:px-5">
           <div className="flex items-end gap-2">
             <img src={portraitSrc} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
             <div id={chatId + "-intro"} className="max-w-[87%] rounded-[20px_20px_20px_6px] bg-white px-3 py-3 text-[13px] leading-relaxed text-[#26322b] shadow-sm sm:text-sm">
               <span className="sr-only">{introText}</span>
-              <span aria-hidden="true">{introComposing ? <span data-aria-intro-composing className="inline-flex items-center gap-1"><span className="size-1.5 animate-bounce rounded-full bg-[#9e336f]" /><span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]" /><span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]" /></span> : introText.slice(0, introLength)}</span>
+              <span aria-hidden="true">{introComposing ? <span data-aria-intro-composing className="inline-flex items-center gap-1"><span className="size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f]" /><span className="size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]" /><span className="size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]" /></span> : introText.slice(0, introLength)}</span>
             </div>
           </div>
 
@@ -328,7 +325,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                   )}
                   {message.widget === "interest" && (
                     <div data-aria-chat-interest data-lead-form-shell className="space-y-2">
-                      <LeadStepForm trackingSource={formPrefix + "_interest"} compact
+                      <LeadStepForm trackingSource={formPrefix + "_interest"} compact chatReceipt
                         onSent={() => track("interest_submitted")} />
                     </div>
                   )}
@@ -360,13 +357,13 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                     <>
                       {typedLength === 0 ? (
                         <span aria-hidden="true" className="inline-flex items-center gap-1" data-aria-composing>
-                          <span className="size-1.5 animate-bounce rounded-full bg-[#9e336f]" />
-                          <span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]" />
-                          <span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]" />
+                          <span className="size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f]" />
+                          <span className="size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]" />
+                          <span className="size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]" />
                         </span>
                       ) : <span aria-hidden="true">{renderChatText(message.text, typedLength)}</span>}
                       <span className="sr-only">{plainChatText(message.text)}</span>
-                      {typedLength > 0 && <span aria-hidden="true" className="ml-0.5 inline-block h-3 w-1 animate-pulse bg-[#9e336f] align-middle" />}
+                      {typedLength > 0 && <span aria-hidden="true" className="ml-0.5 inline-block h-3 w-1 motion-safe:animate-pulse bg-[#9e336f] align-middle" />}
                     </>
                   ) : renderChatText(message.text)}
                   {!isTyping && message.questionId === "requirements" && (
@@ -394,21 +391,14 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
             );
           })}
 
-          {menuReady && messages.length > 0 && (
-            <div data-aria-chat-followup-prompt className="flex items-end gap-2">
-              <img src={portraitSrc} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
-              <p className="max-w-[87%] rounded-[20px_20px_20px_6px] bg-white px-3 py-3 text-[13px] leading-relaxed text-[#26322b] shadow-sm">
-                Chceš sa ma opýtať ešte inú otázku alebo chceš vyplniť nezáväzný formulár a počkať na telefonát od mojich rodičov?
-              </p>
-            </div>
-          )}
           {menuReady && visibleQuestions.length > 0 && (
             <div data-aria-chat-questions aria-label="Vyber si otázku"
-              className="ml-11 grid grid-cols-2 gap-2" role="group">
+              className="grid w-full grid-cols-2 gap-2" role="group">
               {visibleQuestions.map(question => (
                 <button key={question.id} type="button" data-aria-chat-question={question.id}
                   onClick={() => ask(question)}
-                  className={"min-h-11 min-w-0 rounded-xl border px-2.5 py-2.5 text-left text-xs font-semibold leading-snug shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
+                  className={"min-h-11 min-w-0 rounded-xl border px-2 py-2.5 text-center text-xs font-semibold leading-snug shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
+                    (question.id === "requirements" ? "max-[350px]:col-span-2 whitespace-nowrap " : "") +
                     (question.id === "puppy"
                       ? "border-[#9e336f]/30 bg-[#f9e5ee] font-extrabold text-[#873063] hover:bg-[#f5d6e5]"
                       : "border-[#e4d9cb] bg-white text-[#26322b] hover:border-[#aa4b00]")}>
@@ -425,13 +415,13 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
             data-aria-chat-followup={messages.length > 0 ? "true" : undefined}
             aria-label="Možnosti pokračovania"
             className="flex shrink-0 items-stretch gap-2 border-t border-white/60 bg-white/80 px-2.5 py-2.5 backdrop-blur-2xl sm:px-5">
-            <button type="button" data-aria-chat-interest-cta onClick={showInterest}
-              className="min-h-11 min-w-0 flex-[1.6] rounded-xl bg-[#9e336f] px-2 py-2 text-xs font-extrabold leading-tight text-white shadow-sm focus-visible:outline-2 focus-visible:outline-[#9e336f]">
-              Mám záujem o škôlku
-            </button>
             <button type="button" data-aria-chat-other-cta onClick={showOther}
               className="min-h-11 min-w-0 flex-1 rounded-xl border border-[#ffa414]/55 bg-[#fff0d5] px-2 py-2 text-[11px] font-extrabold leading-tight text-[#26322b] shadow-sm transition-colors hover:border-[#ffa414] hover:bg-[#ffe3b2] focus-visible:outline-2 focus-visible:outline-[#9e336f]">
               Máš inú otázku?
+            </button>
+            <button type="button" data-aria-chat-interest-cta onClick={showInterest}
+              className="min-h-11 min-w-0 flex-[1.6] rounded-xl bg-[#9e336f] px-2 py-2 text-xs font-extrabold leading-tight text-white shadow-sm focus-visible:outline-2 focus-visible:outline-[#9e336f]">
+              Mám záujem o škôlku
             </button>
           </nav>
         )}

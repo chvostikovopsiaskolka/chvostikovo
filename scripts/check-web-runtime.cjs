@@ -30,17 +30,9 @@ const selectedEngines = engines.filter(([name]) => engineSelection === "all" || 
 function isPaidLeadFixture(page) { return new URL(page.url()).pathname==='/psia-skolka-kosice/'; }
 
 async function centerFixtureControl(control) {
-  if(!isPaidLeadFixture(control.page())){
-  await control.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
-  await control.page().evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
-
-    return;
-  }
   await control.evaluate(async el=>{
     const result=el.scrollIntoView({block:'center',behavior:'instant'});
     if(result&&typeof result.then==='function')await result;
-    // Safari returns undefined; root-scroll promises can also resolve early.
-    // Wait for measured geometry/scroll stability, not a guessed scroll duration.
     await new Promise((resolve,reject)=>{
       const started=performance.now();let stableSince=started,last=null;
       const settle=now=>{
@@ -48,8 +40,8 @@ async function centerFixtureControl(control) {
         const r=el.getBoundingClientRect(),current=[r.left,r.top,r.width,r.height,scrollX,scrollY];
         if(last&&current.some((value,index)=>Math.abs(value-last[index])>0.5))stableSince=now;
         last=current;
-        if(now-stableSince>=100){resolve();return;}
-        if(now-started>2500){reject(new Error('Fixture control did not settle before interaction'));return;}
+        if(now-stableSince>=150){resolve();return;}
+        if(now-started>3000){reject(new Error('Fixture control did not settle before interaction'));return;}
         requestAnimationFrame(settle);
       };
       requestAnimationFrame(settle);
@@ -58,38 +50,39 @@ async function centerFixtureControl(control) {
 }
 
 async function activateFixtureControl(control) {
-  await centerFixtureControl(control);
-  if(await control.page().evaluate(()=>navigator.maxTouchPoints>0)){
-    // Use the already-settled hit-tested point. Locator.tap would perform a
-    // second auto-scroll, which can race WebKit's native smooth scrolling.
-    const point=await control.evaluate(el=>{
+  const page=control.page();
+  // Native scroll triggered by Playwright's actionability check must not
+  // race the site's smooth anchor scrolling. Scope the override to fixture
+  // interaction only; keep real pointer input and native hit testing.
+  const prior=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const prior=[root.style.getPropertyValue('scroll-behavior'),root.style.getPropertyPriority('scroll-behavior')];
+    root.style.setProperty('scroll-behavior','auto','important');
+    return prior;
+  });
+  try {
+    await centerFixtureControl(control);
+    await control.evaluate(el=>{
       const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
       const hit=document.elementFromPoint(x,y);
       if(x<0||y<0||x>=innerWidth||y>=innerHeight||!hit||!el.contains(hit))
-        throw new Error('Fixture touch target is outside the viewport or occluded');
-      return {x,y};
+        throw new Error('Fixture touch target is outside the viewport or occluded: '+JSON.stringify({rect:r.toJSON(),hit:hit?.outerHTML?.slice(0,180)}));
     });
-    await control.page().touchscreen.tap(point.x,point.y);
-  }else await control.click();
+    // Let Playwright dispatch an actual touch action to the locator, not
+    // stale viewport coordinates. Its actionability check must pass.
+    if(await page.evaluate(()=>navigator.maxTouchPoints>0))await control.tap({timeout:5000});
+    else await control.click({timeout:5000});
+  }finally{
+    await page.evaluate(([value,priority])=>{
+      if(value)document.documentElement.style.setProperty('scroll-behavior',value,priority);
+      else document.documentElement.style.removeProperty('scroll-behavior');
+    },prior);
+  }
 }
 
 // Exercise the actual visible radio and next button; settle scrolling before
 // clicking so a moving viewport or fixed mobile dock cannot intercept it.
 async function advanceLeadContact(form) {
-  if(!isPaidLeadFixture(form.page())){
-  const choice=form.locator('label:has(input[name="zaujem"])').first();
-  await centerFixtureControl(choice);
-  await choice.click();
-  await form.locator('input[name="zaujem"]').first().evaluate(el=>{
-    if(!el.checked)throw new Error('Lead interest radio did not select');
-  });
-  const next=form.getByRole('button',{name:'Pokračovať',exact:true});
-  await centerFixtureControl(next);
-  await next.click();
-  await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
-
-    return;
-  }
   const choice=form.locator('label:has(input[name="zaujem"])').first();
   await activateFixtureControl(choice);
   await form.locator('input[name="zaujem"]').first().evaluate(el=>{
@@ -143,6 +136,10 @@ async function assertPaidAriaChat(page) {
     await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'visible'});
     if(await chat.locator('[data-aria-chat-question]').count()!==4)throw new Error('Paid chat must reuse four FAQ choices');
     await chat.locator('[data-aria-chat-question="pricing"]').click();
+    const typing=chat.locator('[data-aria-typing="true"]');
+    await typing.locator('[data-aria-composing]').waitFor({state:'visible',timeout:2500});
+    await page.waitForFunction(()=>{const t=document.querySelector('[data-aria-typing="true"]');return (t?.querySelector('[aria-hidden="true"]')?.textContent?.length||0)>12;},null,{timeout:5000});
+    if(await chat.locator('[data-aria-chat-questions]').count())throw new Error('Paid FAQ exposed while typing');
     await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'detached'});
     await chat.locator('[data-aria-chat-questions]').waitFor({state:'visible',timeout:20000});
     if(await chat.locator('[data-aria-chat-question]').count()!==4||!(await chat.innerText()).includes('20 €/deň'))throw new Error('Paid chat must reuse pricing answer and refill four FAQ');
@@ -170,6 +167,7 @@ async function assertPaidAriaChat(page) {
     await form.locator('input[type="checkbox"]').check();
     await form.getByRole('button',{name:'Odoslať záujem',exact:true}).click();
     await interest.locator('[data-lead-step-success]').waitFor({state:'visible'});
+    if(await interest.locator('[data-lead-success-links]').count()||!await interest.getByText('Je toto telefónne číslo správne?').count()||await chat.locator('[data-aria-chat-followup-prompt]').count())throw new Error('Chat receipt must retain phone verification without page links or repeat prompt');
     if(posted.length!==2||posted[1].cta_source!=='lead_landing_aria_chat_interest')throw new Error('Paid chat must submit the existing interest form with its own CRM source');
     await chat.getByRole('button',{name:'Close',exact:true}).click();
     await chat.waitFor({state:'hidden'});
@@ -203,7 +201,7 @@ async function assertCampaignContentFlow(page) {
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==2||structure.benefits!==3||structure.requirements!==4||
     structure.carousel!==1||!structure.checker||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
-  for(const [width,height] of [[375,667],[390,844],[768,1024],[1024,768],[1440,900],[1864,891]]) {
+  for(const [width,height] of [[320,720],[375,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
     await page.setViewportSize({width,height});
     await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
     await page.waitForTimeout(160);
@@ -215,7 +213,7 @@ async function assertCampaignContentFlow(page) {
       const elements=[title,pills,photos,cta,proof];
       return {overflow:document.documentElement.scrollWidth>innerWidth+1,
         visible:elements.every(r=>r&&r.width>0&&r.top>=0&&r.bottom<=Math.min(aria.top,face.top,dock.top)+1),
-        desktop:(()=>{if(innerWidth<1024)return true;const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect());return photos.left>title.right&&Math.abs(photos.top-title.top)<2&&photos.height>=410&&Math.abs(images[0].left-images[1].left)<2&&images[0].bottom<images[1].top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;})(),
+        desktop:(()=>{if(innerWidth<1024)return true;const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect());const service=box('[data-aria-service-group]');const seam=(images[0].bottom+images[1].top)/2;return photos.left>title.right&&Math.abs(photos.top-service.top)<2&&Math.abs(images[1].bottom-cta.bottom)<2&&Math.abs((title.top+title.bottom)/2-seam)<=36&&service.bottom<title.top&&title.bottom<=pills.top&&pills.bottom<=cta.top&&photos.height>=448&&Math.abs(images[0].left-images[1].left)<2&&images[0].bottom<images[1].top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;})(),
         mobileOrder:(()=>{if(innerWidth>=640)return true;const service=box('[data-aria-service-group]');return service.bottom<=title.top&&title.bottom<=pills.top&&pills.bottom<=photos.top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=10;})(),
         admissionClear:(()=>{const h=box('#lead-requirements h2');return [...document.querySelectorAll('#lead-requirements > [aria-hidden="true"] svg')].every(e=>{const p=e.getBoundingClientRect();return p.right<=h.left||p.left>=h.right||p.bottom<=h.top||p.top>=h.bottom;});})(),
         galleryEdge:(()=>{const r=box('#lead-photo-carousel [data-gesture-track="photos"]');return Math.abs(r.left)<2&&Math.abs(r.right-document.documentElement.offsetWidth)<2;})(),
@@ -228,6 +226,13 @@ async function assertCampaignContentFlow(page) {
         pillCount:visiblePills.length,pillBg:visiblePills.every(el=>getComputedStyle(el).backgroundColor==='rgb(248, 221, 235)'),
         pillRows:new Set(visiblePills.map(el=>Math.round(el.getBoundingClientRect().top))).size,
         actionBg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).backgroundColor,
+        actionFg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).color,
+        pillBold:visiblePills.every(el=>Number(getComputedStyle(el).fontWeight)>=700),
+        pillGap:parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pills]')).columnGap),
+        photoCrop:[...document.querySelectorAll('[data-lead-hero-photo] img')].length===2&&[...document.querySelectorAll('[data-lead-hero-photo] img')].every(el=>getComputedStyle(el).objectPosition==='50% 0%'),
+        reviewGap:parseFloat(getComputedStyle(document.querySelector('[data-aria-lead-review-spacing]')).marginTop),
+        galleryBelow:box('#lead-photo-carousel').top>=innerHeight-2,
+        compactLauncher:(()=>{const b=box('[data-aria-bubble-chat-cta]'),s=box('[data-aria-speech]');return b.width<s.width-16&&b.height>=43&&b.height<=50;})(),
         dockInside:dock.top>=0&&dock.bottom<=innerHeight+1,
         ctaHeight:cta.height,proofBottom:proof.bottom,ariaTop:aria.top,faceWidth:face?.width,
         widget:(()=>{const speech=box('[data-aria-speech]');const tail=document.querySelector('[data-aria-speech] [data-aria-tail]');return dock.height<=1&&Math.abs(face.width-(innerWidth>=640?104:92))<2&&
@@ -235,7 +240,7 @@ async function assertCampaignContentFlow(page) {
           (innerWidth<1024||speech.width>=455&&speech.width<=482)&&!!tail&&Number(tail.dataset.tipX)<-8&&
           document.querySelectorAll('[data-aria-section-navigation]').length===0&&document.querySelectorAll('[data-aria-chat-trigger]').length===1&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
     });
-    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.ctaHeight<44||
+    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(184, 91, 0)'||fold.actionFg!=='rgb(255, 255, 255)'||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.compactLauncher||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
   if(await page.locator('#lead-requirements h2').innerText()!=='Podmienky prijatia psíka')throw new Error('Campaign conditions heading differs');
@@ -1341,7 +1346,7 @@ if (!bellaris && brandPreviewCandidate) {
                   const interestCta=actions.locator('[data-aria-chat-interest-cta]');
                   const otherCta=actions.locator('[data-aria-chat-other-cta]');
                   if(!await otherCta.getByText('Máš inú otázku?').count() ||
-                     await interestCta.evaluate(el=>el.getBoundingClientRect().width<=el.nextElementSibling.getBoundingClientRect().width))
+                     await interestCta.evaluate(el=>el.getBoundingClientRect().width<=el.previousElementSibling.getBoundingClientRect().width||el.getBoundingClientRect().left<=el.previousElementSibling.getBoundingClientRect().left))
                     throw new Error('CTA must rename the question and widen Mám záujem o škôlku');
                   await page.setViewportSize({width:320,height:720});
                   const size=await chat.evaluate(el=>{
@@ -1357,6 +1362,8 @@ if (!bellaris && brandPreviewCandidate) {
                   await questionMenu.locator('[data-aria-chat-question="pricing"]').click();
                   const typing=chat.locator('[data-aria-chat-turn="aria"] [data-aria-typing="true"]');
                   await typing.waitFor({state:'visible',timeout:10000});
+                  await typing.locator('[data-aria-composing]').waitFor({state:'visible',timeout:2500});
+                  if(await questionMenu.count())throw new Error('FAQ must wait until Aria finishes composing');
                   await page.waitForFunction(()=>{
                     const t=document.querySelector('[data-aria-chat-turn="aria"] [data-aria-typing="true"]');
                     return (t?.querySelector('[aria-hidden="true"]')?.textContent?.length||0)>12;
@@ -1378,8 +1385,8 @@ if (!bellaris && brandPreviewCandidate) {
                      !await chat.getByText(/200 €/).count())
                     throw new Error('Pass must state 20 €/day, saving 50 € and pass price 200 €');
                   if(JSON.stringify(await ids())!==JSON.stringify(['requirements','caretakers','puppy','location'])||
-                     !await chat.locator('[data-aria-chat-followup-prompt]').getByText(/telefonát od mojich rodičov/).count())
-                    throw new Error('Four next unanswered questions must show below Aria followup immediately');
+                     await chat.locator('[data-aria-chat-followup-prompt]').count())
+                    throw new Error('Four next unanswered questions must show without redundant followup');
                   await questionMenu.locator('[data-aria-chat-question="requirements"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
                   if(await chat.locator('[data-aria-chat-requirements] article').count()!==4||await questionMenu.locator('button').count()!==4)
@@ -2143,6 +2150,7 @@ if (!bellaris && brandPreviewCandidate) {
               throw new Error('Backend error must NOT emit a paid Lead');
             await contact.getByRole('button', { name: 'Odoslať záujem' }).click();
             await page.locator('#aria-hero-form [data-lead-step-success]').waitFor({ state: 'visible' });
+            if(await page.locator('#aria-hero-form [data-lead-success-links] a').count()!==2)throw new Error('Public form must keep both success links as button-like anchors');
             for (let i = 0; i < 15 && !trackedEvents.some(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_hero_inline'); i++)
               await page.waitForTimeout(100);
             const sent = trackedEvents.filter(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_hero_inline');
@@ -2800,13 +2808,14 @@ if (!bellaris && brandPreviewCandidate) {
               if(!await owner.isVisible() || await application.locator('input[name="pes"]').isVisible()) throw new Error('Collapsed application preview fields incorrect');
               await centerFixtureControl(owner);
               await owner.fill('Testovacie meno');
-              await centerFixtureControl(toggle);
-              await centerFixtureControl(toggle);
-              await toggle.click();
+              // Dismiss the focused text input before testing the next touch;
+              // the virtual keyboard/focus scroll can otherwise move the target.
+              await owner.blur();
+              await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
               if(!await application.locator('input[name="pes"]').isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await owner.inputValue()!=='Testovacie meno' || await page.getByRole('dialog').count()) throw new Error('Inline application did not expand or retain owner data');
-              await centerFixtureControl(toggle);
-              await toggle.click();
+              await activateFixtureControl(toggle);
+              await application.locator('input[name="pes"]').waitFor({state:'hidden',timeout:5000});
               if(await application.locator('input[name="pes"]').isVisible() || await owner.inputValue()!=='Testovacie meno') throw new Error('Inline application collapse lost data');
               await owner.fill('');
               await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
@@ -3034,13 +3043,13 @@ if (!bellaris && brandPreviewCandidate) {
               // Verify the real inline registration, not a second form or modal.
               const application=page.locator('[data-home-friendship-form]');
               const toggle=application.locator('#home-friendship-application');
-              await centerFixtureControl(toggle);
-              await toggle.click();
+              await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
               if(!await application.locator('input[name="pes"]').isVisible() || await application.locator('[data-lead-step-form]').count() || await page.getByRole('dialog').count()) throw new Error('Friendship must expand the existing application in-place');
               const fits=await application.evaluate(el=>{const b=el.getBoundingClientRect();return b.width<=innerWidth-16 && el.scrollWidth<=el.clientWidth+2 && (innerWidth<1024 || b.width>=800);});
               if(!fits)throw new Error('Inline application responsive width incorrect');
-              await toggle.click();
+              await activateFixtureControl(toggle);
+              await application.locator('input[name="pes"]').waitFor({state:'hidden',timeout:5000});
             }
           }
           if (errors.length) throw new Error(errors.join('; '));
@@ -3048,30 +3057,12 @@ if (!bellaris && brandPreviewCandidate) {
             // Freeze DOM indices instead of re-resolving a changing :visible list
             // while WebKit scrolls/paints the previously revealed homepage forms.
             const homeRoute=url.pathname==='/';
-            const forms=page.locator(homeRoute?'[data-lead-step-form]':'[data-lead-step-form]:visible');
-            const visibleIndices=homeRoute
-              ? await forms.evaluateAll(nodes=>nodes.flatMap((node,index)=>node.getClientRects().length&&node.getBoundingClientRect().height>0?[index]:[]))
-              : Array.from({length:await forms.count()},(_,index)=>index);
+            const forms=page.locator('[data-lead-step-form]');
+            const visibleIndices=await forms.evaluateAll(nodes=>nodes.flatMap((node,index)=>node.getClientRects().length&&node.getBoundingClientRect().height>0?[index]:[]));
             for(const i of visibleIndices){
               const form=forms.nth(i);
               if(await form.getAttribute('data-lead-step')==='1'){
-                if(homeRoute){
-                  // Real touch interaction on the mobile context. Wait for
-                  // React's enabled state, not only the native checked radio.
-                  const choice=form.locator('label:has(input[name="zaujem"])').first();
-                  await centerFixtureControl(choice);
-                  await choice.tap();
-                  const next=form.locator('button:not([disabled])').filter({hasText:/^Pokračovať$/});
-                  await next.waitFor({state:'visible',timeout:5000});
-                  if(!await form.locator('input[name="zaujem"]').first().isChecked())
-                    throw new Error('Shared form interest radio did not select');
-                  await centerFixtureControl(next);
-                  await next.tap();
-                  await form.locator('[role="progressbar"][aria-valuenow="2"]').waitFor({state:'visible',timeout:5000}).catch(async error=>{
-                    const details=await form.evaluate(el=>({step:el.dataset.leadStep,section:el.closest('section')?.id,selected:!!el.querySelector('input[name="zaujem"]:checked'),rect:el.getBoundingClientRect().toJSON()}));
-                    throw new Error('Homepage contact transition failed: '+JSON.stringify(details)+' '+String(error));
-                  });
-                }else if(url.pathname==='/psia-skolka-kosice/'){
+                if(homeRoute||isPaidLeadFixture(page)){
                   await advanceLeadContact(form);
                 }else{
                   await form.locator('label').first().click();
@@ -3080,7 +3071,7 @@ if (!bellaris && brandPreviewCandidate) {
               }
               await assertLeadContactIntro(form);
               const sharedBack=form.getByRole('button',{name:'Späť',exact:true});
-              if(homeRoute){await centerFixtureControl(sharedBack);await sharedBack.tap();}
+              if(homeRoute||isPaidLeadFixture(page))await activateFixtureControl(sharedBack);
               else await sharedBack.click();
               await form.getByRole('button',{name:'Pokračovať',exact:true}).waitFor({state:'visible',timeout:5000});
               if(await form.getAttribute('data-lead-step')!=='1')throw new Error('Shared form back failed');

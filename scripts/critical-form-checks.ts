@@ -142,7 +142,10 @@ assert(ariaLandingTracking.includes('"lead_landing_first_visit_details"') &&
 const guidedLeadTracking = readFileSync(new URL("../src/components/site/LeadStepForm.tsx", import.meta.url), "utf8");
 const ariaChatMobile = readFileSync(new URL("../src/components/site/AriaGuidedChat.tsx", import.meta.url), "utf8");
 assert(ariaChatMobile.includes('const visibleQuestions = unanswered.slice(0, 4)') &&
-  ariaChatMobile.includes('data-aria-chat-followup-prompt') &&
+  !ariaChatMobile.includes('data-aria-chat-followup-prompt') &&
+  ariaChatMobile.includes('compact chatReceipt') &&
+  guidedLeadTracking.includes('!chatReceipt && <div data-lead-success-links') &&
+  ariaChatMobile.indexOf('data-aria-chat-other-cta') < ariaChatMobile.indexOf('data-aria-chat-interest-cta') &&
   ariaChatMobile.includes('data-aria-chat-inline') &&
   ariaChatMobile.includes('data-aria-chat-message-id') &&
   ariaChatMobile.includes('chatCompact') &&
