@@ -1667,15 +1667,15 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 }
 .lead-brand-live [data-aria-lead-chat] [data-aria-bubble-chat-cta]::before { content: ""; position: absolute; inset: -4px 0; }
 /* One SVG gradient fills both the balloon and its rounded tail. */
-[data-aria-chat-lead] { --aria-glass-space: ; --aria-chat-warm-alpha: 30%; --aria-chat-rose-alpha: 28%; }
+[data-aria-chat-lead] { --aria-glass-space: ; --aria-chat-warm-alpha: 36%; --aria-chat-rose-alpha: 34%; }
 @supports (background: linear-gradient(145deg in oklab, white, black)) {
   [data-aria-chat-lead] { --aria-glass-space: in oklab; }
 }
-.lead-brand-live [data-aria-lead-chat] [data-aria-speech] { --aria-liquid-warm: #fff8ed; --aria-liquid-rose: #fff0f7; border-radius: 16px; padding-block: 8px; -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4); }
+.lead-brand-live [data-aria-lead-chat] [data-aria-speech] { --aria-liquid-warm: #fff1df; --aria-liquid-rose: #fbe4f0; border-radius: 16px; padding-block: 8px; -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4); }
 .lead-brand-live [data-aria-lead-chat] [data-aria-message] p { font-size: .8125rem; line-height: 1.35; }
 @media (max-width: 639px) {
-  .lead-brand-live [data-aria-lead-chat] [data-aria-speech] { --aria-liquid-warm: #fff2df; --aria-liquid-rose: #fbe2ef; }
-  [data-aria-chat-lead] { --aria-chat-warm-alpha: 40%; --aria-chat-rose-alpha: 36%; }
+  .lead-brand-live [data-aria-lead-chat] [data-aria-speech] { --aria-liquid-warm: #ffeccf; --aria-liquid-rose: #f9d8e9; }
+  [data-aria-chat-lead] { --aria-chat-warm-alpha: 46%; --aria-chat-rose-alpha: 42%; }
   /* Give the greeting real space rather than clipping it with nowrap.
      Rem limits preserve text resizing; enlarged text may naturally reflow. */
   .lead-brand-live [data-aria-guide] { padding-inline: 8px; }
@@ -1751,9 +1751,9 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .lead-brand-live [data-lead-hero-grid] {
     display: grid;
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    grid-template-rows: minmax(0, 1fr) auto auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto auto auto auto minmax(0, 1fr);
     align-items: start;
-    grid-template-areas: ". photos" "service photos" "title photos" "pills photos" "action photos";
+    grid-template-areas: ". photos" "service photos" "title photos" "pills photos" "action photos" ". photos";
     column-gap: 3rem;
     row-gap: 0.75rem;
     text-align: left;
@@ -1767,7 +1767,7 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .lead-brand-live [data-lead-hero-photos] { grid-area: photos; grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); margin: 0; min-height: clamp(28rem, 58svh, 34rem); align-self: stretch; }
   .lead-brand-live [data-lead-hero-photo] { position: relative; height: auto; min-height: 0; }
   .lead-brand-live [data-lead-hero-photo] img { position: absolute; inset: 0; }
-  .lead-brand-live [data-lead-hero-action] { grid-area: action; margin: 0; max-width: 26rem; align-items: flex-start; align-self: end; }
+  .lead-brand-live [data-lead-hero-action] { grid-area: action; margin: 0; max-width: 26rem; align-items: flex-start; align-self: start; }
   .lead-brand-live [data-aria-lead-hero-cta] { font-size: 1rem; }
   .lead-brand-live [data-aria-lead-review-spacing] { margin-top: .75rem; }
 }
