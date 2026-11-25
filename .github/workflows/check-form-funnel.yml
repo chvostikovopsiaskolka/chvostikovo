@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - "src/components/site/**"
+      - "src/styles.css"
       - "src/lib/**"
       - "supabase/functions/website-landing-event/**"
       - "scripts/**"
@@ -22,10 +23,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Verify impact selection guards
+        run: node --test scripts/public-web-impact.test.cjs
+      - name: Select form dependencies
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/public-web-impact.cjs "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" >> "$GITHUB_ENV"
+      - name: Explain visual-only form gate
+        if: env.FORM_CHECKS_REQUIRED == 'false'
+        run: echo "Form, consent and attribution implementations unchanged; their regression is not required. Visual candidate checks run in Chromium and WebKit."
       - uses: oven-sh/setup-bun@v2
+        if: env.FORM_CHECKS_REQUIRED == 'true'
       - run: bun install --frozen-lockfile
+        if: env.FORM_CHECKS_REQUIRED == 'true'
       - run: node scripts/restore-cori-image.mjs
+        if: env.FORM_CHECKS_REQUIRED == 'true'
       - name: Inspect original daycare video codec for iPhone compatibility
+        if: env.FORM_CHECKS_REQUIRED == 'true'
         run: |
           if command -v ffprobe >/dev/null 2>&1; then
             ffprobe -v error -show_entries format=format_name,duration:stream=codec_type,codec_name,profile,pix_fmt,width,height -of json src/assets/skolkari.mp4
@@ -33,21 +48,30 @@ jobs:
             node scripts/inspect-daycare-video.cjs
           fi
       - name: Restricted-storage consent regression
+        if: env.FORM_CHECKS_REQUIRED == 'true'
         run: bun scripts/check-consent-resilience.mjs
       - name: GA4 acquisition attribution regression
+        if: env.FORM_CHECKS_REQUIRED == 'true'
         run: bun scripts/check-ga4-attribution.mjs
       - name: Critical form regression
+        if: env.FORM_CHECKS_REQUIRED == 'true'
         run: bun run check:critical-forms
       - name: AI referral regression
+        if: env.FORM_CHECKS_REQUIRED == 'true'
         run: node scripts/ai-referral-checks.cjs
       - name: Mobile dock contract
+        if: env.FORM_CHECKS_REQUIRED == 'true'
         run: node scripts/mobile-dock-contract.cjs
       - name: Mobile footer legal/credit contract
+        if: env.FORM_CHECKS_REQUIRED == 'true'
         run: node scripts/footer-mobile-contract.cjs
       # TanStack generates the typed route tree during Vite build.
       - name: Build static pages and generate routes
+        if: env.FORM_CHECKS_REQUIRED == 'true'
         run: bun run build:pages
       - name: TypeScript validation
+        if: env.FORM_CHECKS_REQUIRED == 'true'
         run: bun run check:types
       - name: Verify SEO route, sitemap and HTML
+        if: env.FORM_CHECKS_REQUIRED == 'true'
         run: node scripts/check-seo-indexability.cjs
