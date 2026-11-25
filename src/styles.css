@@ -511,10 +511,10 @@
   }
   /* Landing-page docks have one fewer tab and a wider central interest CTA.
      The six-slot main-page navigation and all desktop CSS stay unchanged. */
-  .mobile-dock:not([data-variant="main"]) .mobile-dock-bar {
+  .mobile-dock:not([data-home-dock]) .mobile-dock-bar {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(100px, 1.9fr) minmax(0, 1fr) minmax(0, 1fr);
   }
-  .mobile-dock:not([data-variant="main"]) .mobile-dock-apply > span {
+  .mobile-dock:not([data-home-dock]) .mobile-dock-apply > span {
     font-size: 9px;
     letter-spacing: -0.025em;
     line-height: 1.12;
@@ -1416,8 +1416,8 @@
    "Mám záujem" retains a soft colored glow. LEAD and product pages stay as-is. */
 body.site-brand:has(#top) :is(.btn-coral, .btn-forest, .btn-outline-forest, .hero-cta-primary),
 body.site-brand:has(#top) :is(.btn-coral, .btn-forest, .btn-outline-forest, .hero-cta-primary):is(:hover, :active),
-body.site-brand:has(#top) .mobile-dock[data-variant="main"] :is(.mobile-dock-bar, .mobile-dock-item, .mobile-dock-back-top),
-body.site-brand:has(#top) .mobile-dock[data-variant="main"] :is(.mobile-dock-item, .mobile-dock-back-top):is(:hover, :active) {
+body.site-brand:has(#top) .mobile-dock[data-home-dock] :is(.mobile-dock-bar, .mobile-dock-item, .mobile-dock-back-top),
+body.site-brand:has(#top) .mobile-dock[data-home-dock] :is(.mobile-dock-item, .mobile-dock-back-top):is(:hover, :active) {
   box-shadow: none;
   background-image: none;
 }
@@ -1460,11 +1460,11 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
   .site-brand #top > div.relative.z-10.mt-11 { margin-top: 0.6rem; }
 }
 @media (max-width: 379px) {
-  .mobile-dock[data-variant="main"] .mobile-dock-bar { padding: 3px 2px; }
-  .mobile-dock[data-variant="main"] .mobile-dock-item {
+  .mobile-dock[data-home-dock] .mobile-dock-bar { padding: 3px 2px; }
+  .mobile-dock[data-home-dock] .mobile-dock-item {
     min-height: 48px; padding: 3px 0; gap: 2px;
   }
-  .mobile-dock[data-variant="main"] .mobile-dock-item.mobile-dock-apply { min-height: 50px; }
+  .mobile-dock[data-home-dock] .mobile-dock-item.mobile-dock-apply { min-height: 50px; }
 }
 
 /* One Hero CTA rather than an always-open form. Use real flow so reviews
@@ -1807,3 +1807,33 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 /* The menu contact row shares the exact desktop language control. */
 .mobile-dock-menu-actions > [data-language-switch] { justify-content: center; min-width: 0; min-height: 50px; }
 .mobile-dock-menu-actions > [data-language-switch] a { flex: 1; min-width: 0; }
+
+/* APP-01: both localized home docks share the same visual treatment. The EN
+   homepage has no untranslated products destination, so it has five slots. */
+@media (max-width: 1023px) {
+  .mobile-dock[data-home-dock][data-variant="en"] .mobile-dock-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(52px, 1.1fr) minmax(0, 1fr);
+  }
+  .mobile-dock[data-home-dock] .mobile-dock-bar { position: relative; }
+  .mobile-dock .mobile-dock-compact-menu {
+    position: absolute; inset-inline: 0; bottom: calc(100% + 8px);
+    max-height: min(62svh, calc(100dvh - 105px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)));
+    padding: 8px; gap: 6px; pointer-events: auto; overflow-y: auto;
+    border-radius: 20px; background: rgba(255,252,241,.98);
+    box-shadow: 0 8px 25px rgba(30,65,49,.13);
+  }
+  .mobile-dock-compact-heading { display: flex; flex: 0 0 auto; align-items: center; gap: 4px; padding-left: 4px; }
+  .mobile-dock-compact-heading .mobile-dock-menu-title { flex: 1; min-width: 0; font-family: var(--font-display); font-size: 14px; font-weight: 750; line-height: 1.15; }
+  .mobile-dock-compact-heading [data-language-switch] { padding: 2px; }
+  .mobile-dock-compact-close { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border: 0; background: transparent; color: var(--forest-deep); }
+  .mobile-dock-compact-links { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+  .mobile-dock-compact-links a { display: flex; align-items: center; justify-content: space-between; gap: 3px; min-width: 0; min-height: 54px; border: 1px solid rgb(38 50 43 / 13%); border-radius: 14px; padding: 6px 7px; color: var(--forest-deep); text-decoration: none; background: rgb(255 255 255 / 62%); }
+  .mobile-dock-compact-links strong, .mobile-dock-compact-links small { display: block; overflow-wrap: anywhere; line-height: 1.15; }
+  .mobile-dock-compact-links strong { font-family: var(--font-display); font-size: 12px; font-weight: 700; }
+  .mobile-dock-compact-links small { margin-top: 3px; font-size: 10px; opacity: .78; }
+  .mobile-dock-compact-links svg { flex-shrink: 0; }
+  .mobile-dock-compact-links a:hover { background: var(--peach); }
+  .site-brand #top .home-hero-cta { max-width: 340px; }
+  .site-brand #top [data-home-hero-interest-cta] { font-size: clamp(12px, 3.5vw, 16px); padding-inline: 7px; }
+  @media (prefers-reduced-transparency: reduce) { .mobile-dock .mobile-dock-compact-menu { background: #fffcf1; } }
+}

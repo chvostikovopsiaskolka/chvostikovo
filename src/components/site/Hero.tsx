@@ -1,3 +1,5 @@
+import { Phone } from "lucide-react";
+import { PHONE } from "@/content/site";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
 import { useState } from "react";
 import { LeadStepForm } from "./LeadStepForm";
@@ -47,16 +49,17 @@ export function Hero({ onMobileInquiryOpen, mobileInquiryOpen, language = "sk" }
               </button>
             ))}
           </div>
-          <div className="home-hero-cta mx-auto mt-5 flex w-full max-w-[340px] justify-center">
+          <div className="home-hero-cta mx-auto mt-5 flex w-full max-w-[340px] items-center justify-center gap-2">
             <button type="button" data-home-hero-interest-cta aria-controls="home-hero-interest"
               aria-expanded={mobileInquiryOpen}
               onClick={() => {
                 trackMarketingInteraction("inquiry_cta", t("home_hero_interest_mobile", "en_hero_mobile_form"));
                 onMobileInquiryOpen();
               }}
-              className="hero-cta-primary min-h-[46px] w-full rounded-full font-display text-base font-bold">
+              className="hero-cta-primary min-h-[46px] min-w-0 flex-1 rounded-full font-display text-base font-bold">
               {t("Mám záujem o škôlku", "I'm interested in daycare")}
             </button>
+            <a data-home-hero-phone href={"tel:" + PHONE} data-tracking-source={t("home_hero_phone", "en_hero_phone")} aria-label={t("Zavolať do Chvostíkova", "Call Chvostíkovo")} onClick={() => void trackCookielessInteraction("phone_click", t("home_hero_phone", "en_hero_phone"), language)} className="grid size-[46px] shrink-0 place-items-center rounded-full bg-[#ffa414] text-[#26322b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral"><Phone size={20} aria-hidden="true" /></a>
           </div>
         </div>
 
