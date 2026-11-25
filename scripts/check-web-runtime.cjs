@@ -2979,7 +2979,7 @@ async function assertBilingualNavigation(browser,engine) {
                     galleryImmediatelyAfterAbout:(() => {
                       const about=document.getElementById('o-nas');
                       const gallery=document.querySelector('main > section[aria-label="Fotogaléria zo psiej škôlky Chvostíkovo"]');
-                      return !!about && !!gallery && about.nextElementSibling===gallery && gallery.nextElementSibling?.id==='cennik';
+                      return !!about && !!gallery && about.nextElementSibling===gallery && gallery.nextElementSibling?.matches('[data-home-puppy-checker]') && gallery.nextElementSibling?.nextElementSibling?.id==='cennik';
                     })(),
                     mobileHeroBreathingAndThinCta:innerWidth>=640 || (() => {
                       const section=document.getElementById('top');
@@ -3044,7 +3044,7 @@ async function assertBilingualNavigation(browser,engine) {
                       ? !!document.querySelector('#top [data-home-hero-interest-cta]') &&
                         [...document.querySelectorAll('#top [data-lead-step-form]')].every(el=>el.getBoundingClientRect().height===0)
                       : getComputedStyle(document.querySelector('#top .home-hero-desktop-cta .hero-cta-primary')).boxShadow!=='none',
-                    conditionsNext:document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky',
+                    conditionsNext:document.getElementById('psie-priatelstva').nextElementSibling?.id==='podmienky',
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
                     noCareCta:!document.querySelector('#preco-chvostikovo .relative.z-20 button') && dogs.top-videoGrid.getBoundingClientRect().bottom>=24,
                     homeMobileVideoLayout:(() => {
