@@ -8,7 +8,7 @@ import brandWordmark from "@/assets/logo.png";
 import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
 import { FAQ as SITE_FAQ, PRICING } from "@/content/site";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "@/components/site/AriaPreviewText";
-import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
+import { trackCookielessInteraction, trackAriaChatAction } from "@/lib/cookieless-interactions";
 import { trackMarketingInteraction } from "@/lib/analytics";
 
 // Isolate a failed lazy chat chunk (e.g. an outdated iOS page after a deploy).
@@ -332,8 +332,23 @@ export function AriaLeadAssistant({
   const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-[10px] px-0.5 text-center text-forest transition-colors aria-expanded:bg-secondary/75 hover:bg-white/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
 
 
+  function closeTrackedChat() {
+    if (trackingPrefix === "lead_landing_aria") trackAriaChatAction("close");
+    setChatOpen(false);
+  }
+
+  useEffect(() => {
+    if (!chatOpen || trackingPrefix !== "lead_landing_aria") return;
+    const leave = () => trackAriaChatAction("leave");
+    const resume = (event: PageTransitionEvent) => { if (event.persisted) trackAriaChatAction("resume"); };
+    window.addEventListener("pagehide", leave);
+    window.addEventListener("pageshow", resume);
+    return () => { window.removeEventListener("pagehide", leave); window.removeEventListener("pageshow", resume); };
+  }, [chatOpen, trackingPrefix]);
+
   function openChat(questionId?: "pricing") {
-    if (!guidedChatPreview && !leadChat) return;
+    if ((!guidedChatPreview && !leadChat) || chatOpen) return;
+    if (trackingPrefix === "lead_landing_aria") trackAriaChatAction("open");
     setPanel(null);
     setRequestedChatQuestion(questionId ?? null);
     setChatActivated(true);
@@ -672,12 +687,12 @@ export function AriaLeadAssistant({
           </div>}
         </div>
         {(guidedChatPreview || leadChat) && (chatActivated || leadChat) && (
-          <AriaChatBoundary open={chatOpen} onClose={() => setChatOpen(false)}>
+          <AriaChatBoundary open={chatOpen} onClose={closeTrackedChat}>
             <Suspense fallback={null}>
               <AriaGuidedChat open={chatOpen} initialQuestionId={requestedChatQuestion} dockless={leadChat} portraitSrc={portraitSrc}
                 trackingPrefix={trackingPrefix === "lead_landing_aria" ? "lead_landing_aria_chat" : "aria_preview_v3_chat"}
                 formPrefix={trackingPrefix === "lead_landing_aria" ? "lead_landing_aria_chat" : "aria_preview_chat"}
-                onClose={() => setChatOpen(false)} />
+                onClose={closeTrackedChat} />
             </Suspense>
           </AriaChatBoundary>
         )}

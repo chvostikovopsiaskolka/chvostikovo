@@ -1,3 +1,6 @@
+import { ariaEventSource, ariaFormKind, createAriaChatAnalytics, isLeadAriaPath, type AriaAction, type AriaEvent } from "./aria-chat-analytics";
+
+const ariaAnalytics = createAriaChatAnalytics();
 const ENDPOINT =
   "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/website-landing-event";
 
@@ -15,7 +18,8 @@ export type CookielessInteractionName =
   | "form_field_invalid"
   | "form_abandon"
   | "success_conditions_click"
-  | "success_pricing_click";
+  | "success_pricing_click"
+  | "aria_chat_event";
 
 function safeReferrerHost() {
   if (typeof document === "undefined" || !document.referrer) return "";
@@ -160,10 +164,32 @@ export async function trackCookielessInteraction(
   eventSource: string,
   language: "sk" | "en" = "sk",
   attemptId?: string,
+  aria?: AriaEvent,
 ) {
   if (typeof window === "undefined") return;
 
   const url = new URL(window.location.href);
+  // Dedicated event type, same endpoint/table. Old aggregates and dedup remain
+  // untouched; detailed events do not masquerade as form or CTA conversions.
+  if (eventName === "aria_chat_event") {
+    if (!aria || !isLeadAriaPath(url.pathname) || eventSource !== ariaEventSource(aria.action, aria.detail)) return;
+    const safeTag = (value: string | null) => value && /^[a-zA-Z0-9_-]{1,80}$/.test(value) && !/\d{7,}/.test(value) ? value : "";
+    const qa = url.searchParams.get("aria_qa") === "1" || /^(qa|test|demo)$/i.test(url.searchParams.get("utm_source") || "");
+    try {
+      await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true,
+        body: JSON.stringify({ path: "/psia-skolka-kosice/", event_name: eventName, event_source: eventSource,
+          language: "sk", aria, aria_environment: qa ? "qa" : "production",
+          utm_source: safeTag(url.searchParams.get("utm_source")), utm_medium: safeTag(url.searchParams.get("utm_medium")),
+          has_fbclid: Boolean(url.searchParams.get("fbclid")), referrer_host: safeReferrerHost(), navigation_type: navigationType() }) });
+    } catch { /* best effort, no UI dependency */ }
+    return;
+  }
+  if (isLeadAriaPath(url.pathname)) {
+    const kind = ariaFormKind(eventSource);
+    if (kind && (eventName === "form_start" || eventName === "form_attempt" || eventName === "form_error" || eventName === "form_submit")) {
+      void trackAriaChatAction(eventName, kind, attemptId);
+    }
+  }
   const trackedPaths = new Set([
     "/",
     "/psia-skolka-kosice",
@@ -231,6 +257,14 @@ export async function trackCookielessInteraction(
   } catch {
     releaseSessionGuard(guardKey);
   }
+}
+
+export function trackAriaChatAction(action: AriaAction, detail: string | null = null, attemptId?: string) {
+  try {
+    if (typeof window === "undefined" || !isLeadAriaPath(window.location.pathname)) return;
+    const event = ariaAnalytics.record(action, detail, attemptId);
+    if (event) void trackCookielessInteraction("aria_chat_event", ariaEventSource(event.action, event.detail), "sk", undefined, event);
+  } catch { /* optional analytics */ }
 }
 
 export function startFormAttempt(source: string, language: "sk" | "en" = "sk") {

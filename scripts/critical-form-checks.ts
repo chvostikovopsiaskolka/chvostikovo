@@ -8,6 +8,48 @@ function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
+
+import { createAriaChatAnalytics, ariaEventSource, ariaFormKind, ARIA_IDLE_MS } from "../src/lib/aria-chat-analytics";
+{
+  let now = 1000;
+  let serial = 0;
+  const id = () => "11111111-1111-4111-8111-" + String(++serial).padStart(12,"0");
+  const a = createAriaChatAnalytics(() => now, id);
+  const opened = a.record("open")!;
+  const q1 = a.record("question","pricing")!;
+  const q2 = a.record("question","pricing")!;
+  const q3 = a.record("question","requirements")!;
+  const interest = a.record("interest_open")!;
+  const attempt = id();
+  a.record("form_open","interest");
+  a.record("form_start","interest");
+  a.record("form_attempt","interest",attempt);
+  const failed = a.record("form_error","interest",attempt)!;
+  const retry = id();
+  a.record("form_attempt","interest",retry);
+  a.record("close");
+  now += 100;
+  const reopened = a.record("open")!;
+  assert(reopened.action === "reopen" && reopened.chat_id === opened.chat_id, "Aria reopens within 30 minutes retain chat ID");
+  assert(q1.sequence < q2.sequence && q2.sequence < q3.sequence && q3.sequence < interest.sequence && failed.sequence < reopened.sequence, "All clicks retain order, including repeated FAQ");
+  assert(ariaEventSource(q1.action,q1.detail) === ariaEventSource(q2.action,q2.detail), "Same FAQ uses stable source, sequence handles distinct click");
+  assert(!a.record("question","contact@example.com"), "Aria never records unknown/free-text question IDs");
+  assert(ariaFormKind("lead_landing_aria_chat_interest:backend_http:500") === "interest" && !ariaFormKind("hero_desktop_inline"), "Only explicit Aria forms get conversation attribution");
+  a.record("close");
+  now += ARIA_IDLE_MS + 1;
+  const later = a.record("open")!;
+  assert(later.chat_id !== opened.chat_id && later.visit_id === opened.visit_id && later.sequence === 1, "Expired chat gets fresh ID, visit is in-memory");
+  assert(!a.record("form_submit","interest",retry), "Expired attempt must not attach to a new conversation");
+  const automatic = a.record("auto_question","pricing")!;
+  assert(automatic.action === "auto_question", "Automatic answer distinct from manual click");
+  const laterAttempt = id();
+  a.record("form_attempt","other",laterAttempt);
+  a.record("close");
+  const submitted = a.record("form_submit","other",laterAttempt)!;
+  assert(submitted.chat_id === later.chat_id && submitted.form_attempt_id === laterAttempt, "Confirmed contact outcome retained after close, no contact text");
+  assert(!a.record("form_submit","other",laterAttempt), "Same outcome not emitted twice");
+}
+
 const phone = "+421915349028";
 
 shortSchema.parse({
@@ -103,7 +145,7 @@ const faqContact = buildDbPayload(inquirySchema.parse(faqContactInput));
 assert(faqContact.cta_source === "home_faq_contact" && faqContact.raw_payload["Otázka návštevníka"] === faqContactInput.otazka && !("dog_breed" in faqContact), "FAQ contact must retain the question and source without dog details.");
 for (const patch of [{ email: undefined }, { otazka: undefined }, { meno: " " }, { consent: false }]) assert(!inquirySchema.safeParse({ ...faqContactInput, ...patch }).success, "FAQ contact requires the question, identity and consent.");
 const faqFormBlock = ariaFormsSource.slice(ariaFormsSource.indexOf("export function HomeFaqContactForm"), ariaFormsSource.indexOf("/** Inline binary choices"));
-assert(faqFormBlock.includes("await submitInquiry(") && faqFormBlock.includes("trackFaqContactSubmit(source)") && !faqFormBlock.includes("trackMetaFormConversion") && !faqFormBlock.includes("trackFormSubmit") && !faqFormBlock.includes('"form_submit"'), "FAQ contact must emit only its own non-conversion success.");
+assert(faqFormBlock.includes("await submitInquiry(") && faqFormBlock.includes("trackFaqContactSubmit(source)") && !faqFormBlock.includes("trackMetaFormConversion") && !faqFormBlock.includes("trackFormSubmit") && !faqFormBlock.includes('trackCookielessInteraction("form_submit"') && faqFormBlock.includes('trackAriaChatAction("form_submit", "other", attemptId)'), "FAQ contact may record dedicated Aria success but must never emit the ordinary form/advertising conversion.");
 assert(ariaAnalyticsSource.includes('pushAnalyticsEvent("faq_contact_submit"') && ariaBackend.includes("'home_faq_contact',"), "FAQ contact source must be isolated on both analytics and server.");
 assert(readFileSync(new URL("../src/lib/submit-inquiry.ts", import.meta.url), "utf8").includes("data.cta_source !== HOME_FAQ_CONTACT_SOURCE"), "Do not attach Meta consent/identifiers to FAQ contact transport.");
 
@@ -594,3 +636,35 @@ assert(currentBackend.includes("const leadSex = sex(input.dog_sex ?? input.pohla
  "Backend must normalize and store optional enquiry sex with operator notification without widening interest allowlist.");
 
 assert(ariaLandingTracking.includes("leadChat={isLiveLead}") && ariaDockTracking.includes("dockless={leadChat}") && ariaDockTracking.includes("{!leadChat && <div data-aria-section-navigation="), "Paid lead must reuse the existing dockless chat without rendering the old navigation");
+
+// The dedicated envelope uses only existing columns, not the migration candidate.
+{
+  const edgeSource = readFileSync("supabase/functions/website-landing-event/index.ts", "utf8");
+  assert(edgeSource.includes("event_source: encodeAriaObservation(aria)"), "Aria uses a versioned event envelope in the existing source column");
+  assert(!edgeSource.includes("JSON.stringify({ ...aria, path:"), "Aria must not require new DB columns");
+}
+
+{
+  const source=readFileSync("supabase/functions/website-landing-event/index.ts","utf8");
+  let handler: ((request: Request) => Promise<Response>) | undefined;
+  const records: Record<string, unknown>[]=[];
+  const program=transpileModule(source,{compilerOptions:{target:ScriptTarget.ES2022,module:ModuleKind.CommonJS}}).outputText;
+  runInNewContext(program,{
+    Deno:{env:{get:(key:string)=>key==="SUPABASE_URL"?"https://fixture.invalid":"isolated-fixture"},serve:(fn:typeof handler)=>{handler=fn}},
+    Request,Response,Headers,URL,console,
+    fetch:async (url:string,init:RequestInit)=>{assert(url==="https://fixture.invalid/rest/v1/website_interaction_events","Only existing telemetry table may be written");records.push(JSON.parse(String(init.body)));return new Response(null,{status:201})}
+  });
+  assert(handler,"Aria collector mock registered");
+  const send=(body:unknown)=>handler!(new Request("https://fixture.invalid",{method:"POST",headers:{origin:"https://chvostikovo.sk","user-agent":"Mozilla/5.0","content-type":"application/json"},body:JSON.stringify(body)}));
+  const chat_id="11111111-1111-4111-8111-111111111111",visit_id="22222222-2222-4222-8222-222222222222";
+  const payload={path:"/psia-skolka-kosice/",event_name:"aria_chat_event",event_source:"lead_landing_aria_chat_question_pricing",aria_environment:"qa",aria:{chat_id,visit_id,sequence:2,action:"question",detail:"pricing",form_attempt_id:null},utm_source:"qa"};
+  assert((await send(payload)).status===201,"Validated QA detail accepted by collector");
+  assert((await send({...payload,aria:{...payload.aria,sequence:3}})).status===201,"Repeated FAQ receives new sequence");
+  assert(records.length===2&&records[0]?.event_source!==records[1]?.event_source,"Repeated questions distinct in existing DB source");
+  assert(String(records[0]?.event_source).includes("|q|"),"QA envelope distinct");
+  assert(!("aria_chat_id" in records[0]!) && !("utm_source" in records[0]!),"No schema-dependent or raw UTM fields");
+  assert((await send({...payload,aria:{...payload.aria,detail:"free text"}})).status===400,"Unknown question rejected");
+  assert((await send({...payload,aria:{...payload.aria,phone:"synthetic"}})).status===400,"Unknown payload property rejected");
+  assert((await send({path:"/psia-skolka-kosice/",event_name:"form_submit",event_source:"lead_landing_aria_chat_interest",attempt_id:chat_id})).status===201,"Existing ordinary form event still accepted");
+  assert(records[2]?.event_name==="form_submit" && records[2]?.attempt_id===chat_id,"Ordinary form event preserves attempt ID and type");
+}

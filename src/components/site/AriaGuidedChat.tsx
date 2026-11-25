@@ -8,7 +8,7 @@ import { LeadStepForm } from "./LeadStepForm";
 import { AriaPuppyChecker } from "./AriaPuppyChecker";
 import type { PuppyCheckInput } from "@/lib/inquiry";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
+import { trackCookielessInteraction, trackAriaChatAction } from "@/lib/cookieless-interactions";
 
 type ChatMessage = { id: number; side: "person" | "aria"; text: string; questionId?: string; widget?: "puppy" | "puppy_contact" | "interest" | "other" };
 type Question = { id: string; title: string; answer: string };
@@ -194,15 +194,29 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
       history.getBoundingClientRect().top - topGap;
   }, [open, messages.length, typedLength, typingId]);
 
+  const observedForms = useRef(new Set<number>());
+  useEffect(() => {
+    if (!open || trackingPrefix !== "lead_landing_aria_chat") return;
+    for (const message of messages) {
+      if (message.widget !== "interest" && message.widget !== "other" && message.widget !== "puppy_contact") continue;
+      if (typingId !== null && message.id > typingId) continue;
+      if (observedForms.current.has(message.id)) continue;
+      observedForms.current.add(message.id);
+      trackAriaChatAction("form_open", message.widget);
+    }
+  }, [open, messages, typingId, trackingPrefix]);
+
   function closeChat() {
     if (!engaged && messages.length === 0) track("closed_without_selection");
     onClose();
   }
 
-  function ask(question: Question) {
+  function ask(question: Question, origin: "manual" | "automatic" = "manual") {
     if (typingId !== null || answered.includes(question.id)) return;
+    if (trackingPrefix === "lead_landing_aria_chat") trackAriaChatAction(origin === "manual" ? "question" : "auto_question", question.id);
     track("question_" + question.id);
     if (question.id === "puppy") track("puppy_check_open");
+    if (question.id === "puppy" && trackingPrefix === "lead_landing_aria_chat") trackAriaChatAction("puppy_check_open");
     setEngaged(true);
     setAnswered(current => [...current, question.id]);
     const id = nextId.current;
@@ -226,7 +240,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
       if (autoPricingAsked.current) return;
       autoPricingAsked.current = true;
       const question = chatQuestions.find(item => item.id === "pricing");
-      if (question) ask(question);
+      if (question) ask(question, "automatic");
     }, 240);
     return () => window.clearTimeout(timer);
     // ask() only appends a deterministic catalogue question; the stable state
@@ -236,6 +250,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   function showInterest() {
     if (typingId !== null || messages[messages.length - 1]?.widget === "interest") return;
     track("interest_open");
+    if (trackingPrefix === "lead_landing_aria_chat") trackAriaChatAction("interest_open");
     setEngaged(true);
     const id = nextId.current;
     nextId.current += 3;
@@ -251,6 +266,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   function finishPuppyCheck(details: PuppyCheckInput, eligible: boolean) {
     if (puppyCheck) return;
     track(eligible ? "puppy_precheck_passed" : "puppy_precheck_info");
+    if (trackingPrefix === "lead_landing_aria_chat") trackAriaChatAction(eligible ? "puppy_precheck_passed" : "puppy_precheck_info");
     setPuppyCheck(details);
     setPuppyContactIsEligible(eligible);
     const id = nextId.current++;
@@ -260,6 +276,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   function showOther() {
     if (typingId !== null || messages[messages.length - 1]?.widget === "other") return;
     track("other_open");
+    if (trackingPrefix === "lead_landing_aria_chat") trackAriaChatAction("other_open");
     setEngaged(true);
     const id = nextId.current;
     nextId.current += 3;
