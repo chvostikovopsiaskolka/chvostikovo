@@ -96,7 +96,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   const autoPricingAsked = useRef(false);
   useEffect(() => {
     if (!open) { setIntroLength(0); setIntroComposing(true); return; }
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches && !dockless;
     setIntroLength(0); setIntroComposing(true);
     let interval: number | undefined;
     // The direct pricing CTA gives the full greeting briefly before Aria
@@ -114,7 +114,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
       }, preselected ? 18 : 36);
     }, preselected ? 260 : 950);
     return () => { window.clearTimeout(delay); if (interval !== undefined) window.clearInterval(interval); };
-  }, [open, initialQuestionId]);
+  }, [open, initialQuestionId, dockless]);
 
   const [puppyCheck, setPuppyCheck] = useState<PuppyCheckInput | null>(null);
   const [puppyContactIsEligible, setPuppyContactIsEligible] = useState(false);
@@ -137,7 +137,8 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
     const text = messages.find(item => item.id === typingId)?.text;
     if (!text) { setTypingId(null); return; }
     const visibleTextLength = plainChatText(text).length;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Lead reveals words without spatial movement; reduced motion softens its dots in CSS.
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches && !dockless;
     const words = plainChatText(text).match(/\S+\s*|\s+/g) ?? [];
     // Aria first pauses as if composing, then reveals the answer gradually.
     // One timer per active message; cleanup prevents late updates after closing.
@@ -159,7 +160,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
       window.clearTimeout(delay);
       if (interval !== undefined) window.clearInterval(interval);
     };
-  }, [typingId, messages]);
+  }, [typingId, messages, dockless]);
 
   // On mobile, never pin the viewport to scrollHeight during each typewriter
   // tick: that hid the progressively written reply until animation completed.
@@ -274,7 +275,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
 
   return (
     <Dialog open={open} onOpenChange={value => { if (!value) closeChat(); }}>
-      <DialogContent positioning="form" data-aria-chat aria-describedby={chatId + "-intro"} overlayClassName="!bg-forest-deep/25 !backdrop-blur-[12px]"
+      <DialogContent positioning="form" data-aria-chat data-aria-chat-lead={dockless || undefined} aria-describedby={chatId + "-intro"} overlayClassName="!bg-forest-deep/25 !backdrop-blur-[12px]"
         className={"aria-brand-experiment !fixed !flex !gap-0 left-2 right-2 top-auto z-50 min-h-0 w-auto max-w-none flex-col overflow-hidden rounded-[26px] border border-white/70 bg-white/80 backdrop-blur-3xl p-0 text-forest shadow-[0_24px_70px_rgba(25,48,37,.2)] sm:left-1/2 sm:right-auto sm:top-[54%] sm:bottom-auto sm:h-[min(85dvh,750px)] sm:w-[min(620px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2 " +
           (dockless ? "bottom-[max(8px,env(safe-area-inset-bottom))] h-[min(94dvh,800px)]" :
             "bottom-[max(70px,calc(env(safe-area-inset-bottom)+60px))] h-[min(81dvh,720px)]")}>
@@ -289,7 +290,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
             <img src={portraitSrc} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
             <div id={chatId + "-intro"} className="max-w-[87%] rounded-[20px_20px_20px_6px] bg-white px-3 py-3 text-[13px] leading-relaxed text-[#26322b] shadow-sm sm:text-sm">
               <span className="sr-only">{introText}</span>
-              <span aria-hidden="true">{introComposing ? <span data-aria-intro-composing className="inline-flex items-center gap-1"><span className="size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f]" /><span className="size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]" /><span className="size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]" /></span> : introText.slice(0, introLength)}</span>
+              <span aria-hidden="true">{introComposing ? <span data-aria-intro-composing className="inline-flex items-center gap-1"><span className={dockless ? "aria-composing-dot size-1.5 rounded-full bg-[#9e336f]" : "size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f]"} /><span className={dockless ? "aria-composing-dot size-1.5 rounded-full bg-[#9e336f] [animation-delay:160ms]" : "size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]"} /><span className={dockless ? "aria-composing-dot size-1.5 rounded-full bg-[#9e336f] [animation-delay:320ms]" : "size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]"} /></span> : introText.slice(0, introLength)}</span>
             </div>
           </div>
 
@@ -357,9 +358,9 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                     <>
                       {typedLength === 0 ? (
                         <span aria-hidden="true" className="inline-flex items-center gap-1" data-aria-composing>
-                          <span className="size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f]" />
-                          <span className="size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]" />
-                          <span className="size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]" />
+                          <span className={dockless ? "aria-composing-dot size-1.5 rounded-full bg-[#9e336f]" : "size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f]"} />
+                          <span className={dockless ? "aria-composing-dot size-1.5 rounded-full bg-[#9e336f] [animation-delay:160ms]" : "size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]"} />
+                          <span className={dockless ? "aria-composing-dot size-1.5 rounded-full bg-[#9e336f] [animation-delay:320ms]" : "size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]"} />
                         </span>
                       ) : <span aria-hidden="true">{renderChatText(message.text, typedLength)}</span>}
                       <span className="sr-only">{plainChatText(message.text)}</span>

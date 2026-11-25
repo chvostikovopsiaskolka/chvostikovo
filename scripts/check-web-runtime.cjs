@@ -130,14 +130,23 @@ async function assertPaidAriaChat(page) {
   await page.route('**/functions/v1/web-form-submit',handler);
   try {
     const trigger=page.locator('[data-aria-lead-chat] [data-aria-chat-trigger]');
-    await trigger.click();
+    // Verify the 44px hit area beyond the visibly shorter orange surface.
+    const launcher=page.locator('[data-aria-lead-chat] [data-aria-bubble-chat-cta]');
+    const hit=await launcher.evaluate(el=>{const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.bottom+2};});
+    if(await page.evaluate(()=>navigator.maxTouchPoints>0))await page.touchscreen.tap(hit.x,hit.y);
+    else await page.mouse.click(hit.x,hit.y);
     const chat=page.locator('[data-aria-chat]');
-    await chat.waitFor({state:'visible'});
+    await chat.waitFor({state:'visible',timeout:1500});
+    const surface=await chat.evaluate(el=>({background:getComputedStyle(el).backgroundColor,blur:getComputedStyle(el).getPropertyValue('backdrop-filter')||getComputedStyle(el).getPropertyValue('-webkit-backdrop-filter')}));
+    if(surface.background!=='rgba(255, 255, 255, 0.9)'||!surface.blur.includes('blur'))throw new Error('Paid chat must retain its 90 percent frosted surface');
+    if(await trigger.evaluate(el=>getComputedStyle(el).backgroundColor)!=='rgba(0, 0, 0, 0)')throw new Error('Expanded portrait inherited a colored navigation background');
     await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'visible'});
     if(await chat.locator('[data-aria-chat-question]').count()!==4)throw new Error('Paid chat must reuse four FAQ choices');
     await chat.locator('[data-aria-chat-question="pricing"]').click();
     const typing=chat.locator('[data-aria-typing="true"]');
     await typing.locator('[data-aria-composing]').waitFor({state:'visible',timeout:2500});
+    if(!await typing.locator('.aria-composing-dot').first().evaluate(el=>el.getAnimations().some(a=>a.playState==='running')))throw new Error('Paid composing dots are static');
+    if(await typing.locator('.aria-composing-dot').evaluateAll(es=>new Set(es.map(e=>getComputedStyle(e).animationDelay)).size)!==3)throw new Error('Paid composing dots must animate in sequence');
     await page.waitForFunction(()=>{const t=document.querySelector('[data-aria-typing="true"]');return (t?.querySelector('[aria-hidden="true"]')?.textContent?.length||0)>12;},null,{timeout:5000});
     if(await chat.locator('[data-aria-chat-questions]').count())throw new Error('Paid FAQ exposed while typing');
     await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'detached'});
@@ -174,6 +183,18 @@ async function assertPaidAriaChat(page) {
     await trigger.click();
     await chat.waitFor({state:'visible'});
     if(await chat.locator('[data-aria-chat-inline]').count()!==2||!(await chat.innerText()).includes('20 €/deň'))throw new Error('Paid chat must preserve conversation history on reopen');
+    const originalReduced=await page.evaluate(()=>matchMedia('(prefers-reduced-motion: reduce)').matches);
+    await page.emulateMedia({reducedMotion:'reduce'});
+    const calmerQuestion=chat.locator('[data-aria-chat-question="caretakers"]');
+    await calmerQuestion.waitFor({state:'visible',timeout:10000});await calmerQuestion.click();
+    const calmer=chat.locator('[data-aria-typing="true"]');
+    await calmer.locator('.aria-composing-dot').first().waitFor({state:'visible'});
+    if(await calmer.locator('.aria-composing-dot').first().evaluate(el=>getComputedStyle(el).animationName)!=='aria-composing-fade')throw new Error('Reduced-motion dots must use a gentle non-spatial pulse');
+    await page.waitForFunction(()=>{const e=document.querySelector('[data-aria-chat-lead] [data-aria-typing="true"] [aria-hidden="true"]');return (e?.textContent?.length||0)>12;},null,{timeout:5000});
+    const firstLength=await calmer.evaluate(el=>el.querySelector('[aria-hidden="true"]')?.textContent?.length||0);
+    await page.waitForFunction(previous=>{const e=document.querySelector('[data-aria-chat-lead] [data-aria-typing="true"] [aria-hidden="true"]');return (e?.textContent?.length||0)>previous;},firstLength,{timeout:5000});
+    await calmer.waitFor({state:'detached',timeout:20000});
+    await page.emulateMedia({reducedMotion:originalReduced?'reduce':'no-preference'});
     await chat.getByRole('button',{name:'Close',exact:true}).click();
     await chat.waitFor({state:'hidden'});
   } finally { await page.unroute('**/functions/v1/web-form-submit',handler); }
@@ -223,16 +244,16 @@ async function assertCampaignContentFlow(page) {
         cards:(()=>{const cards=[...document.querySelectorAll('[data-lead-price-card]')].map(el=>el.getBoundingClientRect());const taxi=box('#lead-pricing [data-aria-taxi]');return cards.length===2&&Math.abs(cards[0].top-cards[1].top)<2&&Math.abs(cards[0].bottom-cards[1].bottom)<2&&taxi.top>cards[0].bottom&&taxi.width>=cards[1].right-cards[0].left-2;})(),
         cleanSections:getComputedStyle(document.querySelector('#aria-puppy-check')).backgroundColor==='rgb(255, 255, 255)'&&document.querySelector('#lead-faq').parentElement.tagName==='MAIN',
         certificateWidth:(()=>{const e=document.querySelector('[data-safety-certificates]');return e.getBoundingClientRect().width>=e.parentElement.clientWidth-34;})(),
-        pillCount:visiblePills.length,pillBg:visiblePills.every(el=>getComputedStyle(el).backgroundColor==='rgb(248, 221, 235)'),
+        pillCount:visiblePills.length,pillBg:visiblePills.every(el=>{const s=getComputedStyle(el);return s.backgroundColor==='rgb(255, 164, 20)'&&s.color==='rgb(38, 50, 43)'&&parseFloat(s.borderRadius)<=10;}),
         pillRows:new Set(visiblePills.map(el=>Math.round(el.getBoundingClientRect().top))).size,
         actionBg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).backgroundColor,
         actionFg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).color,
         pillBold:visiblePills.every(el=>Number(getComputedStyle(el).fontWeight)>=700),
         pillGap:parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pills]')).columnGap),
-        photoCrop:[...document.querySelectorAll('[data-lead-hero-photo] img')].length===2&&[...document.querySelectorAll('[data-lead-hero-photo] img')].every(el=>getComputedStyle(el).objectPosition==='50% 0%'),
+        photoCrop:[...document.querySelectorAll('[data-lead-hero-photo] img')].length===2&&[...document.querySelectorAll('[data-lead-hero-photo] img')].every(el=>getComputedStyle(el).objectPosition==='50% 50%'),
         reviewGap:parseFloat(getComputedStyle(document.querySelector('[data-aria-lead-review-spacing]')).marginTop),
         galleryBelow:box('#lead-photo-carousel').top>=innerHeight-2,
-        compactLauncher:(()=>{const b=box('[data-aria-bubble-chat-cta]'),s=box('[data-aria-speech]');return b.width<s.width-16&&b.height>=43&&b.height<=50;})(),
+        compactLauncher:(()=>{const b=box('[data-aria-bubble-chat-cta]'),s=box('[data-aria-speech]');const c=document.querySelector('[data-aria-bubble-chat-cta]'),pseudo=getComputedStyle(c,'::before');return Math.abs(b.width-(s.width-parseFloat(getComputedStyle(document.querySelector('[data-aria-speech]')).paddingLeft)-parseFloat(getComputedStyle(document.querySelector('[data-aria-speech]')).paddingRight)))<3&&b.height>=36&&b.height<=40&&parseFloat(pseudo.top)<=-4&&parseFloat(pseudo.bottom)<=-4;})(),
         dockInside:dock.top>=0&&dock.bottom<=innerHeight+1,
         ctaHeight:cta.height,proofBottom:proof.bottom,ariaTop:aria.top,faceWidth:face?.width,
         widget:(()=>{const speech=box('[data-aria-speech]');const tail=document.querySelector('[data-aria-speech] [data-aria-tail]');return dock.height<=1&&Math.abs(face.width-(innerWidth>=640?104:92))<2&&
@@ -240,7 +261,7 @@ async function assertCampaignContentFlow(page) {
           (innerWidth<1024||speech.width>=455&&speech.width<=482)&&!!tail&&Number(tail.dataset.tipX)<-8&&
           document.querySelectorAll('[data-aria-section-navigation]').length===0&&document.querySelectorAll('[data-aria-chat-trigger]').length===1&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
     });
-    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(184, 91, 0)'||fold.actionFg!=='rgb(255, 255, 255)'||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.compactLauncher||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
+    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.actionFg!=='rgb(255, 255, 255)'||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.compactLauncher||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
   if(await page.locator('#lead-requirements h2').innerText()!=='Podmienky prijatia psíka')throw new Error('Campaign conditions heading differs');
