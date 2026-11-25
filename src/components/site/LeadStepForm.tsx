@@ -22,7 +22,7 @@ export const LEAD_STEP_INTERESTS = [
   { value: "Mám záujem využívať škôlku občasne", lines: ["Mám záujem", "občasne", "využívať škôlku"] },
 ] as const;
 
-export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, compact = false, presetInterest, ariaPreview = true, puppyCheck }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; compact?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean; puppyCheck?: PuppyCheckInput | undefined }) {
+export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, compact = false, chatReceipt = false, presetInterest, ariaPreview = true, puppyCheck }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; compact?: boolean; chatReceipt?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean; puppyCheck?: PuppyCheckInput | undefined }) {
   const formId = useId();
   const formRef = useRef<HTMLFormElement>(null);
   const [step, setStep] = useState<1 | 2>(presetInterest ? 2 : 1);
@@ -118,7 +118,8 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
 
   if (sent) {
     return (
-      <div className="flex min-h-75 flex-col items-center justify-center gap-3 text-center" data-lead-step-success>
+      <div className={(chatReceipt ? "flex flex-col items-center gap-2" : "flex min-h-75 flex-col items-center justify-center gap-3") + " text-center"} data-lead-step-success>
+        {chatReceipt ? <p role="status" className="sr-only">Ďakujeme za váš záujem.</p> : <>
         <div className="flex size-14 items-center justify-center rounded-full bg-secondary text-forest">
           <Check className="size-7" aria-hidden="true" />
         </div>
@@ -126,11 +127,12 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
         <p className="max-w-sm text-sm leading-relaxed text-forest/75">
           Váš záujem sme prijali. Príde vám SMS potvrdenie o prijatí záujmu.
         </p>
+        </>}
         {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} />}
-        <div className="mt-2 flex flex-wrap justify-center gap-3 text-sm font-semibold text-forest">
-          <a href="/#podmienky" onClick={() => void trackCookielessInteraction("success_conditions_click", trackingSource)} className="underline underline-offset-4">Podmienky prijatia</a>
-          <a href="/#cennik" onClick={() => void trackCookielessInteraction("success_pricing_click", trackingSource)} className="underline underline-offset-4">Cenník</a>
-        </div>
+        {!chatReceipt && <div data-lead-success-links className="mt-2 flex flex-wrap justify-center gap-3 text-sm font-semibold text-forest">
+          <a href="/#podmienky" onClick={() => void trackCookielessInteraction("success_conditions_click", trackingSource)} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-forest/20 bg-white px-4 py-2 text-forest shadow-sm hover:bg-secondary/55 focus-visible:outline-2 focus-visible:outline-coral">Podmienky prijatia</a>
+          <a href="/#cennik" onClick={() => void trackCookielessInteraction("success_pricing_click", trackingSource)} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-forest/20 bg-white px-4 py-2 text-forest shadow-sm hover:bg-secondary/55 focus-visible:outline-2 focus-visible:outline-coral">Cenník</a>
+        </div>}
       </div>
     );
   }

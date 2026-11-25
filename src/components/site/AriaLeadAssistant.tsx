@@ -1,8 +1,9 @@
 import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, UsersRound, X, ArrowRight } from "lucide-react";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
-// Split the preview-only chat from the paid lead bundle and preserve state after first open.
-const AriaGuidedChat = lazy(() => import("./AriaGuidedChat").then((module) => ({ default: module.AriaGuidedChat })));
+// Keep the chat chunk cached; preload on LEAD for an immediate first open.
+const loadAriaChat = () => import("./AriaGuidedChat").then((module) => ({ default: module.AriaGuidedChat }));
+const AriaGuidedChat = lazy(loadAriaChat);
 import brandWordmark from "@/assets/logo.png";
 import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
 import { FAQ as SITE_FAQ, PRICING } from "@/content/site";
@@ -105,6 +106,13 @@ export function AriaLeadAssistant({
   const stageRef = useRef<"intro" | "puppy" | "contact">("intro");
   const [panel, setPanel] = useState<Panel>(null);
   const [chatOpen, setChatOpen] = useState(false);
+  const [chatReady, setChatReady] = useState(false);
+  useEffect(() => {
+    if (!leadChat) return;
+    let active = true;
+    void loadAriaChat().then(() => { if (active) setChatReady(true); }).catch(() => {});
+    return () => { active = false; };
+  }, [leadChat]);
   const [chatActivated, setChatActivated] = useState(false);
   const [requestedChatQuestion, setRequestedChatQuestion] = useState<"pricing" | null>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
@@ -548,7 +556,7 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        {!panel && !chatOpen && (
+        {!panel && !(chatOpen && (!leadChat || chatReady)) && (
           <div data-aria-message data-aria-suppressed="false"
             className={rightAlignedBubble ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : sectionNavigation ? "pointer-events-none mx-auto mb-3 flex w-[calc(100%-12px)] max-w-[440px] justify-start pl-[106px] sm:max-w-[500px] sm:pl-[120px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
             <div ref={speechRef} data-aria-speech data-aria-outline-ready={outlineReady}
@@ -564,7 +572,7 @@ export function AriaLeadAssistant({
               </svg>}
               {stage === "intro" ? (
                 (guidedChatPreview || leadChat) ? (
-                  <div className="pointer-events-auto relative z-10 min-w-0">
+                  <div className={"pointer-events-auto relative z-10 min-w-0" + (leadChat ? " w-full" : "")}>
                     <p className="font-display text-[11px] font-semibold leading-[1.4] tracking-normal sm:text-[13px]">
                       Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                       <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
@@ -663,7 +671,7 @@ export function AriaLeadAssistant({
             )}
           </div>}
         </div>
-        {(guidedChatPreview || leadChat) && chatActivated && (
+        {(guidedChatPreview || leadChat) && (chatActivated || leadChat) && (
           <AriaChatBoundary open={chatOpen} onClose={() => setChatOpen(false)}>
             <Suspense fallback={null}>
               <AriaGuidedChat open={chatOpen} initialQuestionId={requestedChatQuestion} dockless={leadChat} portraitSrc={portraitSrc}
