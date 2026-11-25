@@ -377,7 +377,8 @@ assert.strictEqual(selectScope([ariaSource,'scripts/check-web-runtime.cjs']),'ar
 assert.strictEqual(selectScope([ariaSource,'src/styles.css']),'full');
 assert.strictEqual(selectScope([ariaSource,'src/components/site/Forms.tsx']),'full');
 assert.strictEqual(selectScope([ariaSource,'src/lib/submit-inquiry.ts']),'full');
-assert.strictEqual(selectScope(['scripts/check-web-runtime.cjs']),'full');
+assert.strictEqual(selectScope(['scripts/check-web-runtime.cjs']),'aria-visual');
+assert.strictEqual(selectScope(['scripts/check-web-runtime.cjs','src/components/site/MobileDock.tsx']),'full');
 assert.strictEqual(selectScope(['src/routes/index.tsx']),'full');
 assert.strictEqual(selectScope([]),'full');
 assert.deepStrictEqual(ARIA_ROUTES,['/psia-skolka-kosice/','/test-aria/','/psia-skolka-pre-steniatka/']);
