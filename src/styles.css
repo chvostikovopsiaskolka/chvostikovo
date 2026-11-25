@@ -1230,7 +1230,7 @@
   .lead-brand-live .hero-safe-top {
     --lead-hero-visible: calc(100svh - 96px - max(8px, env(safe-area-inset-bottom, 0px)));
     --hero-content-top: clamp(28px, calc(20svh - 104px), 66px);
-    min-height: var(--lead-hero-visible);
+    min-height: 100svh;
     justify-content: flex-start;
     padding-bottom: 0.75rem;
   }
@@ -1654,6 +1654,13 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 
 /* Paid campaign content only: preserve the approved Aria launcher and
    use the two original photos with a top-biased crop. */
+.lead-brand-live [data-aria-lead-chat] [data-aria-bubble-chat-cta] {
+  display: flex;
+  width: min(88%, 15rem);
+  min-height: 44px;
+  margin: 0.375rem auto 0;
+  padding-block: 0.25rem;
+}
 .lead-brand-live [data-lead-hero-pill] { font-weight: 700; }
 .lead-brand-live [data-lead-hero-photo] img { object-position: 50% 0%; }
 .lead-brand-live [data-lead-hero-photo]:hover img { transform: none; }
@@ -1686,7 +1693,7 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
    the title and pills belong together in the central part of the column. */
 @media (min-width: 1024px) {
   .lead-brand-live .hero-safe-top {
-    min-height: calc(100svh - 104px);
+    min-height: 100svh;
     justify-content: center;
     padding-bottom: 1rem;
   }
