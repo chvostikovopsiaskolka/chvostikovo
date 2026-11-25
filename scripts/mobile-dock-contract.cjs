@@ -15,11 +15,10 @@ for (const value of ["Produkty", "Podmienky", "Cenník", "O nás", "Prihláška"
   assert(dock.includes(value), "Missing dock item " + value);
 }
 // The main SK order and route-local landing sequences are intentionally distinct.
-const mainDock = dock.slice(dock.indexOf('    : [{ id: "o-nas", label: "O nás"'), dock.indexOf("// Return arrow: hide while moving down; show on upward scroll or after stopping."));
-assert(mainDock.includes('{ id: "o-nas", label: "O nás"') && !mainDock.includes('{ id: "top", label: "Domov"'), "Main dock should replace Domov with O nás");
-assert(mainDock.indexOf('id: "o-nas"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "podmienky"') && mainDock.indexOf('id: "podmienky"') < mainDock.indexOf('id: "produkty"'), "Main nav order must be about, prices, requirements, products");
-assert(!dock.includes('{ id: "top", label: "Domov"') && !dock.includes('{ id: "top", label: "Home"'), "Landing docks should use meaningful local sections instead of Domov");
-assert(mainDock.includes('{ id: "produkty", label: "Produkty"') && !mainDock.includes('{ id: "priestory"'), "Main dock must replace Spaces with Products");
+const mainDock = dock.slice(dock.indexOf('    : [{ id: "top", label: "Domov"'), dock.indexOf("// Return arrow: hide while moving down; show on upward scroll or after stopping."));
+assert(mainDock.includes('{ id: "top", label: "Domov"') && !mainDock.includes('id: "o-nas"'), "Main dock restores Home and moves About into the compact menu");
+assert(mainDock.indexOf('id: "top"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "podmienky"') && mainDock.indexOf('id: "podmienky"') < mainDock.indexOf('id: "produkty"'), "Main dock order");
+assert(dock.includes('{!homeDock && <button') && dock.includes('const eligible = !homeDock'), "Return arrow stays on other landing pages only");
 assert(dock.includes('{!marketing && (') && dock.includes('mobile-dock-item mobile-dock-apply') && read("src/routes/index.tsx").includes("<Header />"), "Homepage retains the dedicated application shortcut");
 assert(dock.includes('id === "produkty" && !marketing ? "/produkty"'), "Products dock item must navigate to the actual catalogue, not a stale anchor");
 
@@ -155,9 +154,9 @@ assert(homepage.includes("<HomePuppyChecker />") &&
   homeChecker.includes("home_puppy_checker_eligible") &&
   homeChecker.includes("home_puppy_checker_info"),
   "Homepage puppy checker must retain shared contact, sourced submissions and no duplicate dock");
-assert(dock.includes('label: "Mám záujem o škôlku"') && dock.includes('label: "Apply"'), "SK interest and EN application labels");
+assert(dock.includes('label: "Mám záujem o škôlku"') && dock.includes('english ? "Apply" : "Prihláška"'), "SK interest and EN application labels");
 assert(dock.includes("marketingExtra"), "Local first visit menu links required");
-assert((dock.match(/id: "interest", label:/g) || []).length === 4, "Four marketing routes must have one prominent interest CTA");
+assert((dock.match(/id: "interest", label:/g) || []).length === 3, "Three marketing variants retain one prominent interest CTA");
 assert(!dock.includes('{ id: "recenzie", label: "Recenzie", icon: ImageIcon }'), "Reviews must leave marketing docks");
 assert(!dock.includes('{ id: "reviews", label: "Reviews", icon: ImageIcon }'), "Reviews must leave EN dock");
 assert(dock.includes('id === "interest" ? (') && dock.includes('{!marketing && ('), "Landing interest CTA is preserved; main navigation retains application CTA");
@@ -385,7 +384,11 @@ assert.deepStrictEqual(ARIA_ROUTES,['/psia-skolka-kosice/','/test-aria/','/psia-
 
 assert(english.includes('<Hero language="en"') && english.includes('<FirstVisit inlineForm leadStyle language="en"') && english.includes('<Pricing interestMode homeLayout language="en"') && english.includes('<HomePuppyChecker language="en"') && english.includes('<Faq homeLayout language="en"'), "EN must reuse homepage components");
 assert(!english.includes('/produkty') && !english.includes('/psia-skolka-pre-steniatka') && !english.includes('MobileLanguageHeader'), "Untranslated destinations and standalone mobile header must not return");
-const enMenu = dock.slice(dock.indexOf("const menuEntries = english"),dock.indexOf("    : [",dock.indexOf("const menuEntries = english")));
-assert(!enMenu.includes('/produkty') && !enMenu.includes('/psia-skolka-pre-steniatka'), "EN menu must omit untranslated pages");
+const compactEntries=dock.slice(dock.indexOf("const homeMenuEntries"),dock.indexOf("const menuEntries ="));
+assert((compactEntries.match(/description:/g)||[]).length===8 && !compactEntries.includes('/produkty') && !compactEntries.includes('/psia-skolka-pre-steniatka'), "Four localized compact links, no duplicate product or puppy links");
+const compactPanel=dock.slice(dock.indexOf('{homeDock ? ('),dock.indexOf(') : <DialogPrimitive.Portal>'));
+assert(compactPanel.includes('data-home-menu') && compactPanel.includes('homeMenuEntries.map') && compactPanel.includes('<LanguageSwitch') && !/href=\{"tel:|INSTAGRAM|FACEBOOK|<img/.test(compactPanel), "Compact home panel contains only secondary links, language and close");
+assert(dock.includes('modal={!homeDock}') && css.includes('bottom: calc(100% + 8px)') && css.includes('background: transparent; color: var(--forest-deep)'), "Compact nonmodal panel anchored above dock");
+assert(hero.includes('data-home-hero-phone') && hero.includes('href={"tel:" + PHONE}') && hero.includes('trackCookielessInteraction("phone_click", t("home_hero_phone", "en_hero_phone"), language)') && !hero.includes('trackMarketingInteraction("phone_click"'), "Hero phone uses existing delegated consented Pixel handler once");
 const switchSource = read("src/components/site/LanguageSwitch.tsx");
 assert(switchSource.includes('Link') && switchSource.includes('preload="intent"') && switchSource.includes('hrefLang={code}'), "Language switch must preserve accessible router links");

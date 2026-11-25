@@ -573,6 +573,31 @@ async function assertFooterMapGeometry(browser, engine) {
 }
 
 
+
+async function assertCompactHomeMenu(page,en) {
+  const menu=page.locator('[data-home-menu]');
+  await menu.waitFor({state:'visible'});
+  const state=await menu.evaluate(el=>{
+    const bar=el.closest('.mobile-dock-bar'),nav=bar.closest('.mobile-dock'),p=el.getBoundingClientRect(),d=bar.getBoundingClientRect();
+    const links=[...el.querySelectorAll('.mobile-dock-compact-links a')];
+    const close=el.querySelector('.mobile-dock-compact-close');
+    return {hrefs:links.map(a=>new URL(a.href).hash),desc:links.every(a=>a.querySelector('small')?.textContent.trim()),
+      targets:links.every(a=>a.getBoundingClientRect().height>=44&&a.scrollWidth<=a.clientWidth+1),
+      height:p.height,gap:d.top-p.bottom,inside:p.left>=0&&p.right<=innerWidth+1&&p.top>=0,
+      noOverflow:el.scrollWidth<=el.clientWidth+1,arrow:!!nav.querySelector('.mobile-dock-back-top'),
+      closeBg:getComputedStyle(close).backgroundColor,extra:el.querySelectorAll('img,a[href^="tel:"],a[href*="instagram.com"],a[href*="facebook.com"]').length,
+      labels:[...bar.children].filter(a=>a.matches('a,button')).map(a=>a.textContent.trim())};
+  });
+  const expected=en?['#about','#en-benefits','#faq','#contact']:['#o-nas','#preco-chvostikovo','#faq','#kontakt'];
+  const labels=en?['Home','Prices','Rules','Apply','Menu']:['Domov','Cenník','Podmienky','Produkty','Prihláška','Menu'];
+  if(JSON.stringify(state.hrefs)!==JSON.stringify(expected)||JSON.stringify(state.labels)!==JSON.stringify(labels)||!state.desc||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.extra||state.gap<5||state.gap>12||state.height>250||state.closeBg!=='rgba(0, 0, 0, 0)')throw new Error('Compact home navigation '+JSON.stringify(state));
+  const phone=await page.locator('[data-home-hero-phone]').evaluate(el=>{
+    const a=el.getBoundingClientRect(),b=el.parentElement.querySelector('[data-home-hero-interest-cta]').getBoundingClientRect();
+    return {href:el.getAttribute('href'),sameRow:Math.abs((a.top+a.bottom-b.top-b.bottom)/2)<3,separate:a.left>=b.right+4,width:a.width,height:a.height,inside:a.right<=innerWidth&&b.left>=0};
+  });
+  if(!phone.href?.startsWith('tel:')||!phone.sameRow||!phone.separate||phone.width<44||phone.height<44||!phone.inside)throw new Error('Hero phone geometry '+JSON.stringify(phone));
+}
+
 async function assertBilingualNavigation(browser,engine) {
   const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
   const captured=[];
@@ -596,6 +621,23 @@ async function assertBilingualNavigation(browser,engine) {
     await page.goto(new URL('/?utm_source=fixture&utm_campaign=bilingual',base).href);
     await page.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});
     const doc=await page.evaluate(()=>window.__bilingualDocument);
+    for(const width of [320,375,390,430]){
+      await page.setViewportSize({width,height:844});
+      await page.locator('.mobile-dock').getByRole('button',{name:'Otvoriť menu'}).click();
+      await assertCompactHomeMenu(page,false);
+      await page.screenshot({path:path.join(out,'compact-sk-menu-'+engine+'-'+width+'.png')});
+      await page.getByRole('button',{name:'Zavrieť menu'}).click();
+      await page.locator('[data-home-menu]').waitFor({state:'hidden'});
+    }
+    await page.locator('.mobile-dock').getByRole('button',{name:'Otvoriť menu'}).click();
+    await page.locator('[data-home-menu] a[href="/#faq"]').click();
+    await page.waitForFunction(()=>location.hash==='#faq');
+    await page.locator('.mobile-dock').getByRole('link',{name:'Domov',exact:true}).click();
+    await page.waitForFunction(()=>scrollY<5&&!location.hash&&location.search.includes('utm_campaign=bilingual'));
+    if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Home must scroll without reload or attribution loss');
+    await page.evaluate(()=>document.addEventListener('click',e=>{if(e.target.closest?.('[data-home-hero-phone]'))e.preventDefault();},true));
+    await activateFixtureControl(page.locator('[data-home-hero-phone]'));
+    if(await page.evaluate(()=>window.__bilingualPixel.some(a=>a[0]==='track'&&a[1]==='Contact')))throw new Error('Unconsented phone Pixel');
     await page.locator('.mobile-dock').getByRole('button',{name:'Otvoriť menu'}).click();
     await page.locator('.mobile-dock-menu [data-language-switch] a[lang="en"]').click();
     await page.waitForURL(/\/en\/dog-daycare-kosice\/?$/);
@@ -613,7 +655,8 @@ async function assertBilingualNavigation(browser,engine) {
         await menu.waitFor({state:'visible'});
         const selected=menu.locator('[data-language-switch] a[lang="en"]');
         if(await selected.getAttribute('aria-current')!=='page')throw new Error('EN active state missing');
-        const buttons=await menu.locator('.mobile-dock-menu-actions [data-language-switch] a').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
+        await assertCompactHomeMenu(page,true);
+        const buttons=await menu.locator('[data-language-switch] a').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
         if(buttons.some(b=>b.width<44||b.height<44))throw new Error('Language target too small');
         await page.screenshot({path:path.join(out,'bilingual-menu-'+engine+'-'+width+'.png')});
         await menu.getByRole('button',{name:'Close menu'}).click();
@@ -624,6 +667,12 @@ async function assertBilingualNavigation(browser,engine) {
     }
     await page.evaluate(()=>{const c=JSON.parse(localStorage.getItem('chvostikovo-cookies'));c.marketing=true;c.analytics=true;localStorage.setItem('chvostikovo-cookies',JSON.stringify(c));window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed',{detail:c}));});
     await page.waitForFunction(()=>window.__bilingualPixel.some(a=>a[0]==='track'&&a[1]==='PageView'));
+    await page.setViewportSize({width:390,height:844});
+    await activateFixtureControl(page.locator('[data-home-hero-phone]'));
+    await page.waitForFunction(()=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='Contact'&&a[2]?.source==='en_hero_phone').length===1);
+    if(await page.evaluate(()=>window.__bilingualGa.filter(a=>a[0]==='event'&&a[1]==='phone_click'&&a[2]?.cta_source==='en_hero_phone').length)!==1)throw new Error('EN phone GA4 must emit once');
+    if(!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='home_hero_phone')||!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='en_hero_phone'))throw new Error('Cookieless phone sources missing');
+    await page.setViewportSize({width:1440,height:900});
     const pv=await page.evaluate(()=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='PageView').length);
     await page.locator('header [data-language-switch] a[lang="sk"]').click();
     await page.waitForURL(u=>u.pathname==='/');
@@ -2938,7 +2987,7 @@ async function assertBilingualNavigation(browser,engine) {
                     applicationAfterPricing:document.getElementById('cennik').nextElementSibling?.id==='psie-priatelstva' && document.getElementById('psie-priatelstva').nextElementSibling?.matches('[data-home-puppy-checker]') && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
                     flatMainDock:getComputedStyle(dock.querySelector('.mobile-dock-bar')).boxShadow==='none',
-                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/#o-nas|/#cennik|/#podmienky|/produkty' && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
+                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/|/#cennik|/#podmienky|/produkty' && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2 &&
                       (() => {
@@ -4114,14 +4163,7 @@ async function assertBilingualNavigation(browser,engine) {
               await productPage.locator('.mobile-dock').getByRole('button', { name: 'Otvoriť menu' }).click();
               const menu = productPage.locator('.mobile-dock-menu');
               await menu.waitFor({ state: 'visible' });
-              const actions = menu.locator('.mobile-dock-menu-actions');
-              const direct=actions.locator(':scope > a');
-              const lang=actions.locator('[data-language-switch]');
-              if(await direct.count()!==3 || await lang.locator('a').count()!==2)throw new Error('Phone, SK/EN and two socials required');
-              const hrefs=await direct.evaluateAll(es=>es.map(e=>e.getAttribute('href')));
-              if(!hrefs[0]?.startsWith('tel:')||!hrefs[1]?.startsWith('https://www.instagram.com/')||!hrefs[2]?.startsWith('https://www.facebook.com/'))throw new Error('Wrong contact destinations');
-              const boxes=await Promise.all([direct.nth(0),lang,direct.nth(1),direct.nth(2)].map(el=>el.boundingBox()));
-              if(boxes.some(b=>!b||b.width<44||b.height<44)||Math.abs(boxes[0].y-boxes[1].y)>5||Math.abs(boxes[2].y-boxes[3].y)>5||boxes[2].y<boxes[0].y+boxes[0].height)throw new Error('Phone and language above social row');
+              await assertCompactHomeMenu(productPage,false);
               await menu.getByRole('button', { name: 'Zavrieť menu' }).click();
               await menu.waitFor({ state: 'hidden' });
             }
@@ -4267,9 +4309,8 @@ async function assertBilingualNavigation(browser,engine) {
               await englishFooterSocial.waitFor({ state: 'visible' });
               if (await englishFooterSocial.locator('a').count() !== 2) throw new Error('English footer social buttons missing');
               await productPage.locator('.mobile-dock').getByRole('button', { name: 'Open menu' }).click();
-              const englishActions = productPage.locator('.mobile-dock-menu-actions');
-              if(await englishActions.locator(':scope > a').count()!==3||await englishActions.locator('[data-language-switch] a').count()!==2)throw new Error('EN menu missing shared language switch');
-              if(await productPage.locator('.mobile-dock-menu-links a[href="/produkty"],.mobile-dock-menu-links a[href="/psia-skolka-pre-steniatka"]').count())throw new Error('Untranslated EN menu destinations');
+              await assertCompactHomeMenu(productPage,true);
+              await productPage.getByRole('button',{name:'Close menu'}).click();
 
             }
             for (const legacy of ['/kosik/', '/objednavka/']) {
