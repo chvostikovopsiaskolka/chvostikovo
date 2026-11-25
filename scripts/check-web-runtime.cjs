@@ -307,14 +307,28 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
     await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
     await page.waitForTimeout(160);
     const fold=await page.evaluate(()=>{
-      const box=s=>document.querySelector(s)?.getBoundingClientRect();
+      const box=s=>{
+        const node=document.querySelector(s);if(!node)return;
+        if(getComputedStyle(node).display!=='contents')return node.getBoundingClientRect();
+        const children=[...node.children].map(e=>e.getBoundingClientRect());
+        const left=Math.min(...children.map(r=>r.left)),right=Math.max(...children.map(r=>r.right)),top=Math.min(...children.map(r=>r.top)),bottom=Math.max(...children.map(r=>r.bottom));
+        return {left,right,top,bottom,width:right-left,height:bottom-top};
+      };
       const title=box('main h1'),pills=box('[data-lead-hero-pills]'),photos=box('[data-lead-hero-photos]'),cta=box('[data-aria-lead-hero-cta]'),proof=box('#recenzie h2');
       const aria=box('[data-aria-message]'),dock=box('[data-aria-dock]'),face=box('[data-aria-dock] img[alt^="Aria"]');
       const visiblePills=[...document.querySelectorAll('[data-lead-hero-pill]')].filter(el=>getComputedStyle(el).display!=='none');
       const elements=[title,pills,photos,cta,proof];
       return {overflow:document.documentElement.scrollWidth>innerWidth+1,
         visible:elements.every(r=>r&&r.width>0&&r.top>=0&&r.bottom<=Math.min(aria.top,face.top,dock.top)+1),
-        desktop:(()=>{if(innerWidth<1024)return true;const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect());const service=box('[data-aria-service-group]');const seam=(images[0].bottom+images[1].top)/2;return photos.left>title.right&&title.top-service.bottom>=8&&title.top-service.bottom<=20&&cta.top-pills.bottom>=10&&cta.top-pills.bottom<=24&&Math.abs((title.top+title.bottom)/2-seam)<=36&&service.bottom<title.top&&title.bottom<=pills.top&&pills.bottom<=cta.top&&photos.height>=448&&Math.abs(images[0].left-images[1].left)<2&&images[0].bottom<images[1].top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;})(),
+        desktop:(()=>{if(innerWidth<1024)return true;
+          const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect()),service=box('[data-aria-service-group]');
+          const headingCenter=(service.top+title.bottom)/2,actionCenter=(pills.top+cta.bottom)/2;
+          return images[0].left>title.right&&images[1].right<pills.left&&images[0].bottom<images[1].top&&
+            Math.abs(headingCenter-(images[0].top+images[0].bottom)/2)<3&&Math.abs(actionCenter-(images[1].top+images[1].bottom)/2)<3&&
+            title.top-service.bottom>=12&&title.top-service.bottom<=20&&cta.top-pills.bottom>=20&&cta.top-pills.bottom<=32&&
+            Math.abs(cta.left-pills.left)<2&&Math.abs(cta.right-pills.right)<2&&Math.abs(cta.right-box('[data-lead-hero-pill="3"]').right)<2&&
+            images.every(r=>r.height>=216)&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;
+        })(),
         mobileOrder:(()=>{if(innerWidth>=640)return true;const service=box('[data-aria-service-group]');return service.bottom<=title.top&&title.bottom<=pills.top&&pills.bottom<=photos.top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=10;})(),
         admissionClear:(()=>{const h=box('#lead-requirements h2');return [...document.querySelectorAll('#lead-requirements > [aria-hidden="true"] svg')].every(e=>{const p=e.getBoundingClientRect();return p.right<=h.left||p.left>=h.right||p.bottom<=h.top||p.top>=h.bottom;});})(),
         galleryEdge:(()=>{const r=box('#lead-photo-carousel [data-gesture-track="photos"]');return Math.abs(r.left)<2&&Math.abs(r.right-document.documentElement.offsetWidth)<2;})(),
