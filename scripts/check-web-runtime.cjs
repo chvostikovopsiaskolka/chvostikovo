@@ -378,9 +378,204 @@ if (!bellaris && brandPreviewCandidate) {
   }
 }
 
+// Shared footer: test the real responsive wrapper and an isolated interactive
+// iframe fixture. Never contact Google or send real consent/analytics requests.
+// The shared application responds to the available form width, not the
+// viewport alone (modal insets and the second-dog card reduce that width).
+async function assertApplicationDogLayout(surface, engine, label) {
+  const page=surface.page(), original=page.viewportSize();
+  const form=surface.locator('form').filter({has:page.locator('input[name="pes"]')});
+  await form.locator('input[name="pes"]').waitFor({state:'visible'});
+  const two=form.getByRole('radio',{name:'Chcem prihlásiť dvoch psíkov'});
+  const one=form.getByRole('radio',{name:'Chcem prihlásiť jedného psíka'});
+  try {
+    await two.check();
+    await form.locator('input[name="pes2"]').waitFor({state:'visible'});
+    for(const width of [320,375,390,430,1440]) {
+      await page.setViewportSize({width,height:width>=1024?900:844});
+      await page.evaluate(()=>document.fonts.ready);
+      const sample=await form.evaluate(el=>{
+        const expected=['identity','age-weight','sex-neuter'];
+        const pairs=[['pes','plemeno'],['vek','vaha'],['pohlavie','kastrovana']];
+        const rows=[...el.querySelectorAll('[data-application-dog-row]')];
+        const checks=rows.map((row,i)=>{
+          const [left,right]=row.children, a=left.getBoundingClientRect(),b=right.getBoundingClientRect(),r=row.getBoundingClientRect();
+          const container=row.closest('.\\@container');
+          const cs=getComputedStyle(container);
+          const available=container.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+          const side=available>=350;
+          const suffix=i>=3?'2':'';
+          const names=[left,right].map(group=>group.querySelector('input')?.name);
+          const correct=names.every((name,j)=>name===pairs[i%3][j]+suffix);
+          const controls=[...row.querySelectorAll('.form-binary-choice-v292 > span')].map(node=>node.getBoundingClientRect());
+          return {row:row.dataset.applicationDogRow,available,side,correct,
+            geometry:side?Math.abs(a.bottom-b.bottom)<2&&a.right<=b.left+1:a.bottom<=b.top+1&&Math.abs(a.left-b.left)<2,
+            fits:a.left>=r.left-1&&b.right<=r.right+1&&row.scrollWidth<=row.clientWidth+1,
+            binary:controls.every(c=>c.height>=44&&c.width>=44)};
+        });
+        const options=[...el.querySelectorAll('input[name="duvod"]')];
+        const cardRects=options.map(input=>input.parentElement.getBoundingClientRect());
+        return {checks,order:rows.map(row=>row.dataset.applicationDogRow).join(',')===expected.concat(expected).join(','),
+          choices:options.map(input=>input.value),required:options.every(input=>input.required&&!input.checked),
+          usageLayout:cardRects.length===2&&cardRects[0].right<=cardRects[1].left+1&&Math.abs(cardRects[0].top-cardRects[1].top)<2,
+          overflow:el.scrollWidth>el.clientWidth+2};
+      });
+      if(!sample.order||sample.checks.length!==6||sample.checks.some(c=>!c.correct||!c.geometry||!c.fits||!c.binary)||
+          sample.choices.join('|')!=='Pravidelne – 1× alebo viackrát týždenne|Občas podľa potreby'||
+          !sample.required||!sample.usageLayout||sample.overflow)
+        throw new Error('Application layout '+label+' '+width+': '+JSON.stringify(sample));
+      console.log('PASS application '+engine+' '+label+' '+width+' '+JSON.stringify(sample));
+    }
+    await page.setViewportSize(original);
+    const next=form.getByRole('button',{name:'Pokračovať',exact:true});
+    const owner=form.locator('input[name="meno"]');
+    if(await owner.isVisible())throw new Error('Owner step visible before dog details');
+    await next.click();
+    if(await form.getAttribute('data-application-step')!=='1')throw new Error('Incomplete dogs passed step validation');
+    for(const suffix of ['', '2']){
+      for(const [name,value] of [['pes','Fixture dog '+suffix],['plemeno','Labrador'],['vek','2 roky'],['vaha','25 kg'],['povaha','Fixture only']])await form.locator('[name="'+name+suffix+'"]').fill(value);
+      for(const name of ['pohlavie','kastrovana'])await form.locator('label:has(input[name="'+name+suffix+'"])').first().click();
+    }
+    await form.locator('label:has(input[name="duvod"])').first().click();
+    await next.click();
+    await owner.waitFor({state:'visible'});
+    if(await form.locator('input[name="pes"]').isVisible())throw new Error('Both application steps visible');
+    await owner.fill('Fixture owner');
+    await form.locator('input[name="telefon"]').fill('912345678');
+    const payload=await form.evaluate(el=>Object.fromEntries(new FormData(el)));
+    if(payload.pes!=='Fixture dog '||payload.pes2!=='Fixture dog 2'||payload.meno!=='Fixture owner'||payload.duvod!=='Pravidelne – 1× alebo viackrát týždenne')throw new Error('Hidden step fields missing from application payload');
+    await form.getByRole('button',{name:'Späť',exact:true}).click();
+    await form.locator('input[name="pes"]').waitFor({state:'visible'});
+    if(await form.locator('input[name="pes2"]').inputValue()!=='Fixture dog 2'||await owner.inputValue()!=='Fixture owner')throw new Error('Step navigation lost application values');
+    await next.click();
+    await owner.waitFor({state:'visible'});
+    if(await owner.inputValue()!=='Fixture owner')throw new Error('Owner values lost on return');
+    await form.getByRole('button',{name:'Späť',exact:true}).click();
+    await form.locator('input[name="pes"]').waitFor({state:'visible'});
+    console.log('PASS application step navigation and full FormData '+engine+' '+label);
+  } finally {
+    await page.setViewportSize(original);
+    await one.check();
+  }
+}
+
+async function assertFooterMapGeometry(browser, engine) {
+  const context = await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  const origin = new URL(base).origin;
+  const routes = [...fullRoutes, '/produkty/', '/stojan-na-misky-pre-psa/', '/target-na-cvicenie-pre-psov/', '/blog/', '/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/'];
+  try {
+    await context.addInitScript(() => {
+      localStorage.setItem('chvostikovo-cookies', JSON.stringify({
+        version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,
+        functional:false,analytics:false,marketing:false
+      }));
+    });
+    await context.route('**/*', route => {
+      const request = route.request(), url = new URL(request.url());
+      if (request.method()==='GET' && url.origin==='https://www.google.com' &&
+          url.pathname==='/maps' && url.searchParams.get('output')==='embed') {
+        return route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><html><body style="margin:0;background:#dcebd5"><div style="position:fixed;inset:0;background:repeating-linear-gradient(40deg,transparent 0 35px,#fff 36px 43px)"></div><button style="position:fixed;bottom:16px;right:16px;min-height:44px" aria-pressed="false" onclick="this.setAttribute(\'aria-pressed\',this.getAttribute(\'aria-pressed\')===\'false\'?\'true\':\'false\')">Map fixture control</button></body></html>'});
+      }
+      if (!['GET','HEAD'].includes(request.method()) || url.origin!==origin) return route.abort();
+      return route.continue();
+    });
+    for (const route of routes) {
+      const page = await context.newPage();
+      const label = route.replaceAll('/','_');
+      try {
+        await page.goto(new URL(route,base).href,{waitUntil:'domcontentloaded',timeout:40000});
+        const map = page.locator('footer [data-footer-map]');
+        await map.waitFor({state:'visible'});
+        if (await map.count()!==1 || await map.locator('iframe').count()!==0 ||
+            await map.getByRole('button',{name:/Otvoriť nastavenia cookies|Open cookie settings/}).count()!==1)
+          throw new Error('Footer map must preserve the functional-consent placeholder: '+route);
+        const fallbackRadius=await map.evaluate(el=>{
+          const card=el.closest('[data-footer-contact-card]'),style=getComputedStyle(card);
+          return Math.abs(parseFloat(getComputedStyle(el).borderTopLeftRadius)-
+            Math.max(0,parseFloat(style.borderTopLeftRadius)-parseFloat(style.paddingRight)))<1;
+        });
+        if(!fallbackRadius)throw new Error('Consent placeholder corners must match the card inset: '+route);
+        await page.evaluate(()=>{
+          const consent=JSON.parse(localStorage.getItem('chvostikovo-cookies'));
+          consent.functional=true;
+          localStorage.setItem('chvostikovo-cookies',JSON.stringify(consent));
+          window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed',{detail:consent}));
+        });
+        const iframe=map.locator('iframe');
+        await iframe.waitFor({state:'visible',timeout:10000});
+        const src=await iframe.getAttribute('src');
+        if(!src?.startsWith('https://www.google.com/maps?') || !src.includes('output=embed') ||
+            !await iframe.getAttribute('title') || await iframe.getAttribute('loading')!=='lazy')
+          throw new Error('Footer map URL, accessible title or lazy loading changed: '+route);
+        const address=page.locator('footer [data-footer-contact-card] a').filter({hasText:'Poľská 6, 040 01 Košice'});
+        if(await address.count()!==1 || await address.getAttribute('target')!=='_blank' ||
+            !/^https:\/\//.test(await address.getAttribute('href')||''))
+          throw new Error('External map address link missing: '+route);
+        // Main, paid landing and EN get the entire width matrix. Other shared
+        // footer consumers get mobile and desktop geometry/readback.
+        const widths=['/','/psia-skolka-kosice/','/en/dog-daycare-kosice/'].includes(route)
+          ? [320,375,390,430,1440] : [390,1440];
+        for(const width of widths) {
+          await page.setViewportSize({width,height:width>=1024?900:844});
+          await centerFixtureControl(map);
+          const sample=await map.evaluate(el=>{
+            const card=el.closest('[data-footer-contact-card]'),frame=el.querySelector('iframe');
+            const c=card.getBoundingClientRect(),m=el.getBoundingClientRect(),f=frame.getBoundingClientRect();
+            const cs=getComputedStyle(card),ms=getComputedStyle(el),fs=getComputedStyle(frame);
+            const root=parseFloat(getComputedStyle(document.documentElement).fontSize);
+            const pad=parseFloat(cs.paddingRight),outer=parseFloat(cs.borderTopRightRadius);
+            const radius=Math.max(0,outer-pad);
+            const corners=['borderTopLeftRadius','borderTopRightRadius','borderBottomLeftRadius','borderBottomRightRadius'];
+            const near=(a,b)=>Math.abs(a-b)<1.5;
+            return {
+              outer,pad,radius,inner:parseFloat(ms.borderTopRightRadius),
+              preserved:near(outer,root*1.25+12)&&near(pad,root*(innerWidth>=640?1.75:1.25)),
+              concentric:corners.every(key=>near(parseFloat(ms[key]),radius)),
+              insets:near(c.right-m.right,pad)&&(innerWidth>=1024||
+                near(m.left-c.left,pad)&&near(c.bottom-m.bottom,parseFloat(cs.paddingBottom))),
+              frameFits:near(f.width,m.width)&&near(f.height,m.height)&&near(f.height,root*15)&&
+                near(f.left,m.left)&&near(f.top,m.top),
+              clipped:ms.overflowX==='hidden'&&ms.overflowY==='hidden',
+              noOverflow:m.left>=0&&m.right<=innerWidth+1&&document.documentElement.scrollWidth<=innerWidth+1,
+              interactive:fs.pointerEvents!=='none'&&document.elementFromPoint(m.left+m.width/2,m.top+m.height/2)===frame,
+              cornerClipped:radius<8||document.elementFromPoint(m.left+1,m.top+1)!==frame
+            };
+          });
+          if(!sample.preserved||!sample.concentric||!sample.insets||!sample.frameFits||
+              !sample.clipped||!sample.noOverflow||!sample.interactive||!sample.cornerClipped)
+            throw new Error('Footer map geometry '+route+' '+width+': '+JSON.stringify(sample));
+          const control=page.frameLocator('footer [data-footer-map] iframe').getByRole('button',{name:'Map fixture control'});
+          await control.waitFor({state:'visible',timeout:10000});
+          const before=await control.getAttribute('aria-pressed');
+          await control.click({timeout:5000});
+          if(await control.getAttribute('aria-pressed')===before)
+            throw new Error('Footer map iframe is not interactive: '+route+' '+width);
+          await page.screenshot({path:path.join(out,'footer-map-'+engine+'-'+label+'-'+width+'.png')});
+          console.log('PASS footer-map '+engine+' '+route+' '+width+' '+JSON.stringify(sample));
+        }
+        await page.evaluate(()=>{
+          const consent=JSON.parse(localStorage.getItem('chvostikovo-cookies'));
+          consent.functional=false;
+          localStorage.setItem('chvostikovo-cookies',JSON.stringify(consent));
+          window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed',{detail:consent}));
+        });
+        await iframe.waitFor({state:'detached',timeout:5000});
+        await map.getByRole('button',{name:/Otvoriť nastavenia cookies|Open cookie settings/}).waitFor({state:'visible'});
+        results.push({engine,route:'footer-map '+route,status:'PASS',widths});
+      } catch(error) {
+        const failure={engine,route:'footer-map '+route,status:'FAIL',error:error.message};
+        failures.push(failure);results.push(failure);
+        console.error('FAIL '+JSON.stringify(failure));
+        await page.screenshot({path:path.join(out,'footer-map-'+engine+'-'+label+'-failure.png')}).catch(()=>{});
+      } finally {await page.close();}
+    }
+  } finally {await context.close();}
+}
+
 (async () => {
   for (const [engine, browserType] of selectedEngines) {
     const browser = await browserType.launch();
+    if (!bellaris && brandPreviewCandidate && runtimeScope==='full') await assertFooterMapGeometry(browser, engine);
     for (const restricted of [false, true]) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
       // Each URL must start without a saved choice from the preceding URL.
@@ -2863,7 +3058,8 @@ if (!bellaris && brandPreviewCandidate) {
               await page.locator('.mobile-dock[data-variant="main"] .mobile-dock-apply').click();
               const dockApplication=page.getByRole('dialog').last();
               await dockApplication.waitFor({state:'visible'});
-              if(!await dockApplication.locator('input[name="meno"]').isVisible()) throw new Error('Homepage mobile application must open the real form');
+              if(!await dockApplication.locator('input[name="pes"]').isVisible() || await dockApplication.locator('input[name="meno"]').isVisible()) throw new Error('Homepage mobile application must open dog step first');
+              if(brandPreviewCandidate)await assertApplicationDogLayout(dockApplication,engine,'modal');
               await dockApplication.getByRole('button',{name:'Close'}).click();
               await dockApplication.waitFor({state:'hidden'});
               const puppyFaq=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
@@ -2901,19 +3097,14 @@ if (!bellaris && brandPreviewCandidate) {
               const application=page.locator('[data-home-friendship-form]');
               const toggle=application.locator('#home-friendship-application');
               const owner=application.locator('input[name="meno"]');
-              if(!await owner.isVisible() || await application.locator('input[name="pes"]').isVisible()) throw new Error('Collapsed application preview fields incorrect');
-              await centerFixtureControl(owner);
-              await owner.fill('Testovacie meno');
-              // Dismiss the focused text input before testing the next touch;
-              // the virtual keyboard/focus scroll can otherwise move the target.
-              await owner.blur();
+              if(await owner.isVisible() || await application.locator('input[name="pes"]').isVisible()) throw new Error('Collapsed application must not show either step');
               await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
-              if(!await application.locator('input[name="pes"]').isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await owner.inputValue()!=='Testovacie meno' || await page.getByRole('dialog').count()) throw new Error('Inline application did not expand or retain owner data');
+              if(await owner.isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await page.getByRole('dialog').count()) throw new Error('Inline application did not open dog step');
+              if(brandPreviewCandidate)await assertApplicationDogLayout(application,engine,'inline');
               await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'hidden',timeout:5000});
-              if(await application.locator('input[name="pes"]').isVisible() || await owner.inputValue()!=='Testovacie meno') throw new Error('Inline application collapse lost data');
-              await owner.fill('');
+              if(await owner.isVisible()) throw new Error('Inline application collapse exposed owner step');
               await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
             }
             await page.setViewportSize({ width: 390, height: 844 });
@@ -3472,6 +3663,39 @@ if (!bellaris && brandPreviewCandidate) {
               }
               if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product routes to retired checkout');
             }
+            // Test the same product wizard inline in the new article without sending real inquiries.
+            await productPage.goto(new URL('/blog/target-pri-rehabilitacii-psa/', base).href);
+            await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});
+            const rehabConsent=productPage.getByRole('button',{name:'Len nevyhnutné',exact:true});
+            if(await rehabConsent.isVisible())await rehabConsent.click();
+            const rehabGallery=productPage.locator('[data-blog-target-gallery]');
+            if(await rehabGallery.locator('figure').count()!==3)throw new Error('Rehab article three photos missing');
+            const rehabForm=productPage.locator('[data-blog-target-inquiry]');
+            if(await rehabForm.count()!==1)throw new Error('Rehab inline inquiry missing');
+            const inquiryUrl='**/functions/v1/product-inquiry-submit';
+            let rehabPayloads=[];
+            const rehabMock=async route=>{
+              const headers={'access-control-allow-origin':'*','access-control-allow-methods':'POST, OPTIONS','access-control-allow-headers':'content-type'};
+              if(route.request().method()==='OPTIONS'){await route.fulfill({status:204,headers});return;}
+              rehabPayloads.push(route.request().postDataJSON());
+              await route.fulfill({status:200,headers,contentType:'application/json',body:'{"ok":true,"inquiry_id":1}'});
+            };
+            await productPage.route(inquiryUrl,rehabMock);
+            try{
+              await rehabForm.getByRole('button',{name:/Stredný/}).click();
+              await rehabForm.getByPlaceholder('5',{exact:true}).fill('4');
+              await rehabForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+              await rehabForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+              await rehabForm.locator('input[name="customer_name"]').fill('TEST Fixture');
+              await rehabForm.locator('input[type="tel"]').fill('901234567');
+              await rehabForm.locator('input[name="email"]').fill('test@example.com');
+              await rehabForm.locator('input[name="customer_location"]').fill('Hlavná 12, Košice, 040 01');
+              await rehabForm.locator('input[type="checkbox"][required]').check();
+              await rehabForm.getByRole('button',{name:'Odoslať záujem',exact:true}).click();
+              await rehabForm.getByRole('status').waitFor({state:'visible'});
+              const payload=rehabPayloads[0];
+              if(rehabPayloads.length!==1||payload?.configuration?.size!=='medium'||payload?.configuration?.height_cm!==4||payload?.source_ref!=='/blog/target-pri-rehabilitacii-psa/'||payload?.product_type!=='target')throw new Error('Rehab inquiry payload mismatch');
+            }finally{await productPage.unroute(inquiryUrl,rehabMock);}
             await productPage.goto(new URL('/blog/stojan-na-misky-pre-psa-vyhody-a-vyber/', base).href);
             await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
             const standFigure = productPage.locator('article section.flow-root figure').first();

@@ -136,6 +136,8 @@ function ContactDetails({ language }: { language: "sk" | "en" }) {
   );
 }
 
+const footerMapRadius = "rounded-[max(0px,calc(var(--footer-card-radius)_-_var(--footer-card-padding)))]";
+
 function FunctionalMap({ language }: { language: "sk" | "en" }) {
   const [allowed, setAllowed] = useState(false);
   const isEnglish = language === "en";
@@ -152,7 +154,7 @@ function FunctionalMap({ language }: { language: "sk" | "en" }) {
 
   if (!allowed) {
     return (
-      <div className="flex h-60 flex-col items-center justify-center rounded-4xl bg-secondary/60 px-6 text-center shadow-card">
+      <div data-footer-map className={`flex h-60 flex-col items-center justify-center bg-secondary/60 px-6 text-center shadow-card ${footerMapRadius}`}>
         <MapPin className="size-8 text-coral" />
         <p className="mt-3 font-display text-lg font-bold text-forest">
           {isEnglish ? "Google Map is disabled" : "Google mapa je vypnutá"}
@@ -176,12 +178,12 @@ function FunctionalMap({ language }: { language: "sk" | "en" }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-4xl shadow-card">
+    <div data-footer-map className={`overflow-hidden shadow-card ${footerMapRadius}`}>
       <iframe
         title={isEnglish ? "Map – Chvostíkovo, Poľská 6, Košice" : "Mapa – Chvostíkovo, Poľská 6, Košice"}
         src="https://www.google.com/maps?gl=sk&hl=sk&output=embed&q=Chvost%C3%ADkovo+psia+%C5%A1k%C3%B4lka%2C+Po%C4%BEsk%C3%A1+6%2C+040+01+Ko%C5%A1ice&z=16"
         loading="lazy"
-        className="h-60 w-full border-0"
+        className="h-60 w-full border-0 [clip-path:inset(0_round_max(0px,calc(var(--footer-card-radius)_-_var(--footer-card-padding))))]"
       />
     </div>
   );
@@ -219,7 +221,7 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
     <>
       <footer className="bg-forest py-9 text-cream/80">
         <div className="mx-auto max-w-6xl px-4">
-          <div className="rounded-3xl bg-cream p-5 text-forest sm:p-7">
+          <div data-footer-contact-card className="rounded-[var(--footer-card-radius)] bg-cream p-[var(--footer-card-padding)] text-forest [--footer-card-radius:calc(var(--radius)_+_12px)] [--footer-card-padding:1.25rem] sm:[--footer-card-padding:1.75rem]">
             <div className="mb-6 flex flex-col items-center gap-4 lg:flex-row lg:justify-between">
               <img src={logo} alt={isEnglish ? "Chvostíkovo dog daycare" : "Chvostíkovo psia škôlka"} className="h-8 w-auto" loading="lazy" />
               <div className="w-full lg:hidden">

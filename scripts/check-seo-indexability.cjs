@@ -283,3 +283,14 @@ assert(blogIndex.includes("target-na-cvicenie-psov-prve-cviky/"), "Target guide 
 console.log("[seo] PASS: product sitemap + canonical + original photos + reciprocal guides + prerendered blog articles");
 
 
+
+// Rehabilitation article: dedicated canonical, schema, static HTML, three variant photos and inline target wizard.
+{
+  const p = "/blog/target-pri-rehabilitacii-psa";
+  const html = fs.readFileSync("dist/client"+p+"/index.html","utf8");
+  assert(sitemap.includes("<loc>https://chvostikovo.sk"+p+"/</loc>"),"Rehab sitemap missing");
+  assert(pagesConfig.includes('{ path: "'+p+'" }'),"Rehab prerender config missing");
+  for (const token of ["BlogPosting","https://chvostikovo.sk"+p+"/","data-blog-target-gallery","data-blog-target-inquiry","40 × 20 cm","30 × 15 cm","25 × 25 cm","data-product-inquiry-steps"]) assert(html.includes(token),"Rehab prerender missing "+token);
+  for (const product of ["target-na-cvicenie-pre-psov","stojan-na-misky-pre-psa"]) assert(fs.readFileSync("dist/client/"+product+"/index.html","utf8").includes(p+"/"),"Missing product link to rehab guide");
+  assert(blogIndex.includes(p+"/"),"Rehab missing from blog index");
+}

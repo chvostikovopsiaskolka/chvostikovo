@@ -4,9 +4,11 @@ import { Footer } from "./Contact";
 import { LeadStepForm } from "./LeadStepForm";
 import { BlogCardCarousel } from "./BlogCardCarousel";
 import { StandGalleryLoop } from "./StandGalleryLoop";
+import { TargetInquiryInline } from "./TargetInquiry";
+import { Fragment } from "react";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
-import { blogCards, blogPath, type BlogArticleData } from "@/content/blog";
+import { blogArticles, blogCards, blogPath, type BlogArticleData } from "@/content/blog";
 
 const SITE = "https://chvostikovo.sk";
 const BRAND = "Chvostíkovo";
@@ -58,6 +60,7 @@ export function blogArticleHead(article: BlogArticleData) {
 export function BlogArticle({ article }: { article: BlogArticleData }) {
   const trackingSource = "blog_" + article.slug.replaceAll("-", "_") + "_inquiry";
   const related = blogCards.filter(card => card.id !== article.slug);
+  const rehabGuide = article.slug === "target-pri-rehabilitacii-psa";
   const productGuide = Boolean(article.productPage);
   const standGuide = article.slug === "stojan-na-misky-pre-psa-vyhody-a-vyber";
   const workdayGuide = article.slug === "kam-so-psom-pocas-pracovneho-dna";
@@ -102,14 +105,14 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
             {article.sections.map((section, index) => (
               <section key={section.heading} className="flow-root">
                 <h2 className="mb-4 font-display text-2xl leading-tight text-forest sm:text-3xl">{section.heading}</h2>
-                {index === 0 && (
+                {index === 0 && !rehabGuide && (
                   <figure className="mb-6 sm:float-right sm:mb-4 sm:ml-7 sm:w-[42%]">
                     <img src={article.image.src} alt={article.image.alt} decoding="async"
                       className={standGuide ? "block h-[260px] w-full rounded-2xl object-cover sm:h-auto" : "block h-auto w-full rounded-2xl"} style={{ objectPosition: article.image.position ?? "center" }} width={article.image.width ?? 1000} height={article.image.height ?? 750} />
                     <figcaption className="mt-2 text-xs leading-relaxed text-forest/65">{article.imageCaption ?? "Zo života našej psej škôlky v Košiciach"}</figcaption>
                   </figure>
                 )}
-                {index === 1 && !workdayGuide && (
+                {index === 1 && !workdayGuide && !rehabGuide && (
                   <figure className="mb-6 sm:float-left sm:mb-4 sm:mr-7 sm:w-[42%]">
                     <img src={article.secondImage.src} alt={article.secondImage.alt} loading="lazy" decoding="async"
                       className="block h-auto w-full rounded-2xl" width={article.secondImage.width ?? 900} height={article.secondImage.height ?? 675} />
@@ -123,8 +126,18 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                     </figure>
                   )}
                   <div className="min-w-0 space-y-4">
-                    {section.paragraphs.map(paragraph => (
-                      <p key={paragraph} className="text-base leading-8 text-forest/85 sm:text-lg">{emphasizedText(paragraph)}</p>
+                    {section.paragraphs.map((paragraph, paragraphIndex) => (
+                      <Fragment key={paragraph}>
+                        <p className="text-base leading-8 text-forest/85 sm:text-lg">{rehabGuide && index===5 && article.productPage ? <>{emphasizedText(paragraph.split("Target na cvičenie pre psov")[0] ?? "")}<a href={article.productPage.href} onClick={trackProductClick} className="font-semibold text-coral-dark underline underline-offset-4">Target na cvičenie pre psov</a>{emphasizedText(paragraph.split("Target na cvičenie pre psov")[1] ?? "")}</> : emphasizedText(paragraph)}</p>
+                        {rehabGuide && index===4 && paragraphIndex===0 && article.variantGallery && (
+                          <div data-blog-target-gallery className="grid grid-cols-3 gap-2 sm:gap-4">
+                            {article.variantGallery.map(photo=><figure key={photo.label} className="relative min-w-0 overflow-hidden rounded-xl">
+                              <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" className="aspect-[3/4] w-full object-cover"/>
+                              <figcaption className="absolute inset-x-1 bottom-1 rounded-md bg-background/95 px-1 py-1 text-center text-[clamp(9px,2.6vw,14px)] font-bold text-forest">{photo.label}</figcaption>
+                            </figure>)}
+                          </div>
+                        )}
+                      </Fragment>
                     ))}
                     {section.points && (
                       <ul className="list-disc space-y-2 pl-6 text-base leading-relaxed text-forest/85">
@@ -154,7 +167,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                     <StandGalleryLoop />
                   </section>
                 )}
-                <section id="produkt" aria-labelledby="blog-product-heading"
+                {rehabGuide ? <section id="produkt" aria-label="Mám záujem o target" className="rounded-3xl bg-secondary p-4 sm:p-8"><TargetInquiryInline sourceRef={blogPath(article.slug)} /></section> : <section id="produkt" aria-labelledby="blog-product-heading"
                   className="scroll-mt-24 rounded-3xl bg-secondary p-6 shadow-soft sm:p-9">
                   <h2 id="blog-product-heading" className="font-display text-2xl text-forest sm:text-3xl">{standGuide ? "Pozrite si naše vyhotovenia" : "Pozrite si naše vyhotovenie"}</h2>
                   <p className="mt-3 max-w-2xl leading-relaxed text-forest/80">{article.productPage.description}</p>
@@ -168,7 +181,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                     </a>
                   </div>
                   {!standGuide && <p className="mt-4 text-sm text-forest/65">Ide o nezáväzný dopyt priamo na produktovej stránke, nie o platbu cez košík.</p>}
-                </section>
+                </section>}
               </>
             ) : (
               <section data-lead-form-shell id="zaujem" aria-labelledby="blog-inquiry-heading"

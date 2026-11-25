@@ -6,7 +6,7 @@ import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
 import { trackAriaQuestionSubmit, trackFaqContactSubmit, trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
-import { startFormAttempt, trackCookielessInteraction } from "@/lib/cookieless-interactions";
+import { startFormAttempt, trackCookielessInteraction, trackAriaChatAction } from "@/lib/cookieless-interactions";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
 import { LeadPhoneReceipt } from "./LeadPhoneReceipt";
@@ -79,7 +79,10 @@ export function ShortForm({
       const submittedPhone = phoneFromForm(form, `s-${formId}-tel`);
       const dogName = showChatDogFields ? String(fd.get("pes_meno") || "").trim() : "";
       const breed = String(fd.get("plemeno") || "").trim();
-      if (!breed) { setError("Vyplňte plemeno psíka."); setLoading(false); return; }
+      if (!breed) {
+        if (trackingSource === "lead_landing_aria_chat_puppy_contact") trackAriaChatAction("form_error", "puppy_contact", attemptId);
+        setError("Vyplňte plemeno psíka."); setLoading(false); return;
+      }
       const submission = await submitInquiry({
         typ: "informacie",
         consent: true,
@@ -268,7 +271,10 @@ export function HomeFaqContactForm({
   function trackStart() {
     if (started.current) return;
     started.current = true;
-    if (isAria) onStarted?.();
+    if (isAria) {
+      if (source === "lead_landing_aria_chat_other") trackAriaChatAction("form_start", "other");
+      onStarted?.();
+    }
     else void trackCookielessInteraction("explore_daycare", source + "_started");
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -298,8 +304,9 @@ export function HomeFaqContactForm({
     setError(null);
     let attemptId: string | undefined;
     try {
+      if (source === "lead_landing_aria_chat_other") attemptId = startFormAttempt(source);
       const phone = phoneFromForm(form, id + "-tel");
-      attemptId = startFormAttempt(source);
+      if (source !== "lead_landing_aria_chat_other") attemptId = startFormAttempt(source);
       await submitInquiry({
         typ: "informacie", consent: true,
         source_ref: sourceRef(), ...attributionPayload(), cta_source: source,
@@ -309,6 +316,7 @@ export function HomeFaqContactForm({
       setSent(true);
       runFormTelemetry(() => {
         if (isAria) {
+          if (source === "lead_landing_aria_chat_other") trackAriaChatAction("form_submit", "other", attemptId);
           trackAriaQuestionSubmit(source);
           onSent?.();
         } else {
@@ -413,6 +421,8 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
   const [receipt, setReceipt] = useState<{ phone: string; auth: { id: number; token: string } | null } | null>(null);
   const [loading, setLoading] = useState(false);
   const [dogCount, setDogCount] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2>(1);
+  const stepHeading = useRef<HTMLHeadingElement>(null);
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
   const trackingSource = "application_form";
@@ -424,12 +434,37 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
     void trackCookielessInteraction("form_start", trackingSource);
   }
 
+  function goToStep(next: 1 | 2) {
+    setStep(next);
+    window.requestAnimationFrame(() => {
+      const heading = stepHeading.current;
+      heading?.focus({ preventScroll: true });
+      heading?.scrollIntoView({ block: "start", behavior: "instant" });
+    });
+  }
+
+  function invalidField(group: Element | null) {
+    return Array.from(group?.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea") ?? [])
+      .find((field) => field.willValidate && !field.validity.valid);
+  }
+
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     // A collapsed preview must never submit incomplete registration data.
     if (!expanded) return;
     if (loading) return;
     const form = e.currentTarget;
+    const invalidDog = invalidField(form.querySelector("[data-application-dog-step]"));
+    if (invalidDog) {
+      if (step === 2) {
+        setStep(1);
+        window.requestAnimationFrame(() => invalidDog.reportValidity());
+      } else invalidDog.reportValidity();
+      return;
+    }
+    if (step === 1) { goToStep(2); return; }
+    const invalidOwner = invalidField(form.querySelector("[data-application-owner-step]"));
+    if (invalidOwner) { invalidOwner.reportValidity(); return; }
     progress.markAttempt();
     const attemptId = startFormAttempt(trackingSource);
     setLoading(true);
@@ -510,14 +545,14 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
   const details = (
     <>
       {dogCount === 2 && <h4 className="mt-4 border-b border-coral/20 pb-2 text-base font-bold text-forest">1. psík</h4>}
-      <div>
+      <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="identity">
+        <div className="min-w-0">
           <label className="label-sm" htmlFor={`l-${formId}-pes`}>
             Meno psa *
           </label>
           <input id={`l-${formId}-pes`} name="pes" autoComplete="off" required className="field" placeholder="Rocky" />
       </div>
-      <div className="grid grid-cols-2 gap-3.5">
-        <div>
+        <div className="min-w-0">
           <label className="label-sm" htmlFor={`l-${formId}-plemeno`}>
             Plemeno *
           </label>
@@ -529,28 +564,29 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
             placeholder="Labrador"
           />
         </div>
-        <div>
-          <label className="label-sm" htmlFor={`l-${formId}-vaha`}>Váha psa *</label>
-          <input id={`l-${formId}-vaha`} name="vaha" inputMode="decimal" required className="field" placeholder="25 kg" />
-        </div>
       </div>
-      <div className="grid gap-3.5 sm:grid-cols-2">
-        <DogBinaryChoice label="Pohlavie psa" name="pohlavie" options={["Pes", "Suka"]} />
-        <div>
+      <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="age-weight">
+        <div className="min-w-0">
           <label className="label-sm" htmlFor={`l-${formId}-vek`}>
             Vek psa *
           </label>
           <input id={`l-${formId}-vek`} name="vek" required className="field" placeholder="2 roky" />
         </div>
+        <div className="min-w-0">
+          <label className="label-sm" htmlFor={`l-${formId}-vaha`}>Váha psa *</label>
+          <input id={`l-${formId}-vaha`} name="vaha" inputMode="decimal" required className="field" placeholder="25 kg" />
+        </div>
       </div>
-      <DogBinaryChoice label="Kastrovaný / sterilizovaná" name="kastrovana" options={["Áno", "Nie"]} />
+      <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="sex-neuter">
+        <DogBinaryChoice label="Pohlavie psa" name="pohlavie" options={["Pes", "Suka"]} />
+        <DogBinaryChoice label="Kastrovaný / sterilizovaná" name="kastrovana" options={["Áno", "Nie"]} />
+      </div>
       <fieldset className="min-w-0">
         <legend className="label-sm">Ako plánujete využívať škôlku? *</legend>
-        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {([
             { value: "Pravidelne – 1× alebo viackrát týždenne", lines: ["Pravidelne", "1× alebo viackrát", "týždenne"] },
             { value: "Občas podľa potreby", lines: ["Občas", "podľa potreby"] },
-            { value: "Jednorazové stráženie", lines: ["Jednorazové", "stráženie"] },
           ] as const).map((option) => (
             <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
               <input type="radio" name="duvod" value={option.value} aria-label={option.value} required className="peer sr-only" />
@@ -591,30 +627,32 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
         />
       </div>
       {dogCount === 2 && (
-        <section aria-label="Údaje druhého psíka" className="mt-5 space-y-3.5 rounded-2xl border border-coral/20 bg-card/60 p-3.5 sm:p-4">
+        <section aria-label="Údaje druhého psíka" className="@container mt-5 min-w-0 space-y-3.5 rounded-2xl border border-coral/20 bg-card/60 p-3.5 sm:p-4">
           <h4 className="border-b border-coral/20 pb-2 text-base font-bold text-forest">2. psík</h4>
-          <div>
+          <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="identity">
+            <div className="min-w-0">
             <label className="label-sm" htmlFor={`l-${formId}-pes2`}>Meno druhého psa *</label>
             <input id={`l-${formId}-pes2`} name="pes2" autoComplete="off" required maxLength={200} className="field" placeholder="Beny" />
           </div>
-          <div className="grid grid-cols-2 gap-3.5">
-            <div>
+            <div className="min-w-0">
               <label className="label-sm" htmlFor={`l-${formId}-plemeno2`}>Plemeno *</label>
               <input id={`l-${formId}-plemeno2`} name="plemeno2" required maxLength={200} className="field" placeholder="Zlatý retriever" />
             </div>
-            <div>
+          </div>
+          <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="age-weight">
+            <div className="min-w-0">
+              <label className="label-sm" htmlFor={`l-${formId}-vek2`}>Vek psa *</label>
+              <input id={`l-${formId}-vek2`} name="vek2" required maxLength={100} className="field" placeholder="3 roky" />
+            </div>
+            <div className="min-w-0">
               <label className="label-sm" htmlFor={`l-${formId}-vaha2`}>Váha psa *</label>
               <input id={`l-${formId}-vaha2`} name="vaha2" required inputMode="decimal" className="field" placeholder="25 kg" />
             </div>
           </div>
-          <div className="grid gap-3.5 sm:grid-cols-2">
+          <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="sex-neuter">
             <DogBinaryChoice label="Pohlavie psa" name="pohlavie2" options={["Pes", "Suka"]} />
-            <div>
-              <label className="label-sm" htmlFor={`l-${formId}-vek2`}>Vek psa *</label>
-              <input id={`l-${formId}-vek2`} name="vek2" required maxLength={100} className="field" placeholder="3 roky" />
-            </div>
+            <DogBinaryChoice label="Kastrovaný / sterilizovaná" name="kastrovana2" options={["Áno", "Nie"]} />
           </div>
-          <DogBinaryChoice label="Kastrovaný / sterilizovaná" name="kastrovana2" options={["Áno", "Nie"]} />
           <div>
             <label className="label-sm" htmlFor={`l-${formId}-alergie2`}>Alergie a zdravotné obmedzenia</label>
             <textarea id={`l-${formId}-alergie2`} name="alergie2" maxLength={3000} rows={3} className="field resize-none" placeholder="Alergie, lieky alebo zdravotné obmedzenia..." />
@@ -625,16 +663,32 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
           </div>
         </section>
       )}
-      <PrivacyConsentCheckbox />
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      <button type="submit" disabled={loading} className="btn-coral w-full disabled:opacity-60">
-        {loading ? "Odosielam…" : "Prihlásiť psíka"}
-      </button>
     </>
   );
 
   return (
-    <form onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="space-y-3 text-left sm:space-y-3.5">
+    <form noValidate data-application-form data-application-step={step} onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="@container min-w-0 space-y-3 text-left sm:space-y-3.5">
+      {collapsible && (
+        <button id="home-friendship-application" type="button"
+          aria-expanded={expanded} aria-controls={`l-${formId}-details`}
+          className="btn-coral w-full" onClick={() => {
+            if (!expanded) onExpand?.();
+            setExpanded(!expanded);
+          }}>
+          {expanded ? "Zobraziť menej" : "Zobraziť celú prihlášku"}
+        </button>
+      )}
+      <fieldset id={`l-${formId}-details`} hidden={!expanded} disabled={!expanded} className="min-w-0 space-y-3.5 border-0 p-0">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-semibold text-forest/75">
+            <span>Prihláška do škôlky</span><span>Krok {step} z 2</span>
+          </div>
+          <div role="progressbar" aria-label="Postup prihlášky" aria-valuenow={step} aria-valuemin={1} aria-valuemax={2} className="h-1.5 overflow-hidden rounded-full bg-forest/10">
+            <div className={`h-full rounded-full bg-coral transition-all duration-300 ${step === 1 ? "w-1/2" : "w-full"}`} />
+          </div>
+        </div>
+        <h3 ref={stepHeading} tabIndex={-1} className="font-display text-lg font-bold text-forest outline-none">{step === 1 ? "Údaje o psíkovi" : "Údaje majiteľa"}</h3>
+        <div data-application-dog-step hidden={step !== 1} className="space-y-3.5">
       <fieldset className="rounded-2xl border border-coral/25 bg-secondary/30 p-3.5">
         <legend className="px-1 text-sm font-bold text-forest">Koľkých psíkov chcete prihlásiť?</legend>
         <div className="mt-1 grid grid-cols-2 gap-2">
@@ -647,6 +701,10 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
           ))}
         </div>
       </fieldset>
+          {details}
+          <button type="submit" className="btn-coral w-full">Pokračovať</button>
+        </div>
+        <div data-application-owner-step hidden={step !== 2} className="space-y-3.5">
       <div className="grid gap-3 sm:grid-cols-2 sm:gap-3.5">
         <div>
           <label className="label-sm" htmlFor={`l-${formId}-meno`}>
@@ -656,21 +714,14 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
         </div>
         <PhoneField id={`l-${formId}-tel`} name="telefon" />
       </div>
-      {collapsible && (
-        <button id="home-friendship-application" type="button"
-          aria-expanded={expanded} aria-controls={`l-${formId}-details`}
-          className="btn-coral w-full" onClick={() => {
-            if (!expanded) onExpand?.();
-            setExpanded(!expanded);
-          }}>
-          {expanded ? "Zobraziť menej" : "Zobraziť celú prihlášku"}
-        </button>
-      )}
-      {collapsible ? (
-        <fieldset id={`l-${formId}-details`} hidden={!expanded} disabled={!expanded} className="min-w-0 space-y-3 border-0 p-0 sm:space-y-3.5">
-          {details}
-        </fieldset>
-      ) : details}
+      <PrivacyConsentCheckbox />
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <button type="submit" disabled={loading} className="btn-coral w-full disabled:opacity-60">
+        {loading ? "Odosielam…" : "Prihlásiť psíka"}
+      </button>
+          <button type="button" disabled={loading} onClick={() => goToStep(1)} className="min-h-11 w-full rounded-full border border-forest/20 px-4 font-semibold text-forest hover:bg-secondary/50">Späť</button>
+        </div>
+      </fieldset>
     </form>
   );
 }

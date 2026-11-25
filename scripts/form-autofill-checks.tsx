@@ -103,6 +103,12 @@ try {
     assert.equal(new dom.FormData(form).get(input.name), raw);
     assert.equal(phoneFromForm(form as any, input.id), "+421915349028");
     assert.equal(form.checkValidity(), true);
+    if (form.hasAttribute("data-application-form")) {
+      const next = form.querySelector<HTMLButtonElement>('[data-application-dog-step] button[type="submit"]')!;
+      await React.act(async () => next.click());
+      assert.equal(form.getAttribute("data-application-step"), "2", "Valid dog fields advance to owner step");
+      assert(!requests.some(r => r.url.endsWith("/web-form-submit") || r.body.event_name === "form_attempt" || r.body.event_name === "form_submit"), "Step navigation must not submit or report a conversion");
+    }
     await React.act(async () => {
       form.requestSubmit();
       // SHA-256 telemetry is asynchronous; a fixed 20 ms raced CI/loaded CPUs.
@@ -214,6 +220,12 @@ try {
     form.querySelector<HTMLInputElement>('input[type="tel"]')!.value = "+421915349028";
     const weight = form.querySelector<HTMLInputElement>('input[name="vaha"]');
     if (weight) weight.value = "25";
+    if (form.hasAttribute("data-application-form")) {
+      const next = form.querySelector<HTMLButtonElement>('[data-application-dog-step] button[type="submit"]')!;
+      await React.act(async () => next.click());
+      assert.equal(form.getAttribute("data-application-step"), "2", "Valid dog fields advance to owner step");
+      assert(!requests.some(r => r.url.endsWith("/web-form-submit") || r.body.event_name === "form_attempt" || r.body.event_name === "form_submit"), "Step navigation must not submit or report a conversion");
+    }
     const consoleError = console.error;
     console.error = () => {};
     try {
