@@ -19,7 +19,7 @@ const mainDock = dock.slice(dock.indexOf('    : [{ id: "top", label: "Domov"'), 
 assert(mainDock.includes('{ id: "top", label: "Domov"') && mainDock.includes('id: "o-nas"'), "Main dock retains Home and About");
 assert(mainDock.indexOf('id: "top"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "podmienky"') && mainDock.indexOf('id: "podmienky"') < mainDock.indexOf('id: "produkty"'), "Main dock order");
 assert(dock.includes('{!homeDock && <button') && dock.includes('const eligible = !homeDock'), "Return arrow stays on other landing pages only");
-assert(dock.includes('{!marketing && (') && dock.includes('mobile-dock-item mobile-dock-apply') && read("src/routes/index.tsx").includes("<Header />"), "Homepage retains the dedicated application shortcut");
+assert(dock.includes('{!marketing && (') && dock.includes('mobile-dock-item mobile-dock-apply') && read("src/routes/index.tsx").includes("<Header desktopHome />"), "Homepage retains the dedicated application shortcut");
 assert(dock.includes('id === "produkty" && !marketing ? "/produkty"'), "Products dock item must navigate to the actual catalogue, not a stale anchor");
 
 for (const anchor of ["lead-first-visit", "puppy-first-visit", "dog-sitting-first-visit"]) assert(dock.includes('id: "' + anchor + '"'), "Missing landing first-visit shortcut: " + anchor);
@@ -45,7 +45,7 @@ assert(dock.includes("menuEntries.map"), "Menu must preserve other links");
 assert(dock.includes("PHONE") && dock.includes("<LanguageSwitch language={language}"), "Contacts and language required");
 assert(header.includes("<MobileDock onApplicationOpen="), "Common SK header must expose dock");
 assert(header.includes("<LongForm onSent=") && header.includes("<FormDialog open={open}"), "Use existing application form");
-assert(english.includes('language="en" variant="en" onApplicationOpen=') && english.includes('<LongForm language="en"'), "EN uses the shared application");
+assert(english.includes('language="en" variant="en" desktopHome onApplicationOpen=') && english.includes('<LongForm language="en"'), "EN uses the shared application");
 assert(css.includes("max-width: 1023px") && css.includes("min-width: 1024px"), "Mobile/desktop separation");
 assert(css.includes("env(safe-area-inset-bottom") && css.includes("grid-template-columns: repeat(4"), "Safe area and six columns");
 assert(css.includes("body:has([data-form-dialog]) .mobile-dock"), "Hide dock for every existing FormDialog");
@@ -395,3 +395,8 @@ const switchSource = read("src/components/site/LanguageSwitch.tsx");
 assert(switchSource.includes('Link') && switchSource.includes('preload="intent"') && switchSource.includes('hrefLang={code}'), "Language switch must preserve accessible router links");
 
 assert(hero.includes("data-home-hero-desktop-phone") && hero.includes("PHONE_PRETTY") && hero.includes("home_hero_phone_desktop") && hero.includes("en_hero_phone_desktop"), "Desktop Hero phone must show canonical number and separate tracking source");
+
+assert(header.includes('<MobileDock desktopHome onApplicationOpen=') && english.includes('variant="en" desktopHome'),"SK/EN home reuses one desktop dock");
+assert(css.includes('body:has([data-desktop-home-dock])') && css.includes('data-desktop-floating="true"'),"Desktop dock reserves a real slot and floats only on home");
+
+assert(css.includes("grid-template-columns: repeat(6, minmax(0, 1fr))") && css.includes("grid-column: 3 / -1; grid-row: 1") && css.includes("grid-row: 2; min-width: 0"), "Desktop home dock has separate upper shortcuts and lower main links");

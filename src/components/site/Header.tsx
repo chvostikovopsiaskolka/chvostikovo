@@ -36,11 +36,13 @@ export function Header({
   landingMinimal = false,
   landingTrackingSource = "landing_header",
   hideMobileDock = false,
+  desktopHome = false,
 }: {
   homeSectionLinks?: boolean;
   landingMinimal?: boolean;
   landingTrackingSource?: string;
   hideMobileDock?: boolean;
+  desktopHome?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [applicationSent, setApplicationSent] = useState(false);
@@ -133,6 +135,13 @@ export function Header({
       });
     });
   };
+
+  if (desktopHome && !landingMinimal) {
+    return <>
+      <MobileDock desktopHome onApplicationOpen={() => { setApplicationSent(false); setOpen(true); }} />
+      <FormDialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) setApplicationSent(false); }} hideHeader={applicationSent} title={applicationSent ? "Prihláška odoslaná" : APPLICATION_TITLE} subtitle={APPLICATION_SUBTITLE}><LongForm onSent={() => setApplicationSent(true)} /></FormDialog>
+    </>;
+  }
 
   if (landingMinimal) {
     return (

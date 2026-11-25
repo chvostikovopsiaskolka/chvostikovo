@@ -719,11 +719,31 @@ async function assertBilingualNavigation(browser,engine) {
     if(!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='home_mobile_dock_phone')||!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='en_mobile_dock_phone'))throw new Error('Cookieless phone sources missing');
     await page.setViewportSize({width:1440,height:900});
     const pv=await page.evaluate(()=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='PageView').length);
-    await page.locator('header [data-language-switch] a[lang="sk"]').click();
+    await page.locator('[data-desktop-home-dock] [data-language-switch] a[lang="sk"]').click();
     await page.waitForURL(u=>u.pathname==='/');
     await page.waitForFunction(n=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='PageView').length===n+1,pv);
     if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Desktop language switch reloaded document');
     if(await page.evaluate(()=>window.__bilingualPixel.some(a=>a[0]==='track'&&['Lead','CompleteRegistration'].includes(a[1]))))throw new Error('Language navigation emitted conversion');
+    for(const en of [false,true]){
+      if(en){await page.locator('[data-desktop-home-dock] [data-language-switch] a[lang="en"]').click();await page.waitForFunction(()=>document.documentElement.lang==='en');}
+      for(const width of [1024,1280,1440,1920]){
+        await page.setViewportSize({width,height:900});
+        await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+        const dock=page.locator('[data-desktop-home-dock]');
+        await dock.waitFor({state:'visible'});
+        await page.waitForFunction(()=>document.querySelector('[data-desktop-home-dock]')?.getAttribute('data-desktop-floating')==='false');
+        const geometry=await dock.evaluate(el=>{
+          const bar=el.querySelector('.mobile-dock-bar'),r=bar.getBoundingClientRect(),slot=el.getBoundingClientRect(),logo=el.querySelector('[data-desktop-dock-logo]'),links=[...el.querySelectorAll('a,button')].filter(x=>x.getClientRects().length);
+          const boxes=links.map(x=>x.getBoundingClientRect()), upper=el.querySelector('[data-home-menu]').getBoundingClientRect(), logoBox=logo.getBoundingClientRect(), lower=[...bar.querySelectorAll('.mobile-dock-item')].map(x=>x.getBoundingClientRect()), hero=el.previousElementSibling?.getBoundingClientRect();
+          return {fits:r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&bar.scrollWidth<=bar.clientWidth+1&&r.bottom<=slot.bottom+1,targets:boxes.every(b=>b.height>=44),separate:boxes.every((b,i)=>boxes.every((a,j)=>i===j||a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1)),header:!!document.querySelector('header.fixed'),logo:logoBox.width>0&&logoBox.right<=upper.left+1&&logoBox.bottom<=lower[0].top+1,rows:lower.length>=5&&lower.every(b=>b.top>=upper.bottom-1&&Math.abs(b.top-lower[0].top)<2),slot:el.previousElementSibling?.id==='top'&&slot.height>=108&&r.top>=hero.bottom-1};
+        });
+        if(!geometry.fits||!geometry.targets||!geometry.separate||geometry.header||!geometry.logo||!geometry.rows||!geometry.slot)throw new Error('Desktop home dock '+width+' '+JSON.stringify(geometry));
+        await page.evaluate(()=>window.scrollTo({top:900,behavior:'instant'}));
+        await page.waitForFunction(()=>document.querySelector('[data-desktop-home-dock]')?.getAttribute('data-desktop-floating')==='true');
+        if(!await dock.evaluate(el=>Math.abs(innerHeight-el.querySelector('.mobile-dock-bar').getBoundingClientRect().bottom-12)<2))throw new Error('Desktop dock not floating at bottom');
+        await page.screenshot({path:path.join(out,'desktop-home-dock-'+engine+'-'+(en?'en':'sk')+'-'+width+'.png')});
+      }
+    }
     console.log('PASS bilingual navigation, responsive menu and consented PageView '+engine);
   } finally {await context.close();}
 }
@@ -3037,7 +3057,7 @@ async function assertBilingualNavigation(browser,engine) {
                     singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===8 && !faq.querySelector('a[href="/caste-otazky"]') && !!faq.querySelector('[data-home-faq-contact]') && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
                     applicationAfterPricing:document.getElementById('cennik').nextElementSibling?.id==='psie-priatelstva' && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='cennik' && document.getElementById('psie-priatelstva').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
-                    flatMainDock:getComputedStyle(dock.querySelector('.mobile-dock-bar')).boxShadow==='none',
+                    approvedMainDock:(()=>{const style=getComputedStyle(dock.querySelector('.mobile-dock-bar'));return innerWidth<1024?style.boxShadow==='none':style.boxShadow.includes('inset');})(),
                     mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/|/#o-nas|/#cennik|/#podmienky|/produkty' && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2 &&
