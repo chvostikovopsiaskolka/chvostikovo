@@ -393,17 +393,20 @@ assert(!standInquirySchema.safeParse({
 const forms = readFileSync(new URL("../src/components/site/Forms.tsx", import.meta.url), "utf8");
 assert(!forms.includes('name="duvod2"'), "Second usage selector must not be rendered.");
 
-// v305: shared 1/2-dog application usage is one required radio group with three compact cards.
+// Shared 1/2-dog application usage is one required radio group with two compact cards.
 // Keep backend compatibility for historical submissions and record the broadened regular choice.
 const applicationSource = forms.slice(forms.indexOf("export function LongForm"));
 assert(applicationSource.includes('name="duvod" value={option.value} aria-label={option.value} required'), "The application requires a native accessible radio choice.");
-assert(applicationSource.includes("grid-cols-3") && applicationSource.includes("min-h-20") && applicationSource.includes("peer-checked:border-coral") && applicationSource.includes("peer-focus-visible:outline") && applicationSource.includes("-webkit-tap-highlight-color:transparent"), "Three cards must retain size, selection, focus and mobile touch styling.");
-assert(applicationSource.includes('lines: ["Pravidelne", "1× alebo viackrát", "týždenne"]') && applicationSource.includes('lines: ["Občas", "podľa potreby"]') && applicationSource.includes('lines: ["Jednorazové", "stráženie"]'), "Application wording must not limit weekly visits to one or two.");
+assert(applicationSource.includes("grid grid-cols-2 gap-2") && applicationSource.includes("min-h-20") && applicationSource.includes("peer-checked:border-coral") && applicationSource.includes("peer-focus-visible:outline") && applicationSource.includes("-webkit-tap-highlight-color:transparent"), "Two cards must retain size, selection, focus and mobile touch styling.");
+assert(applicationSource.includes('lines: ["Pravidelne", "1× alebo viackrát", "týždenne"]') && applicationSource.includes('lines: ["Občas", "podľa potreby"]') && !applicationSource.includes('value: "Jednorazové stráženie"'), "Application wording must not limit weekly visits to one or two.");
 assert(!applicationSource.includes('<select id={`l-${formId}-duvod`') && !applicationSource.includes("defaultChecked"), "No application usage dropdown or preselected radio.");
 assert(applicationSource.includes('duvod: String(fd.get("duvod") ?? "")'), "Do not alter submission mapping.");
 assert((applicationSource.match(/name="duvod"/g) || []).length === 1, "Single shared usage field even for two dogs.");
+for (const row of ["identity", "age-weight", "sex-neuter"]) {
+  assert((applicationSource.match(new RegExp(`data-application-dog-row="${row}"`, "g")) || []).length === 2, `Both dogs share the same ${row} layout.`);
+}
 for (const usage of ["Pravidelne – 1× alebo viackrát týždenne", "Občas podľa potreby", "Jednorazové stráženie"]) {
-  assert(applicationSource.includes(usage), "Original categories and broadened regular choice must remain visible.");
+  assert(applicationSource.includes(usage) === (usage !== "Jednorazové stráženie"), "Only the two requested categories are visible; legacy payload remains valid.");
   const parsed = longSchema.parse({ ...twoDogApplication, dog_count: "1", duvod: usage });
   assert(buildDbPayload(parsed).interest_reason === usage, "One-dog application must preserve the selected usage in CRM.");
   const dual = buildDbPayload(inquirySchema.parse({ ...twoDogApplication, duvod: usage }));
