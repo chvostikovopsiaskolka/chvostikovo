@@ -87,7 +87,7 @@ export function AriaLeadAssistant({
   onOpenPuppyChecker: () => void;
   onRevealInlineForm?: (() => void) | undefined;
   /** Optional entry point for the paid Hero CTA; reuse the same tracked chat. */
-  openChatRef?: Ref<{ open: () => void }>;
+  openChatRef?: Ref<{ open: () => void }> | undefined;
   hidden?: boolean;
   trackingPrefix?: string;
   requirementsSectionId?: string;
