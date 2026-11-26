@@ -94,6 +94,22 @@ async function assertPawsTransmit(page,selector,background){
   assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'reservation rail stable');assert((await page.locator('.booking-picker-week-v127').first().evaluate(el=>parseFloat(getComputedStyle(el).paddingTop)))>=10);
   const bounds=await page.locator('#bookingPickerDaysV37').evaluate(el=>({width:el.clientWidth,scroll:el.scrollWidth}));assert(bounds.scroll<=bounds.width+1);assert((await page.locator('.booking-picker-week-v127').first().evaluate(el=>getComputedStyle(el).boxShadow)).includes('inset'),'week boundary');assert((await page.locator('.booking-day-v37').first().evaluate(el=>getComputedStyle(el).boxShadow)).includes('inset'),'day boundary');
   if(width===390){await assertPawsTransmit(page,'#bookingPickerDaysV37','#bookingPickerV37');assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'nav stable after calendar pixel check');assert(await page.locator('.bottom-nav').isVisible(),'nav visible after calendar pixel check');}
+  // A full next month is a real five-column calendar, including split month boundaries.
+  await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2026-11-26'});bratislavaToday=()=> '2026-11-26';const days=[];for(let d=new Date('2026-11-23T12:00:00Z');d<=new Date('2026-12-31T12:00:00Z');d.setUTCDate(d.getUTCDate()+1)){if(d.getUTCDay()>=1&&d.getUTCDay()<=5)days.push({date:d.toISOString().slice(0,10),available:8,capacity:10,occupied:2,bookings_open:true,dogs:[]});}state.data.visits=[];state.data.availability={days};window.customerDesignRefreshCalendarV351();});
+  assert.equal(await page.locator('#bookingPickerDaysV37 .calendar-month-v438').count(),2);
+  assert.equal(await page.locator('[data-date="2026-12-31"].booking-day-v37').count(),1);
+  assert.equal(await page.locator('#bookingPickerDaysV37 .calendar-later-v438').count(),1);
+  assert.equal(await page.locator('#bookingPickerDaysV37 .calendar-empty-v438').count(),1,'December starts on Tuesday');
+  assert.equal(await page.locator('#bookingPickerDaysV37 .calendar-weekletters-v438').count(),2);
+  const dec=page.locator('.booking-day-v37[data-date="2026-12-02"]');if(!await dec.evaluate(el=>el.classList.contains('selected')))await dec.click();
+  const taxiToggle=page.locator('#bookingPickerTaxiByDayV91 [data-taxi-toggle="2026-12-02"]');await taxiToggle.scrollIntoViewIfNeeded();
+  const row=taxiToggle.locator('..'),before=await row.boundingBox();await taxiToggle.click();
+  const popup=row.locator('.calendar-taxi-popover-v438');assert(await popup.isVisible());
+  const after=await row.boundingBox();assert(Math.abs(before.height-after.height)<1,'taxi popup does not increase selected row height');
+  assert.equal(await popup.locator('[data-taxi-mode]').count(),dogs*3);
+  assert(await popup.evaluate(el=>el.scrollWidth<=el.clientWidth+1),'taxi choices do not overflow');
+  await popup.locator('[data-taxi-mode="pickup"]').first().click();assert.equal(await page.locator('.calendar-taxi-popover-v438').count(),0);
+  assert(await page.locator('[data-taxi-toggle="2026-12-02"]').textContent().then(s=>s.includes('Vybrané')));
   await page.waitForTimeout(80);if(width===390)await page.screenshot({path:'/tmp/liquid-v364-reservations-'+dogs+'.png'});
   await page.evaluate(()=>window.closeBookingPickerV305());
   await page.evaluate(()=>{window.__noticeFixture=[{id:1,active:true,title:'Zbierka',body:'Synthetic full article',valid_from:'2020-01-01'}];return loadAnnouncements(true);});

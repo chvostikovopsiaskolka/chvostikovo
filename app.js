@@ -3375,8 +3375,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const weekNotice=currentWeek
         ? `<div id="designWeekDeadline" data-week-from="${week[0].date}" data-week-to="${weekEnd.toISOString().slice(0,10)}" ${hasWeekBookingV337(week[0].date,weekEnd.toISOString().slice(0,10))?'hidden':''}><strong>Nestihli ste rezervovať miesto do nedele?</strong><span>Kliknite na deň, odošlite žiadosť a počkajte na schválenie v prípade voľného miesta.</span></div>`
         : '';
-      const futureWeek=false; // All available weeks stay visible in one compact calendar.
-      const futureOpen=!futureWeek||futureWeekExpandedV235||week.some(d=>selectedDatesV37.has(d.date));
+      // All real available dates stay visible in one compact calendar.
       const monday=row.monday,friday=smartShiftV199(monday,4);
       const heading=row.kind==='current'&&row.firstForKind?'Tento týždeň · '+compactDateV37(monday)+' – '+compactDateV37(friday):'';
       groups.push(`<div class="booking-picker-week-v127 calendar-row-v438" data-calendar-kind="${row.kind}" data-week-from="${monday}" data-first-date="${week[0].date}" data-week-to="${row.weekEnd}"><div class="booking-picker-week-label-v127">${heading}</div><div class="booking-picker-future-body-v235">${weekNotice}<div class="booking-picker-week-days-v127">${Array.from({length:(new Date(week[0].date+'T12:00:00Z').getUTCDay()+6)%7},()=>'<div class="calendar-empty-v438" aria-hidden="true"></div>').join('')}${week.map(d=>{
@@ -3430,6 +3429,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const date=button.dataset.taxiToggle;
       expandedTaxiDateV201=expandedTaxiDateV201===date?null:date;
       renderPickerV37();
+      const popup=$('bookingPickerTaxiByDayV91')?.querySelector('.calendar-taxi-popover-v438');
+      if(popup){const box=popup.getBoundingClientRect(),nav=document.querySelector('.bottom-nav')?.getBoundingClientRect();if(nav&&box.bottom>nav.top-8)popup.classList.add('calendar-taxi-above-v438');}
     }));
     $('bookingPickerTaxiByDayV91').querySelectorAll('[data-taxi-mode]').forEach(button=>button.addEventListener('click',()=>{
       const date=button.dataset.taxiDate;

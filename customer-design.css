@@ -1175,3 +1175,5 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 .compact-overview-v437>.calendar-weekletters-v438{margin:0 0 4px}
 
 .customer-design #bookingPickerV37 .calendar-taxi-popover-v438 .booking-taxi-inline-choices-v201 button{white-space:normal!important;overflow-wrap:normal;line-height:1.2!important}
+
+.customer-design #bookingPickerV37 .design-selected-day>.calendar-taxi-popover-v438.calendar-taxi-above-v438{top:auto;bottom:calc(100% - 3px)}

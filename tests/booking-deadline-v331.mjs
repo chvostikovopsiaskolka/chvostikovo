@@ -44,5 +44,27 @@ await db.exec("update dogs set booking_late_exception=false;select set_config('c
 await login(owner,'2030-10-23 12:00:00');await assert.rejects(db.query(pair),/voľné miesto/);assert.equal((await db.query('select count(*) n from customer_booking_requests')).rows[0].n,0,'insufficient pair capacity rolls back both dogs');
 await db.exec("update portal_day_settings set capacity=10;delete from vaccinations where dog_id=9002 and vaccination_type='rabies'");await assert.rejects(db.query(pair),/očkovan/);assert.equal((await db.query('select count(*) n from customer_booking_requests')).rows[0].n,0,'second dog vaccine failure rolls back first dog too');
 await login(other,'2030-10-23 12:00:00');await assert.rejects(db.query("select * from portal_request_booking(9001,'2030-10-25','none')"),/priradený/);assert.equal((await db.query('select count(*) n from portal_messages')).rows[0].n,0);
+// v438: run the exact LIVE baseline and candidate body in this isolated PostgreSQL fixture.
+await db.exec("create or replace function private.guard_customer_rpc_v336() returns void language sql as $select$");
+const clockSql=s=>s.replaceAll("now() at time zone 'Europe/Bratislava'","current_setting('fixture.clock')::timestamp");
+await db.exec(clockSql(fs.readFileSync('supabase/backups/booking-month-horizon-v438-rollback.sql','utf8')));
+await login(owner,'2026-11-26 12:00:00');
+await assert.rejects(db.query("select * from portal_request_booking(9001,'2026-12-31','none')"),/3 týždne/,'old limit explains missing 18 December and later days');
+await db.exec(clockSql(fs.readFileSync('supabase/changes/booking-month-horizon-v438.sql','utf8')));
+await db.exec("insert into vaccinations(dog_id,vaccination_type,valid_until) values(9002,'rabies','2031-01-01')");
+await db.exec('begin');
+const monthLast=(await db.query("select * from portal_request_booking(9001,'2026-12-31','pickup_dropoff')")).rows[0];assert.equal(monthLast.status,'pending');assert.equal(Number(monthLast.taxi_amount),10);
+await db.exec('rollback');
+await assert.rejects(db.query("select * from portal_request_booking(9001,'2027-01-04','none')"),/konca nasledujúceho mesiaca/);
+const monthPair="select portal_request_dogs_batch_v254(array[9001,9002]::bigint[],'[{\"date\":\"2026-12-31\",\"taxi_by_dog\":{\"9001\":\"pickup\",\"9002\":\"dropoff\"}}]'::jsonb,'50000000-0000-0000-0000-000000000002'::uuid) result";
+await db.exec('begin');const monthPairRows=(await db.query(monthPair)).rows[0].result.bookings;assert.equal(monthPairRows.length,2);assert.equal((await db.query(monthPair)).rows[0].result.bookings.length,2);await db.exec('rollback');
+await db.exec("insert into portal_day_settings(day,capacity,bookings_open) values('2026-12-31',10,false)");
+await assert.rejects(db.query(monthPair),/zatvorené/);
+await db.exec("update portal_day_settings set bookings_open=true,capacity=1 where day='2026-12-31'");
+await assert.rejects(db.query(monthPair),/voľné miesto/);assert.equal((await db.query('select count(*) n from customer_booking_requests')).rows[0].n,0,'month pair failure remains atomic');
+await login(other,'2026-11-26 12:00:00');await assert.rejects(db.query("select * from portal_request_booking(9001,'2026-12-31','none')"),/priradený/);
+await login(owner,'2026-12-30 19:00:00');await assert.rejects(db.query("select * from portal_request_booking(9001,'2026-12-31','none')"),/19:00/);
+await login(owner,'2026-12-01 12:00:00');await assert.rejects(db.query("select * from portal_request_booking(9001,'2027-02-01','none')"),/konca nasledujúceho mesiaca/);
+console.log('PASS v438 actual baseline/candidate month horizon, year rollover, closed day, cutoff, ownership, two-dog capacity and taxi');
 await db.close();console.log('PASS reproduced old Sunday restriction; complete server booking/pair bodies accept Wednesday and Thursday18:59 without messages, reject19:00+, resist legacy bypass flags, retain idempotency, scope, vaccine and capacity atomicity; isolated PostgreSQL, no production sends');
 
