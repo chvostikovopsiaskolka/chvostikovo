@@ -342,16 +342,34 @@ async function rosterPhotoPaths(rows: Array<Json>, viewerId?: string, viewerDogI
   return paths;
 }
 
+// Date-only calendar arithmetic; input is already localDateIso() in Bratislava.
+function bookingMonthEnd(today: string) {
+  const [year, month] = today.split('-').map(Number);
+  return new Date(Date.UTC(year, month + 1, 0, 12)).toISOString().slice(0, 10);
+}
+async function availabilityRows(path: string) {
+  const rows: Array<Json> = [];
+  const size = 500;
+  for (let offset = 0; ; offset += size) {
+    const page = await rest(path + '&order=reservation_date.asc,id.asc&limit=' + size + '&offset=' + offset) as Array<Json>;
+    if (!Array.isArray(page)) throw new Error('Dostupnosť miest sa nepodarilo načítať.');
+    rows.push(...page);
+    if (page.length < size) return rows;
+  }
+}
 async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
   const today = localDateIso();
   const weekday = new Date(today + 'T12:00:00Z').getUTCDay();
   const firstMonday = addDays(today, weekday === 0 ? 1 : 1 - weekday);
-  const dates = nextWeekdays(firstMonday, 15);
+  // Keep the legacy roster window separate from the longer booking horizon.
+  const endDate = bookingMonthEnd(today);
+  const dates = nextWeekdays(firstMonday, 50).filter(date => date <= endDate);
+  const rosterDates = new Set(dates.slice(0, 15));
   const monday = dates[0];
   const friday = dates[dates.length - 1];
   const results = await Promise.all([
-    rest('reservations?reservation_date=gte.' + monday + '&reservation_date=lte.' + friday + '&status=in.(booked,attended)&select=reservation_date,dog_id'),
-    rest('customer_booking_requests?reservation_date=gte.' + monday + '&reservation_date=lte.' + friday + '&status=eq.pending&select=reservation_date'),
+    availabilityRows('reservations?reservation_date=gte.' + monday + '&reservation_date=lte.' + friday + '&status=in.(booked,attended)&select=id,reservation_date,dog_id'),
+    availabilityRows('customer_booking_requests?reservation_date=gte.' + monday + '&reservation_date=lte.' + friday + '&status=eq.pending&select=id,reservation_date'),
     rest('portal_day_settings?day=gte.' + monday + '&day=lte.' + friday + '&select=day,capacity,bookings_open,note'),
     linkedDogRows ? Promise.resolve(linkedDogRows) : linkedDogs(userId),
     rest('customer_booking_requests?user_id=eq.' + encodeURIComponent(userId) + '&reservation_date=gte.' + monday + '&reservation_date=lte.' + friday + '&status=eq.approved&select=reservation_date'),
@@ -363,7 +381,7 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
   const ownDogs = results[3] as Array<Json>;
   const approvedRequests = results[4] as Array<{ reservation_date: string }>;
   const ownDogIds = new Set(ownDogs.map((dog) => Number(dog.id)));
-  const rosterDogIds = [...new Set(reservations.map((row) => Number(row.dog_id)).filter(Boolean))];
+  const rosterDogIds = [...new Set(reservations.filter(row => rosterDates.has(row.reservation_date)).map((row) => Number(row.dog_id)).filter(Boolean))];
   const rosterDogs = rosterDogIds.length
     ? await rest(
       'dogs?id=' + encodeURIComponent(inFilter(rosterDogIds)) +
@@ -402,8 +420,8 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
     const capacity = Number(settingMap.get(date)?.capacity ?? defaultCapacity);
     const booked = reservations.filter((row) => row.reservation_date === date).length;
     const waiting = pending.filter((row) => row.reservation_date === date).length;
-    const viewerApproved = approvedRequests.some((row) => row.reservation_date === date) ||
-      reservations.some((row) => row.reservation_date === date && ownDogIds.has(Number(row.dog_id)));
+    const viewerApproved = rosterDates.has(date) && (approvedRequests.some((row) => row.reservation_date === date) ||
+      reservations.some((row) => row.reservation_date === date && ownDogIds.has(Number(row.dog_id))));
     const consentedDogs = viewerApproved
       ? reservations.filter((row) => row.reservation_date === date)
         .map((row) => rosterDogMap.get(Number(row.dog_id)))
