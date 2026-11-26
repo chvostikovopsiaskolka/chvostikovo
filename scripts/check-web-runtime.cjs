@@ -186,23 +186,17 @@ async function assertPaidAriaChat(page, {visualOnly=false}={}) {
       return storageAvailable;
     });
     const trigger=page.locator('[data-aria-lead-chat] [data-aria-chat-trigger]');
-    // Verify the 44px hit area beyond the visibly shorter orange surface.
-    const launcher=page.locator('[data-aria-lead-chat] [data-aria-bubble-chat-cta]');
-    const hit=await launcher.evaluate(el=>{const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.bottom+2};});
-    if(await page.evaluate(()=>navigator.maxTouchPoints>0))await page.touchscreen.tap(hit.x,hit.y);
-    else await page.mouse.click(hit.x,hit.y);
+    const launcher=page.locator('[data-aria-lead-chat] [data-aria-bubble-question="pricing"]');
+    await launcher.click();
     const chat=page.locator('[data-aria-chat]');
     await chat.waitFor({state:'visible',timeout:1500});
     const surface=await chat.evaluate(el=>({background:getComputedStyle(el).backgroundColor,blur:getComputedStyle(el).getPropertyValue('backdrop-filter')||getComputedStyle(el).getPropertyValue('-webkit-backdrop-filter')}));
-    if(surface.background!=='rgba(255, 255, 255, 0.9)'||!surface.blur.includes('blur'))throw new Error('Paid chat must retain its 90 percent frosted surface');
+    if(surface.background!=='rgba(255, 255, 255, 0.82)'||!surface.blur.includes('blur'))throw new Error('Paid chat must retain its lighter frosted surface');
+    if(!await chat.locator('[data-aria-chat-status]').getByText('Labky na klávesnici').count())throw new Error('Paid chat presence label missing');
     if(await trigger.evaluate(el=>getComputedStyle(el).backgroundColor)!=='rgba(0, 0, 0, 0)')throw new Error('Expanded portrait inherited a colored navigation background');
-    await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'visible'});
-    if(await chat.locator('[data-aria-chat-question]').count()!==4)throw new Error('Paid chat must reuse four FAQ choices');
-    if(brandPreviewCandidate){
-      const greeting=(await chat.locator('[id$="-intro"] > [aria-hidden="true"]').innerText()).replace(/\s+/g,' ').trim();
-      if(!greeting.includes('Ahoj, volám sa Aria.')||!greeting.endsWith('Haf! 🐾'))throw new Error('Chat greeting must introduce Aria and finish with Haf and paws');
-    }
-    await chat.locator('[data-aria-chat-question="pricing"]').click();
+    await chat.locator('[data-aria-chat-turn="person"]').getByText('Aký je cenník škôlky?',{exact:true}).waitFor({state:'visible'});
+    const greeting=(await chat.locator('[id$="-intro"] > [aria-hidden="true"]').innerText()).replace(/\s+/g,' ').trim();
+    if(greeting!=='Ahoj, volám sa Aria. Čo ťa zaujíma o našej škôlke?')throw new Error('Paid direct chat must show the full greeting without Haf');
     const typing=chat.locator('[data-aria-typing="true"]');
     await typing.locator('[data-aria-composing]').waitFor({state:'visible',timeout:2500});
     if(!await typing.locator('.aria-composing-dot').first().evaluate(el=>el.getAnimations().some(a=>a.playState==='running')))throw new Error('Paid composing dots are static');
@@ -228,6 +222,11 @@ async function assertPaidAriaChat(page, {visualOnly=false}={}) {
         if(Math.abs(geometry.leftGap)>2||Math.abs(geometry.rightGap)>2||geometry.overflow>2||geometry.widgetOverflow>2)throw new Error('Paid Aria inline card must fill chat at '+width+': '+JSON.stringify(geometry));
       }
       await page.setViewportSize(viewport);
+      await chat.getByRole('button',{name:'Close',exact:true}).click();
+      await chat.waitFor({state:'hidden'});
+      await page.locator('[data-aria-bubble-question="requirements"]').click();
+      await chat.locator('[data-aria-chat-requirements] article').first().waitFor({state:'visible',timeout:20000});
+      if(await chat.locator('[data-aria-chat-requirements] article').count()!==4||await chat.locator('[data-aria-chat-question]').count()!==4)throw new Error('Requirements quick launcher must reuse the canonical cards and refill questions');
       await chat.getByRole('button',{name:'Close',exact:true}).click();
       await chat.waitFor({state:'hidden'});return;
     }
@@ -420,8 +419,8 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
         photoCrop:[...document.querySelectorAll('[data-lead-hero-photo] img')].length===2&&[...document.querySelectorAll('[data-lead-hero-photo] img')].every(el=>getComputedStyle(el).objectPosition==='50% 50%'),
         reviewGap:parseFloat(getComputedStyle(document.querySelector('[data-aria-lead-review-spacing]')).marginTop),
         galleryBelow:box('#lead-photo-carousel').top>=innerHeight-2,
-        greetingFit:(()=>{if(innerWidth>=640)return true;const p=document.querySelector('[data-aria-message] p'),range=document.createRange();range.selectNodeContents(p);const rects=[...range.getClientRects()].filter(r=>r.width>0);return new Set(rects.map(r=>Math.round(r.top))).size<=2&&p.getBoundingClientRect().height<parseFloat(getComputedStyle(p).lineHeight)*1.5&&p.scrollWidth<=p.clientWidth+1&&face.left>=6&&face.left<=10;})(),
-        compactLauncher:(()=>{const b=box('[data-aria-bubble-chat-cta]'),s=box('[data-aria-speech]');const c=document.querySelector('[data-aria-bubble-chat-cta]'),pseudo=getComputedStyle(c,'::before');return Math.abs(b.width-(s.width-parseFloat(getComputedStyle(document.querySelector('[data-aria-speech]')).paddingLeft)-parseFloat(getComputedStyle(document.querySelector('[data-aria-speech]')).paddingRight)))<3&&b.height>=36&&b.height<=40&&parseFloat(pseudo.top)<=-4&&parseFloat(pseudo.bottom)<=-4;})(),
+        greetingFit:(()=>{const p=document.querySelector('[data-aria-bubble-greeting]'),range=document.createRange();range.selectNodeContents(p);const rects=[...range.getClientRects()].filter(r=>r.width>0&&r.height>0);const expected=innerWidth<640?'Ahoj, volám sa Aria. Čo ťa zaujíma?':'Ahoj, volám sa Aria. Čo ťa zaujíma v našej škôlke?';return p.innerText.replace(/\s+/g,' ').trim()===expected&&new Set(rects.map(r=>Math.round(r.top))).size===1&&p.scrollWidth<=p.clientWidth+1&&(innerWidth>=640||face.left>=6&&face.left<=10);})(),
+        compactLauncher:(()=>{const buttons=[...document.querySelectorAll('[data-aria-bubble-question]')],s=box('[data-aria-speech]'),rs=buttons.map(e=>e.getBoundingClientRect());return rs.length===2&&Math.abs(rs[0].top-rs[1].top)<2&&rs[0].right<rs[1].left&&rs.every(r=>r.height>=44&&r.left>=s.left&&r.right<=s.right)&&buttons.every(e=>e.scrollWidth<=e.clientWidth+1);})(),
         dockInside:dock.top>=0&&dock.bottom<=innerHeight+1,
         ctaHeight:cta.height,proofBottom:proof.bottom,ariaTop:aria.top,faceWidth:face?.width,
         widget:(()=>{const speech=box('[data-aria-speech]');const tail=document.querySelector('[data-aria-speech] [data-aria-tail]');return dock.height<=1&&Math.abs(face.width-(innerWidth>=640?104:Math.min(84,Math.max(60,innerWidth*.2-4))))<2&&
@@ -1007,7 +1006,9 @@ async function assertPublicContent(browser,engine){
             const serverHtml = await response.text();
             if (!serverHtml.includes('data-aria-outline-ready="false"') ||
                 /<svg\b[^>]*\bdata-aria-tail\b/i.test(serverHtml))
-              throw new Error('Aria SSR must show rounded fallback, not an unmeasured SVG tail');
+              throw new Error('Aria SSR must not show an unmeasured SVG tail');
+            if(url.pathname==='/psia-skolka-kosice/'&&!serverHtml.includes('data-aria-initial-outline="true"'))
+              throw new Error('Paid Aria must have a complete stable outline on first paint');
           }
           // The server HTML is visible before effects run; wait for client hydration.
           await page.waitForTimeout(3000);

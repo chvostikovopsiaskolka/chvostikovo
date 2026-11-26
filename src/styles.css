@@ -1228,7 +1228,7 @@
   /* PR517 removed the navigation. Reserve the launcher, not an obsolete
      second dock. On short screens keep the content in normal scroll flow. */
   .lead-brand-live .hero-safe-top {
-    --lead-hero-visible: calc(100svh - 96px - max(8px, env(safe-area-inset-bottom, 0px)));
+    --lead-hero-visible: calc(100svh - 112px - max(8px, env(safe-area-inset-bottom, 0px)));
     --hero-content-top: clamp(28px, calc(20svh - 104px), 66px);
     min-height: 100svh;
     justify-content: flex-start;
@@ -1690,12 +1690,12 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 .lead-brand-live [data-lead-hero-pill] { font-weight: 700; border-radius: 8px; background-color: #ffa414; color: #26322b; }
 .lead-brand-live [data-aria-lead-hero-cta] { text-shadow: 0 1px 2px rgb(104 51 0 / 40%); box-shadow: 0 4px 12px rgb(138 80 0 / 7%), 0 8px 28px rgb(255 164 20 / 15%); }
 [data-aria-chat-lead] {
-  background-color: rgb(255 255 255 / 90%);
+  background-color: rgb(255 255 255 / 82%);
   background-image: linear-gradient(145deg var(--aria-glass-space), rgb(255 255 255 / 55%), rgb(255 255 255 / 5%) 48%, rgb(255 255 255 / 25%)), radial-gradient(ellipse at 5% 0% var(--aria-glass-space), rgb(255 225 181 / var(--aria-chat-warm-alpha)), transparent 58%), radial-gradient(ellipse at 95% 100% var(--aria-glass-space), rgb(248 221 235 / var(--aria-chat-rose-alpha)), transparent 60%);
   border-color: rgb(255 255 255 / 85%);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 95%), inset 0 0 0 1px rgb(255 255 255 / 40%), 0 24px 70px rgb(25 48 37 / 18%);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(10px) saturate(1.4);
+  backdrop-filter: blur(10px) saturate(1.4);
 }
 [data-aria-chat-lead] [data-aria-chat-history] { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
 /* Inline forms and widgets use the entire conversation content width. */
@@ -1712,7 +1712,9 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .lead-brand-live [data-aria-tail] path { fill: #fff; }
   .lead-brand-live [data-aria-lead-chat] [data-aria-speech] { -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
-@media (min-width: 1024px) { .lead-brand-live [data-aria-lead-chat] [data-aria-message] p { font-size: 18px; } .lead-brand-live [data-aria-lead-chat] [data-aria-bubble-chat-cta] { font-size: 14px; } }
+@media (min-width: 1024px) { .lead-brand-live [data-aria-lead-chat] [data-aria-message] p { font-size: 13px; } }
+.lead-brand-live [data-aria-lead-chat] [data-aria-bubble-question] { overflow-wrap: anywhere; }
+.lead-brand-live [data-aria-lead-chat] [data-aria-bubble-greeting] { line-height: 1.3; }
 .lead-brand-live [data-lead-hero-photo] img { object-position: 50% 50%; }
 .lead-brand-live [data-lead-hero-photo]:hover img { transform: none; }
 .lead-brand-live [data-lead-hero-pills] { gap: clamp(5px, 1.6vw, 10px); }

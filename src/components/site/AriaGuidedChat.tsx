@@ -79,7 +79,7 @@ const chatQuestions: Question[] = [
 ];
 
 export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefix, formPrefix, dockless = false, portraitSrc = ARIA_HEAD_DATA_URI }: {
-  open: boolean; onClose: () => void; initialQuestionId: "pricing" | null;
+  open: boolean; onClose: () => void; initialQuestionId: "pricing" | "requirements" | null;
   trackingPrefix: string; formPrefix: string; dockless?: boolean; portraitSrc?: string;
 }) {
   function track(action: string) {
@@ -90,10 +90,9 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   const [answered, setAnswered] = useState<string[]>([]);
   const [typingId, setTypingId] = useState<number | null>(null);
   const [typedLength, setTypedLength] = useState(0);
-  const introText = "Ahoj, volám sa Aria. Čo ťa zaujíma o našej škôlke? Haf! 🐾";
+  const introText = dockless ? "Ahoj, volám sa Aria. Čo ťa zaujíma o našej škôlke?" : "Ahoj, volám sa Aria. Čo ťa zaujíma o našej škôlke? Haf! 🐾";
   const [introLength, setIntroLength] = useState(0);
   const [introComposing, setIntroComposing] = useState(true);
-  const autoPricingAsked = useRef(false);
   useEffect(() => {
     if (!open) { setIntroLength(0); setIntroComposing(true); return; }
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches && !dockless;
@@ -101,7 +100,12 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
     let interval: number | undefined;
     // The direct pricing CTA gives the full greeting briefly before Aria
     // types the selected answer. Regular portrait-open keeps the original pace.
-    const preselected = initialQuestionId === "pricing";
+    const preselected = initialQuestionId !== null;
+    if (dockless && preselected) {
+      setIntroComposing(false);
+      setIntroLength(introText.length);
+      return;
+    }
     const delay = window.setTimeout(() => {
       setIntroComposing(false);
       if (reduced) { setIntroLength(introText.length); return; }
@@ -128,7 +132,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   const visibleQuestions = unanswered.slice(0, 4);
   const introFinished = !introComposing && introLength >= introText.length;
   const menuReady = introFinished && typingId === null &&
-    !(initialQuestionId === "pricing" && !autoPricingAsked.current && !answered.includes("pricing"));
+    !(initialQuestionId && !answered.includes(initialQuestionId));
 
   // Typewriter animation is visual only. Screen readers receive a complete
   // response in a single accessible text node; respect reduced motion.
@@ -233,14 +237,13 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   }
 
   useEffect(() => {
-    if (!open || initialQuestionId !== "pricing" || autoPricingAsked.current ||
+    if (!open || !initialQuestionId ||
         introComposing || introLength < introText.length ||
-        answered.includes("pricing") || typingId !== null) return;
+        answered.includes(initialQuestionId) || typingId !== null) return;
     const timer = window.setTimeout(() => {
-      if (autoPricingAsked.current) return;
-      autoPricingAsked.current = true;
-      const question = chatQuestions.find(item => item.id === "pricing");
-      if (question) ask(question, "automatic");
+      const question = chatQuestions.find(item => item.id === initialQuestionId);
+      // A direct launcher button is a real visitor selection, not a bot-generated question.
+      if (question) ask(question, dockless ? "manual" : "automatic");
     }, 240);
     return () => window.clearTimeout(timer);
     // ask() only appends a deterministic catalogue question; the stable state
@@ -292,13 +295,18 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
 
   return (
     <Dialog open={open} onOpenChange={value => { if (!value) closeChat(); }}>
-      <DialogContent positioning="form" data-aria-chat data-aria-chat-lead={dockless || undefined} aria-describedby={chatId + "-intro"} overlayClassName="!bg-forest-deep/25 !backdrop-blur-[12px]"
+      <DialogContent positioning="form" data-aria-chat data-aria-chat-lead={dockless || undefined} aria-describedby={chatId + "-intro"} overlayClassName={dockless ? "!bg-forest-deep/10 !backdrop-blur-[2px]" : "!bg-forest-deep/25 !backdrop-blur-[12px]"}
         className={"aria-brand-experiment !fixed !flex !gap-0 left-2 right-2 top-auto z-50 min-h-0 w-auto max-w-none flex-col overflow-hidden rounded-[26px] border border-white/70 bg-white/80 backdrop-blur-3xl p-0 text-forest shadow-[0_24px_70px_rgba(25,48,37,.2)] sm:left-1/2 sm:right-auto sm:top-[54%] sm:bottom-auto sm:h-[min(85dvh,750px)] sm:w-[min(620px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2 " +
           (dockless ? "bottom-[max(8px,env(safe-area-inset-bottom))] h-[min(94dvh,800px)]" :
             "bottom-[max(70px,calc(env(safe-area-inset-bottom)+60px))] h-[min(81dvh,720px)]")}>
         <header className="flex shrink-0 items-center gap-3 border-b border-white/60 bg-white/45 backdrop-blur-2xl px-4 py-3 pr-12">
           <img src={portraitSrc} alt="" width={48} height={48} className="size-12 shrink-0 object-contain drop-shadow-sm" />
-          <DialogTitle className="font-display text-base font-extrabold text-forest sm:text-lg">Aria z Chvostíkova</DialogTitle>
+          <div className="min-w-0">
+            <DialogTitle className="font-display text-base font-extrabold text-forest sm:text-lg">Aria z Chvostíkova</DialogTitle>
+            {dockless && <p data-aria-chat-status title="Automatická sprievodkyňa" className="mt-0.5 flex items-center gap-1.5 text-xs font-medium text-forest/80">
+              <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-emerald-500" /> Labky na klávesnici
+            </p>}
+          </div>
         </header>
 
         <div ref={scrollRef} role="log" aria-label="Konverzácia s Ariou" aria-live="polite"
@@ -307,7 +315,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
             <img src={portraitSrc} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
             <div id={chatId + "-intro"} className="max-w-[87%] rounded-[20px_20px_20px_6px] bg-white px-3 py-3 text-[13px] leading-relaxed text-[#26322b] shadow-sm sm:text-sm">
               <span className="sr-only">{introText}</span>
-              <span aria-hidden="true">{introComposing ? <span data-aria-intro-composing className="inline-flex items-center gap-1"><span className={dockless ? "aria-composing-dot size-1.5 rounded-full bg-[#9e336f]" : "size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f]"} /><span className={dockless ? "aria-composing-dot size-1.5 rounded-full bg-[#9e336f] [animation-delay:160ms]" : "size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]"} /><span className={dockless ? "aria-composing-dot size-1.5 rounded-full bg-[#9e336f] [animation-delay:320ms]" : "size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]"} /></span> : introText.slice(0, introLength)}</span>
+              <span aria-hidden="true">{introComposing ? <span data-aria-intro-composing className="inline-flex items-center gap-1"><span className={dockless ? "aria-composing-dot size-1.5 rounded-full bg-[#9e336f]" : "size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f]"} /><span className={dockless ? "aria-composing-dot size-1.5 rounded-full bg-[#9e336f] [animation-delay:160ms]" : "size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]"} /><span className={dockless ? "aria-composing-dot size-1.5 rounded-full bg-[#9e336f] [animation-delay:320ms]" : "size-1.5 motion-safe:animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]"} /></span> : dockless ? renderChatText("Ahoj, volám sa **Aria.** **Čo ťa zaujíma o našej škôlke?**", introLength) : introText.slice(0, introLength)}</span>
             </div>
           </div>
 
