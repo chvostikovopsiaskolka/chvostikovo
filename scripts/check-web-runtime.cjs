@@ -6,12 +6,12 @@ const path = require('node:path');
 const bellaris = process.env.WEB_SITE === 'bellaris';
 const { ARIA_ROUTES } = require('./public-web-impact.cjs');
 const runtimeScope = process.env.WEB_RUNTIME_SCOPE || 'full';
-if(!['full','aria','aria-visual'].includes(runtimeScope)||bellaris&&runtimeScope!=='full')throw new Error('Invalid public web runtime scope');
+if(!['full','aria','aria-visual','navigation'].includes(runtimeScope)||bellaris&&runtimeScope!=='full')throw new Error('Invalid public web runtime scope');
 const base = process.env.WEB_BASE_URL || (bellaris ? 'https://bellaris.sk' : 'https://chvostikovo.sk');
 const fullRoutes = bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/', '/test-aria/'];
 const urls = (runtimeScope === 'aria-visual' ? ['/psia-skolka-kosice/'] : runtimeScope === 'aria' ? ARIA_ROUTES : fullRoutes).map(route => new URL(route, base));
 const brandPreviewCandidate = new URL(base).hostname === '127.0.0.1';
-if(runtimeScope==='aria-visual'&&!brandPreviewCandidate)throw new Error('Visual assertions require a freshly built local candidate');
+if(['aria-visual','navigation'].includes(runtimeScope)&&!brandPreviewCandidate)throw new Error('Visual assertions require a freshly built local candidate');
 const out = process.env.RUNTIME_REPORT_DIR || 'runtime-report';
 fs.mkdirSync(out, { recursive: true });
 const results = [];
@@ -280,6 +280,57 @@ async function assertPaidAriaChat(page, {visualOnly=false}={}) {
   }
 }
 
+async function assertPaidReturnArrow(page) {
+  // Paid-only scroll shortcut: same-document scroll, no chat open or CTA conversion.
+  await page.setViewportSize({width:390,height:844});
+  const back=page.locator('[data-aria-back-top]');
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+  await back.waitFor({state:'hidden'});
+  await page.waitForFunction(()=>window.scrollY<5);
+  await page.evaluate(()=>window.scrollTo({top:650,behavior:'instant'}));
+  await page.waitForFunction(()=>window.scrollY>160);
+  await back.waitFor({state:'visible',timeout:4000}).catch(async error=>{throw new Error('Paid arrow idle visibility: '+JSON.stringify(await back.evaluate(el=>({scrollY,innerWidth,visible:el.dataset.visible,disabled:el.disabled,visibility:getComputedStyle(el).visibility,dialog:!!document.querySelector('[data-form-dialog], [role="dialog"][data-state="open"]')}))),{cause:error});});
+  const arrowGeometry=await back.evaluate(el=>{const a=el.getBoundingClientRect(),p=document.querySelector('[data-aria-chat-trigger]').getBoundingClientRect();return a.height>=44&&a.width>=44&&a.bottom<=p.top-4&&Math.abs(a.left-p.left)<=2&&a.top>=0;});
+  if(!arrowGeometry)throw new Error('Return arrow must sit above Aria without covering her');
+  await page.evaluate(()=>window.scrollTo({top:450,behavior:'instant'}));
+  await page.waitForFunction(()=>Math.abs(scrollY-450)<8);
+  await back.waitFor({state:'visible'});
+  // Fixed shortcut must be hit directly without centering/scrolling the document.
+  const hit=await back.evaluate(el=>{const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;if(el.disabled||!el.contains(document.elementFromPoint(x,y)))throw new Error('Aria return arrow is occluded or disabled');return {x,y};});
+  const prior=await page.evaluate(()=>({search:location.search,path:location.pathname}));
+  if(await page.evaluate(()=>navigator.maxTouchPoints>0))await page.touchscreen.tap(hit.x,hit.y);else await page.mouse.click(hit.x,hit.y);
+  await page.waitForFunction(()=>window.scrollY<5,null,{timeout:5000}).catch(async error=>{throw new Error('Paid return click did not reach top: '+JSON.stringify(await page.evaluate(()=>({scrollY,hash:location.hash,visible:document.querySelector('[data-aria-back-top]')?.dataset.visible}))),{cause:error});});
+  if(!await page.evaluate(p=>location.search===p.search&&location.pathname===p.path&&!location.hash,prior))throw new Error('Arrow must preserve attribution and route');
+  await back.waitFor({state:'hidden'});
+  await page.setViewportSize({width:1280,height:900});
+  await page.evaluate(()=>window.scrollTo({top:650,behavior:'instant'}));
+  await page.waitForFunction(()=>scrollY>160);
+  if(await back.isVisible())throw new Error('Paid arrow must stay hidden on desktop');
+  await page.setViewportSize({width:390,height:844});
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+  await page.waitForFunction(()=>scrollY<5);
+  if(await page.locator('[data-aria-chat-trigger]').getAttribute('aria-expanded')!=='false')throw new Error('Return arrow must not open chat');
+
+}
+async function assertPaidReturnNavigation(browser,engine) {
+  const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+  try {
+    await context.addInitScript(()=>localStorage.setItem('chvostikovo-cookies',JSON.stringify({version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,functional:false,analytics:false,marketing:false})));
+    await context.route('**/*',route=>{const req=route.request(),u=new URL(req.url());return u.origin===new URL(base).origin&&['GET','HEAD'].includes(req.method())?route.continue():route.abort();});
+    const page=await context.newPage();
+    const errors=[];page.on('pageerror',e=>errors.push(e.message));
+    const response=await page.goto(new URL('/psia-skolka-kosice/?utm_source=fixture&utm_campaign=arrow',base).href,{waitUntil:'domcontentloaded'});
+    if(response?.status()!==200)throw new Error('Paid LEAD HTTP '+response?.status());
+    await page.locator('[data-aria-speech] [data-aria-tail]').waitFor({state:'attached'});
+    const cookie=page.getByRole('button',{name:/Len nevyhnutné|Odmietnuť/}).first();
+    if(await cookie.isVisible())await cookie.click();
+    await page.evaluate(()=>history.replaceState(history.state,'',location.pathname+location.search+'#lead-pricing'));
+    await assertPaidReturnArrow(page);
+    if(errors.length)throw new Error('Paid navigation runtime errors: '+errors.join('; '));
+    console.log('PASS paid LEAD mobile return arrow and desktop absence '+engine);
+  }finally{await context.close();}
+}
+
 async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
   await page.locator('[data-aria-lead-chat] img[alt^="Aria"]').evaluate(async image=>{
     await image.decode();
@@ -359,6 +410,7 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
     if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.actionFg!=='rgb(255, 255, 255)'||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.greetingFit||!fold.compactLauncher||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
+  await assertPaidReturnArrow(page);
   if(await page.locator('#lead-requirements h2').innerText()!=='Podmienky prijatia psíka')throw new Error('Campaign conditions heading differs');
   if(visualOnly){
     await page.setViewportSize({width:390,height:844});
@@ -380,11 +432,9 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
   await centerFixtureControl(puppyLink);
   await puppyLink.click();
   await page.waitForFunction(()=>Math.abs(document.getElementById('aria-puppy-check').getBoundingClientRect().top)<140);
-  await centerFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
-  await page.locator('[data-aria-lead-hero-cta]').click();
+  await activateFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
-  await centerFixtureControl(page.locator('[data-lead-faq-cta]'));
-  await page.locator('[data-lead-faq-cta]').click();
+  await activateFixtureControl(page.locator('[data-lead-faq-cta]'));
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
   if(await page.getByRole('dialog').count())throw new Error('Campaign CTA must scroll to its in-page form');
   const form=page.locator('#aria-hero-form [data-lead-step-form]');
@@ -607,7 +657,7 @@ async function assertCompactHomeMenu(page,en) {
   await menu.waitFor({state:'visible'});
   const state=await menu.evaluate(el=>{
     const bar=el.closest('.mobile-dock-bar'),nav=bar.closest('.mobile-dock'),p=el.getBoundingClientRect(),d=bar.getBoundingClientRect();
-    const links=[...el.querySelectorAll('.mobile-dock-compact-links a')];
+    const links=[...el.querySelectorAll('.mobile-dock-compact-links a')].filter(a=>a.getClientRects().length);
     const phone=el.querySelector('[data-home-dock-phone]');
     return {hrefs:links.map(a=>new URL(a.href).hash),labels:links.map(a=>a.textContent.trim()),
       targets:[...links,phone,...el.querySelectorAll('[data-language-switch] a')].every(a=>a&&a.getBoundingClientRect().height>=44&&a.scrollWidth<=a.clientWidth+1),
@@ -617,11 +667,24 @@ async function assertCompactHomeMenu(page,en) {
       dialog:!!nav.querySelector('button[aria-haspopup="dialog"]'),reserve:parseFloat(getComputedStyle(document.body).paddingBottom)};
   });
   const main=en?['Home','About','Prices','Rules','Apply']:['Domov','O nás','Cenník','Podmienky','Produkty','Prihláška'];
-  if(JSON.stringify(state.hrefs)!==JSON.stringify(['#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['Have a puppy?','FAQ']:['Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>60||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
+  if(JSON.stringify(state.hrefs)!==JSON.stringify(['#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['Have a puppy?','FAQ']:['Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>46||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
+  if(await menu.locator('[data-desktop-only-shortcut]').isVisible())throw new Error('Why shortcut must remain desktop-only');
+  const crop=await page.locator('[data-home-hero-photo] img').evaluateAll(imgs=>imgs.map(img=>getComputedStyle(img).objectPosition));
+  if(crop.join('|')!=='50% 0%|50% 50%')throw new Error('Only the collies photo should use the top-biased crop: '+crop.join('|'));
   if(await page.locator('[data-home-hero-phone]').count())throw new Error('Duplicate mobile Hero phone');
   if(!await page.evaluate(()=>!!(document.querySelector('[data-home-puppy-checker]')?.compareDocumentPosition(document.querySelector('[data-home-pricing-columns]'))&Node.DOCUMENT_POSITION_FOLLOWING)))throw new Error('Puppy checker must precede pricing');
 }
 
+// Active section color is the same for both home languages and both dock layouts.
+async function assertHomeDockActivePink(page,en,section='top') {
+  await page.waitForFunction(({en,section})=>{
+    const active=document.querySelector('.mobile-dock[data-home-dock] .mobile-dock-item[aria-current="location"]');
+    const href=active&&new URL(active.href,location.href);
+    const expected=section==='top'?(en?'/en/dog-daycare-kosice':'/'):null;
+    return !!active&&(expected?href.pathname.replace(/\/$/,'')===expected.replace(/\/$/,'')&&!href.hash:href.hash==='#'+section)
+      &&getComputedStyle(active).backgroundColor==='rgb(248, 221, 236)';
+  },{en,section},{timeout:5000});
+}
 async function assertApplicationPreview(page,en) {
   const form=page.locator('[data-home-friendship-form] form[data-application-form]');
   const toggle=form.locator('#home-friendship-application');
@@ -641,7 +704,7 @@ async function assertApplicationPreview(page,en) {
   console.log('PASS application preview '+(en?'EN':'SK'));
 }
 
-async function assertBilingualNavigation(browser,engine) {
+async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={}) {
   const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
   const captured=[];
   try {
@@ -667,9 +730,11 @@ async function assertBilingualNavigation(browser,engine) {
     for(const width of [320,375,390,430]){
       await page.setViewportSize({width,height:844});
       await assertCompactHomeMenu(page,false);
+      await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+      await assertHomeDockActivePink(page,false);
       await page.screenshot({path:path.join(out,'compact-sk-menu-'+engine+'-'+width+'.png')});
     }
-    await assertApplicationPreview(page,false);
+    if(!navigationOnly)await assertApplicationPreview(page,false);
     await page.locator('[data-home-menu] a[href="/#aria-puppy-check"]').click();
     await page.waitForFunction(()=>location.hash==='#aria-puppy-check');
     await page.locator('[data-home-menu] a[href="/#faq"]').click();
@@ -683,7 +748,7 @@ async function assertBilingualNavigation(browser,engine) {
     await page.locator('[data-home-menu] [data-language-switch] a[lang="en"]').click();
     await page.waitForURL(/\/en\/dog-daycare-kosice\/?$/);
     await page.waitForFunction(()=>document.documentElement.lang==='en');
-    await assertApplicationPreview(page,true);
+    if(!navigationOnly)await assertApplicationPreview(page,true);
     if(captured.some(r=>r.path.endsWith('/web-form-submit')))throw new Error('Collapsed application posted to receiver');
     if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Language switch reloaded document');
     if(await page.evaluate(()=>window.__bilingualPixel.some(a=>a[0]==='track')))throw new Error('Pixel fired without consent');
@@ -698,6 +763,8 @@ async function assertBilingualNavigation(browser,engine) {
         const selected=menu.locator('[data-language-switch] a[lang="en"]');
         if(await selected.getAttribute('aria-current')!=='page')throw new Error('EN active state missing');
         await assertCompactHomeMenu(page,true);
+        await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+        await assertHomeDockActivePink(page,true);
         const buttons=await menu.locator('[data-language-switch] a').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
         if(buttons.some(b=>b.width<44||b.height<44))throw new Error('Language target too small');
         await page.screenshot({path:path.join(out,'bilingual-menu-'+engine+'-'+width+'.png')});
@@ -735,14 +802,23 @@ async function assertBilingualNavigation(browser,engine) {
         const geometry=await dock.evaluate(el=>{
           const bar=el.querySelector('.mobile-dock-bar'),r=bar.getBoundingClientRect(),slot=el.getBoundingClientRect(),logo=el.querySelector('[data-desktop-dock-logo]'),links=[...el.querySelectorAll('a,button')].filter(x=>x.getClientRects().length);
           const boxes=links.map(x=>x.getBoundingClientRect()), upper=el.querySelector('[data-home-menu]').getBoundingClientRect(), logoBox=logo.getBoundingClientRect(), lower=[...bar.querySelectorAll('.mobile-dock-item')].map(x=>x.getBoundingClientRect()), hero=el.previousElementSibling?.getBoundingClientRect();
-          return {fits:r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&bar.scrollWidth<=bar.clientWidth+1&&r.bottom<=slot.bottom+1,targets:boxes.every(b=>b.height>=44),separate:boxes.every((b,i)=>boxes.every((a,j)=>i===j||a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1)),header:!!document.querySelector('header.fixed'),logo:logoBox.width>0&&logoBox.right<=upper.left+1&&logoBox.bottom<=lower[0].top+1,rows:lower.length>=5&&lower.every(b=>b.top>=upper.bottom-1&&Math.abs(b.top-lower[0].top)<2),slot:el.previousElementSibling?.id==='top'&&slot.height>=108&&r.top>=hero.bottom-1};
+          return {centered:Math.abs((upper.left+upper.right-r.left-r.right)/2)<2,width:r.width<=980.5,shortcut:el.querySelector('[data-desktop-only-shortcut]')?.getBoundingClientRect().width>0,upperLinks:[...el.querySelectorAll('[data-home-menu] .mobile-dock-compact-links a')].map(a=>new URL(a.href).hash),fits:r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&bar.scrollWidth<=bar.clientWidth+1&&r.bottom<=slot.bottom+1,targets:boxes.every(b=>b.height>=44),separate:boxes.every((b,i)=>boxes.every((a,j)=>i===j||a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1)),header:!!document.querySelector('header.fixed'),logo:logoBox.width>0&&logoBox.right<=upper.left+1&&logoBox.bottom<=lower[0].top+1,rows:lower.length>=5&&lower.every(b=>b.top>=upper.bottom-1&&Math.abs(b.top-lower[0].top)<2),slot:el.previousElementSibling?.id==='top'&&slot.height>=108&&r.top>=hero.bottom-1};
         });
-        if(!geometry.fits||!geometry.targets||!geometry.separate||geometry.header||!geometry.logo||!geometry.rows||!geometry.slot)throw new Error('Desktop home dock '+width+' '+JSON.stringify(geometry));
+        await assertHomeDockActivePink(page,en);
+        if(!geometry.centered||!geometry.width||!geometry.shortcut||geometry.upperLinks.join('|')!==('#aria-puppy-check|'+(en?'#en-benefits':'#preco-chvostikovo')+'|#faq')||!geometry.fits||!geometry.targets||!geometry.separate||geometry.header||!geometry.logo||!geometry.rows||!geometry.slot)throw new Error('Desktop home dock '+width+' '+JSON.stringify(geometry));
         await page.evaluate(()=>window.scrollTo({top:900,behavior:'instant'}));
         await page.waitForFunction(()=>document.querySelector('[data-desktop-home-dock]')?.getAttribute('data-desktop-floating')==='true');
         if(!await dock.evaluate(el=>Math.abs(innerHeight-el.querySelector('.mobile-dock-bar').getBoundingClientRect().bottom-12)<2))throw new Error('Desktop dock not floating at bottom');
         await page.screenshot({path:path.join(out,'desktop-home-dock-'+engine+'-'+(en?'en':'sk')+'-'+width+'.png')});
       }
+      const priceId=en?'pricing':'cennik';
+      await page.locator('[data-desktop-home-dock] .mobile-dock-item[href$="#'+priceId+'"]').click();
+      await assertHomeDockActivePink(page,en,priceId);
+      await page.locator('[data-desktop-home-dock] .mobile-dock-item[href$="#'+priceId+'"]').hover();
+      await assertHomeDockActivePink(page,en,priceId);
+      const why=page.locator('[data-desktop-home-dock] [data-desktop-only-shortcut]');
+      await why.click();
+      await page.waitForFunction(id=>Math.abs(document.getElementById(id).getBoundingClientRect().top-8)<16,en?'en-benefits':'preco-chvostikovo');
     }
     console.log('PASS bilingual navigation, responsive menu and consented PageView '+engine);
   } finally {await context.close();}
@@ -751,6 +827,13 @@ async function assertBilingualNavigation(browser,engine) {
 (async () => {
   for (const [engine, browserType] of selectedEngines) {
     const browser = await browserType.launch();
+    try {
+    if(runtimeScope==='navigation'){
+      await assertBilingualNavigation(browser,engine,{navigationOnly:true});
+      await assertPaidReturnNavigation(browser,engine);
+      results.push({engine,scope:'navigation',status:'PASS'});
+      continue;
+    }
     if (!bellaris && brandPreviewCandidate && runtimeScope==='full') { await assertFooterMapGeometry(browser, engine); await assertBilingualNavigation(browser,engine); }
     for (const restricted of (runtimeScope==='aria-visual'?[false]:[false,true])) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -3557,7 +3640,7 @@ async function assertBilingualNavigation(browser,engine) {
           const failure = { engine, restricted, route: url.pathname, status: 'FAIL', error: error.message, runtimeErrors: errors };
           results.push(failure); failures.push(failure);
           await page.screenshot({ path: path.join(out, `${label}.png`), fullPage: true }).catch(() => {});
-          console.error(`FAIL ${label}: ${error.message}`, errors);
+          console.error(`FAIL ${label}: ${error.stack || error.message}`, errors);
         } finally { await page.close(); }
       }
       if (runtimeScope === 'full' && !bellaris && !restricted) {
@@ -4413,14 +4496,14 @@ async function assertBilingualNavigation(browser,engine) {
             const failure = {engine, width, route:'product-inquiries', status:'FAIL', error:error.message};
             failures.push(failure);
             results.push(failure);
-            console.error('FAIL product inquiries and redirects ' + engine + ' ' + width + ': ' + error.message);
+            console.error('FAIL product inquiries and redirects ' + engine + ' ' + width + ': ' + (error.stack || error.message));
             await productPage.screenshot({path:path.join(out, 'products-' + engine + '-' + width + '.png'), fullPage:true}).catch(()=>{});
           } finally { await productPage.close(); }
         }
       }
       await context.close();
     }
-    await browser.close();
+    } finally { await browser.close(); }
   }
   fs.writeFileSync(path.join(out, 'results.json'), JSON.stringify({ checkedAt: new Date().toISOString(), base, results }, null, 2));
   if (failures.length) process.exitCode = 1;

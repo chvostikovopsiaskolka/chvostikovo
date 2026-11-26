@@ -238,6 +238,7 @@ export function MobileDock({ language = "sk", variant = "main", desktopHome = fa
   // Keep the main menu short; no duplicated dock links or footer actions.
   const homeMenuEntries = [
     {label:english ? "Have a puppy?" : "Máte šteniatko?", icon:Dog, href:homePath+"#aria-puppy-check"},
+    ...(desktopHome ? [{label:english ? "Why choose us?" : "Prečo si vybrať nás?", icon:Heart, href:homePath+(english ? "#en-benefits" : "#preco-chvostikovo"), desktopOnly:true}] : []),
     {label:english ? "FAQ" : "Časté otázky", icon:MessageCircle, href:homePath+"#faq"},
   ];
   const menuEntries = [
@@ -269,7 +270,7 @@ export function MobileDock({ language = "sk", variant = "main", desktopHome = fa
           {desktopHome && homeDock && <img data-desktop-dock-logo src={logo} alt="Chvostíkovo" className="hidden lg:block" />}
           {homeDock && <div className="mobile-dock-compact-menu" data-home-menu>
             <div className="mobile-dock-compact-links">
-              {homeMenuEntries.map(({href,label,icon:Icon}) => <a key={href} href={href} onClick={event => go(event, href)}><Icon size={17} strokeWidth={1.9} aria-hidden="true" /><span>{label}</span></a>)}
+              {homeMenuEntries.map(({href,label,icon:Icon,...entry}) => <a key={href} href={href} data-desktop-only-shortcut={"desktopOnly" in entry ? true : undefined} onClick={event => go(event, href)}><Icon size={17} strokeWidth={1.9} aria-hidden="true" /><span>{label}</span></a>)}
             </div>
             <a data-home-dock-phone className="mobile-dock-compact-phone" href={"tel:" + PHONE} aria-label={english ? "Call Chvostíkovo" : "Zavolať do Chvostíkova"} data-tracking-source={english ? "en_mobile_dock_phone" : "home_mobile_dock_phone"} onClick={() => void trackCookielessInteraction("phone_click", english ? "en_mobile_dock_phone" : "home_mobile_dock_phone", language)}><Phone size={19} strokeWidth={1.9} aria-hidden="true" /></a>
             <LanguageSwitch language={language} source={"mobile_dock_" + variant + "_language"} />

@@ -1,5 +1,6 @@
 import { Component, lazy, Suspense, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, UsersRound, X, ArrowRight } from "lucide-react";
+import { AriaReturnToTop } from "./AriaReturnToTop";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 // Keep the chat chunk cached; preload on LEAD for an immediate first open.
 const loadAriaChat = () => import("./AriaGuidedChat").then((module) => ({ default: module.AriaGuidedChat }));
@@ -645,6 +646,7 @@ export function AriaLeadAssistant({
         )}
 
         <div className={leadChat ? "pointer-events-none relative mx-auto h-0 w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (rightAlignedBubble || sectionNavigation ? "mx-auto w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
+          {leadChat && <AriaReturnToTop enabled={!hidden && !chatOpen && !panel} />}
           {!leadChat && <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />}
           {leadChat ? (
             <button type="button" data-aria-chat-trigger aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}

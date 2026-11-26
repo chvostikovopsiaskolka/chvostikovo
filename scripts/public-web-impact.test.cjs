@@ -40,3 +40,24 @@ test('display greeting literal alone is visual; JS/import/form changes cannot us
    assert.equal(formChecksRequired([file],{copyBefore,copyAfter:bad}),true);
  }
 });
+
+test('navigation scope permits only bounded HOME/LEAD selectors and exact navigation wiring',()=>{
+ const {navigationCssOnly,homeDockOnly,ariaReturnOnly}=require('./public-web-impact.cjs');
+ const prefix='.global{color:red;}\n';
+ const scoped=prefix+"/* HOME navigation and paid LEAD return control — scoped overrides. */"+'\n.mobile-dock[data-home-dock] .mobile-dock-item{background:pink;}\n.lead-brand-live [data-aria-back-top]{display:none;}';
+ assert.equal(navigationCssOnly(prefix,scoped),true);
+ assert.equal(selectScope(['src/styles.css'],{before:prefix,after:scoped}),'navigation');
+ for(const bad of [scoped+'\nbody{display:none;}',scoped+'\n.mobile-dock[data-home-dock] + form{display:none;}',scoped.replace('color:red','color:blue')])
+  assert.equal(selectScope(['src/styles.css'],{before:prefix,after:bad}),'full');
+ const dockBefore="              {homeMenuEntries.map(({href,label,icon:Icon}) => <a key={href} href={href} onClick={event => go(event, href)}><Icon size={17} strokeWidth={1.9} aria-hidden=\"true\" /><span>{label}</span></a>)}\n";
+ const dockAfter="    ...(desktopHome ? [{label:english ? \"Why choose us?\" : \"Prečo si vybrať nás?\", icon:Heart, href:homePath+(english ? \"#en-benefits\" : \"#preco-chvostikovo\"), desktopOnly:true}] : []),\n              {homeMenuEntries.map(({href,label,icon:Icon,...entry}) => <a key={href} href={href} data-desktop-only-shortcut={\"desktopOnly\" in entry ? true : undefined} onClick={event => go(event, href)}><Icon size={17} strokeWidth={1.9} aria-hidden=\"true\" /><span>{label}</span></a>)}\n";
+ assert.equal(homeDockOnly(dockBefore,dockAfter),true);
+ assert.equal(selectScope(['src/components/site/MobileDock.tsx'],{dockBefore,dockAfter}),'navigation');
+ assert.equal(selectScope(['src/components/site/MobileDock.tsx'],{dockBefore,dockAfter:dockAfter+'submitForm();'}),'full');
+ const ariaBefore='unchanged assistant';
+ const ariaAfter="import { AriaReturnToTop } from \"./AriaReturnToTop\";\n          {leadChat && <AriaReturnToTop enabled={!hidden && !chatOpen && !panel} />}\n"+ariaBefore;
+ assert.equal(ariaReturnOnly(ariaBefore,ariaAfter),true);
+ assert.equal(selectScope(['src/components/site/AriaLeadAssistant.tsx','src/components/site/AriaReturnToTop.tsx'],{ariaBefore,ariaAfter}),'navigation');
+ assert.equal(selectScope(['src/components/site/AriaReturnToTop.tsx']),'full');
+ assert.equal(selectScope(['src/styles.css','src/lib/tracking.ts'],{before:prefix,after:scoped}),'full');
+});
