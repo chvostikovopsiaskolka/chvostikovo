@@ -45,7 +45,7 @@ await login(owner,'2030-10-23 12:00:00');await assert.rejects(db.query(pair),/vo
 await db.exec("update portal_day_settings set capacity=10;delete from vaccinations where dog_id=9002 and vaccination_type='rabies'");await assert.rejects(db.query(pair),/očkovan/);assert.equal((await db.query('select count(*) n from customer_booking_requests')).rows[0].n,0,'second dog vaccine failure rolls back first dog too');
 await login(other,'2030-10-23 12:00:00');await assert.rejects(db.query("select * from portal_request_booking(9001,'2030-10-25','none')"),/priradený/);assert.equal((await db.query('select count(*) n from portal_messages')).rows[0].n,0);
 // v438: run the exact LIVE baseline and candidate body in this isolated PostgreSQL fixture.
-await db.exec("create or replace function private.guard_customer_rpc_v336() returns void language sql as $select$");
+await db.exec("create or replace function private.guard_customer_rpc_v336() returns void language sql as $$select$$");
 const clockSql=s=>s.replaceAll("now() at time zone 'Europe/Bratislava'","current_setting('fixture.clock')::timestamp");
 await db.exec(clockSql(fs.readFileSync('supabase/backups/booking-month-horizon-v438-rollback.sql','utf8')));
 await login(owner,'2026-11-26 12:00:00');

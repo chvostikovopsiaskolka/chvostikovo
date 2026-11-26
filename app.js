@@ -2995,19 +2995,19 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   function calendarRowsV438(days,today){
     const current=smartMondayV199(today),next=smartShiftV199(current,7),groups=new Map();
     for(const day of days){
-      const monday=smartMondayV199(day.date),month=day.date.slice(0,7),key=month+'|'+monday;
-      if(!groups.has(key))groups.set(key,{month,monday,weekEnd:smartShiftV199(monday,6),kind:monday===current?'current':monday===next?'next':'later',days:[]});
-      groups.get(key).days.push(day);
+      const monday=smartMondayV199(day.date),key=monday;
+      if(!groups.has(key))groups.set(key,{month:day.date.slice(0,7),monday,weekEnd:smartShiftV199(monday,6),kind:monday===current?'current':monday===next?'next':'later',days:[]});
+      const row=groups.get(key);row.days.push(day);row.month=day.date.slice(0,7); // A cross-month week belongs to its last actual working day.
     }
     const seen=new Set();return [...groups.values()].map(row=>{const first=!seen.has(row.kind);seen.add(row.kind);return {...row,firstForKind:first};});
   }
   function calendarMonthNameV438(month){
     const language=document.documentElement.lang==='en'?'en':'sk-SK';
-    const name=new Intl.DateTimeFormat(language,{month:'long'}).format(new Date(month+'-01T12:00:00Z'));
+    const name=new Intl.DateTimeFormat('sk-SK',{month:'long'}).format(new Date(month+'-01T12:00:00Z'));
     return name.charAt(0).toUpperCase()+name.slice(1);
   }
   function calendarWeekLettersV438(){
-    const en=document.documentElement.lang==='en';return '<div class="calendar-weekletters-v438" aria-hidden="true">'+(en?['M','T','W','T','F']:['P','U','S','Š','P']).map(s=>'<span>'+s+'</span>').join('')+'</div>';
+    return '<div class="calendar-weekletters-v438" aria-hidden="true">'+['P','U','S','Š','P'].map((s,i)=>'<span data-weekday-index="'+i+'">'+s+'</span>').join('')+'</div>';
   }
   function compactEligibleV437(date,dogs,days){
     const day=days.find(d=>d.date===date),today=bratislavaClockV95().date;

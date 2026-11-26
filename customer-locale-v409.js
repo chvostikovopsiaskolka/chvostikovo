@@ -175,6 +175,9 @@
   const dayShortEn={Po:'Mon',Ut:'Tue',St:'Wed','Št':'Thu',Pi:'Fri',So:'Sat',Ne:'Sun'};
   const monthsEn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const translate = (text,element) => {
+    if(element?.matches?.('.calendar-weekletters-v438 [data-weekday-index]'))return ['M','T','W','T','F'][Number(element.dataset.weekdayIndex)]||null;
+    if(element?.matches?.('.calendar-month-v438')){const sk=['Január','Február','Marec','Apríl','Máj','Jún','Júl','August','September','Október','November','December'],en=['January','February','March','April','May','June','July','August','September','October','November','December'];return en[sk.indexOf(text)]||null;}
+    const weekRange=text.match(/^Tento týždeň · (.+)$/);if(weekRange)return 'This week · '+weekRange[1];
     const exact=DICTIONARY.get(text);if(exact)return exact;
     // Only calendar UI may contain short weekday abbreviations. Never map
     // ordinary names, announcements, signed text or user-entered data.
