@@ -312,18 +312,7 @@ assert(campaignOrder.includes('<AriaMosaicGallery paidLead />') &&
 /* APP-01 23.11: explicitly test reordered LEAD, mobile inline and narrow widths. */
 const paid = read("src/routes/test-aria.tsx");
 const ariaAssistant = read("src/components/site/AriaLeadAssistant.tsx");
-assert(campaignOrder.indexOf('{leadPhotoGallery}') >= 0 &&
-       campaignOrder.indexOf('{leadPhotoGallery}') < campaignOrder.indexOf('{pricingSection}') &&
-       campaignOrder.indexOf('{pricingSection}') < campaignOrder.indexOf('{firstVisitSection}') &&
-       campaignOrder.indexOf('{firstVisitSection}') < campaignOrder.indexOf('{heroFormSection}') &&
-       campaignOrder.indexOf('{heroFormSection}') < campaignOrder.indexOf('{caretakersSection}') &&
-       campaignOrder.indexOf('{caretakersSection}') < campaignOrder.indexOf('{benefitsSection}') &&
-       campaignOrder.indexOf('{benefitsSection}') < campaignOrder.indexOf('{conditionsSection}') &&
-       campaignOrder.indexOf('{conditionsSection}') < campaignOrder.indexOf('{puppyChecker}') &&
-       campaignOrder.indexOf('{puppyChecker}') < campaignOrder.indexOf('<AriaMosaicGallery paidLead />') &&
-       campaignOrder.indexOf('<AriaMosaicGallery paidLead />') < campaignOrder.indexOf('{friendshipSection}') &&
-       campaignOrder.indexOf('{friendshipSection}') < campaignOrder.indexOf('{campaignFaqSection}') &&
-       campaignOrder.indexOf('{campaignFaqSection}') < campaignOrder.indexOf('</> : <>') &&
+assert(require('./public-content-impact.cjs').orderProof(paidLeadCurrent) &&
        paid.includes('data-lead-benefits') && paid.includes('id="lead-photo-carousel"'),
        "Campaign keeps the existing forms and puts the full-width carousel above pricing");
 assert(hero.includes('data-home-hero-photos') &&

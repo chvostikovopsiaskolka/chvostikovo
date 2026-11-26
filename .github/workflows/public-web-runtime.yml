@@ -89,6 +89,11 @@ jobs:
           bun install --frozen-lockfile
           node scripts/restore-cori-image.mjs
           bun run build:pages
+          if [ "$WEB_RUNTIME_SCOPE" = "content" ]; then
+            node scripts/mobile-dock-contract.cjs
+            bun run check:types
+            node scripts/check-seo-indexability.cjs
+          fi
           python3 -m http.server 4173 --directory dist/client > /tmp/web-runtime-server.log 2>&1 &
           for attempt in $(seq 1 30); do curl --fail --silent http://127.0.0.1:4173/ > /dev/null && break; sleep 1; done
       - name: Verify hydrated pages in Chromium and Safari WebKit
