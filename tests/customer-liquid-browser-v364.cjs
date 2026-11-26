@@ -101,6 +101,12 @@ async function assertPawsTransmit(page,selector,background){
   assert.equal(await page.locator('#bookingPickerDaysV37 .calendar-later-v438').count(),1);
   assert.equal(await page.locator('#bookingPickerDaysV37 .calendar-empty-v438').count(),0,'November 30 stays in the first December row');assert.equal(await page.locator('[data-week-from="2026-11-30"] .booking-day-v37').count(),5);assert.equal(await page.locator('[data-week-from="2026-11-30"] .booking-day-v37').first().getAttribute('data-date'),'2026-11-30');
   assert.equal(await page.locator('#bookingPickerDaysV37 .calendar-weekletters-v438').count(),2);
+  await page.evaluate(()=>{for(const [date,occupied] of [['2026-12-07',0],['2026-12-08',5],['2026-12-09',6],['2026-12-10',10],['2026-12-11',11]]){const d=state.data.availability.days.find(x=>x.date===date);Object.assign(d,{occupied,capacity:11,available:11-occupied});}window.customerDesignRefreshCalendarV351();});
+  const tiles=await page.locator('[data-week-from="2026-12-07"] .booking-day-v37').evaluateAll(nodes=>nodes.map(el=>({h:el.getBoundingClientRect().height,level:el.dataset.capacityLevel,bg:getComputedStyle(el).backgroundColor,fg:getComputedStyle(el.querySelector('strong')).color,count:getComputedStyle(el.querySelector(':scope > span')).display,dot:!!el.querySelector('.design-capacity-dot')})));
+  assert.equal(tiles.length,5);assert(tiles.every(t=>Math.abs(t.h-tiles[0].h)<1&&!t.dot),'identical tile heights and no dots');
+  for(const t of tiles.slice(0,2)){assert.equal(t.level,'free');assert.equal(t.bg,'rgb(33, 131, 78)');assert.equal(t.fg,'rgb(255, 255, 255)');assert.equal(t.count,'none');}
+  for(const t of tiles.slice(2,4)){assert.equal(t.level,'limited');assert.equal(t.bg,'rgb(255, 223, 117)');assert.notEqual(t.count,'none');}
+  assert.equal(tiles[4].level,'full');assert.notEqual(tiles[4].count,'none');
   const dec=page.locator('.booking-day-v37[data-date="2026-12-02"]');if(!await dec.evaluate(el=>el.classList.contains('selected')))await dec.click();
   const taxiToggle=page.locator('#bookingPickerTaxiByDayV91 [data-taxi-toggle="2026-12-02"]');await taxiToggle.scrollIntoViewIfNeeded();
   const row=taxiToggle.locator('..'),before=await row.boundingBox();await taxiToggle.click();
