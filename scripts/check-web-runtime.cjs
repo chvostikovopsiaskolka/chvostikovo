@@ -362,7 +362,7 @@ async function assertPaidReturnNavigation(browser,engine) {
   }finally{await context.close();}
 }
 
-async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
+async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=null}={}) {
   await page.locator('[data-aria-lead-chat] img[alt^="Aria"]').evaluate(async image=>{
     await image.decode();
     if(image.naturalWidth<400||image.naturalHeight<400)throw new Error("Paid Aria must use the approved high-resolution head");
@@ -478,7 +478,12 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
   await centerFixtureControl(puppyLink);
   await puppyLink.click();
   await page.waitForFunction(()=>Math.abs(document.getElementById('aria-puppy-check').getBoundingClientRect().top)<140);
+  const beforeHeroSubmits=trackedEvents?.filter(e=>e.name==='form_submit').length;
   await assertHeroAriaEntry(page);
+  if(trackedEvents){
+    for(let i=0;i<15&&!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='lead_landing_hero_aria_cta');i++)await page.waitForTimeout(100);
+    if(!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='lead_landing_hero_aria_cta')||trackedEvents.filter(e=>e.name==='form_submit').length!==beforeHeroSubmits)throw new Error('Hero CTA source missing or chat click emitted conversion');
+  }
   await activateFixtureControl(page.locator('[data-lead-faq-cta]'));
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
   if(await page.getByRole('dialog').count())throw new Error('Campaign CTA must scroll to its in-page form');
@@ -1230,7 +1235,7 @@ async function assertPublicContent(browser,engine){
             results.push({engine,restricted,route:url.pathname,scope:'aria-visual',status:'PASS'});
             console.log('PASS LEAD visual geometry and chat surface '+engine);continue;
           }
-          if(revisedLead) await assertCampaignContentFlow(page);
+          if(revisedLead) await assertCampaignContentFlow(page,{trackedEvents:restricted?null:trackedEvents});
           // Candidate-only regression for the three unified Chvostíkovo galleries.
           // Production-baseline CI keeps testing its already published version.
           if (!bellaris && !restricted && !revisedLead && new URL(base).hostname === '127.0.0.1') {
