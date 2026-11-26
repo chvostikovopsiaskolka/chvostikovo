@@ -1127,7 +1127,7 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 #compactDogChoicesV437>button:last-child{border-right:0}
 #compactDogChoicesV437>button[aria-pressed=true]{background:#e2f2e6;color:#235b3c}
 #compactDogChoicesV437>button:focus-visible,.compact-overview-grid-v437 button:focus-visible{outline:2px solid #f57916;outline-offset:-2px}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-picker-week-v127{border:0!important;box-shadow:none!important;background:transparent!important;padding:5px 0!important;margin:0!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-picker-week-v127{padding:10px 6px!important;margin:0!important}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-day-v37{display:grid!important;grid-template-columns:auto auto;grid-template-rows:auto auto;align-content:center;justify-content:center;align-items:baseline;column-gap:2px;row-gap:2px;min-height:52px!important;padding:5px 1px!important}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-day-v37 strong{font-size:clamp(10px,3.3vw,14px)!important;white-space:nowrap}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-day-v37 small{font-size:clamp(8px,2.5vw,10px)!important;white-space:nowrap}
