@@ -575,6 +575,64 @@ async function assertApplicationDogLayout(surface, engine, label) {
   }
 }
 
+async function assertBilingualLegalFooter(browser, engine) {
+  const origin = new URL(base).origin;
+  for (const language of ['sk','en']) {
+    const english = language === 'en';
+    const route = english ? '/en/dog-daycare-kosice/' : '/';
+    const context = await browser.newContext({viewport:{width:320,height:844},isMobile:true,hasTouch:true});
+    try {
+      await context.route('**/*', route => {
+        const request=route.request(), url=new URL(request.url());
+        if (!['GET','HEAD'].includes(request.method()) || url.origin!==origin) return route.abort();
+        return route.continue();
+      });
+      const page=await context.newPage();
+      await page.goto(new URL(route,base).href,{waitUntil:'domcontentloaded',timeout:40000});
+      const reject=page.getByRole('button',{name:english?'Necessary only':'Len nevyhnutné',exact:true});
+      await reject.waitFor({state:'visible',timeout:15000});
+      const copy=page.locator('[data-cookie-panel] p').filter({hasText:english?"I'm Aria and welcome to Chvostíkovo!":"Som Aria a vítam ťa v Chvostíkove!"});
+      if(await copy.count()!==1 || await copy.locator('br').count()!==1 ||
+          Number(await copy.evaluate(el=>getComputedStyle(el).fontWeight))<500)
+        throw new Error('Bilingual cookie greeting/line break/weight missing: '+language);
+      await activateFixtureControl(reject);
+      const nav=page.locator('footer [data-footer-legal]');
+      await nav.waitFor({state:'visible'});
+      const privacy=nav.getByRole('link',{name:english?'Privacy policy – GDPR':'Ochrana osobných údajov – GDPR'});
+      const privacyPath=english?'/en/privacy':'/ochrana-osobnych-udajov';
+      if(await privacy.getAttribute('href')!==privacyPath)throw new Error('Privacy link changed: '+language);
+      const complaint=nav.getByRole('button',{name:english?'Complaints policy – goods':'Reklamačný poriadok – tovar',exact:true});
+      for(const width of [320,1440]) {
+        await page.setViewportSize({width,height:844});
+        if(!await nav.evaluate(el=>{const children=[...el.children].map(x=>x.getBoundingClientRect());return children.length===2&&children[0].left<children[1].left&&children[1].right<=innerWidth+1&&document.documentElement.scrollWidth<=innerWidth+1;}))
+          throw new Error('Legal footer columns overflow: '+language+' '+width);
+        await activateFixtureControl(complaint);
+        const dialog=page.locator('[role="dialog"]').filter({has:page.locator('[data-goods-complaints]')});
+        await dialog.waitFor({state:'visible'});
+        const content=dialog.locator('[data-goods-complaints]');
+        if(await content.locator('section').count()!==7)throw new Error('Incomplete goods policy '+language);
+        const adr=content.locator('a[href^="https://www.soi.sk/"]');
+        if(await adr.count()!==1||await adr.getAttribute('target')!=='_blank')throw new Error('ADR link missing '+language);
+        const pdf=content.locator('a[download]');
+        const expected=english?'/documents/complaints-policy-goods-en.pdf':'/documents/reklamacny-poriadok-tovar.pdf';
+        if(await pdf.getAttribute('href')!==expected)throw new Error('PDF language/path mismatch '+language);
+        const response=await page.request.get(new URL(expected,base).href);
+        if(!response.ok()||(await response.body()).subarray(0,5).toString()!=='%PDF-')throw new Error('PDF response invalid '+language);
+        await page.keyboard.press('Escape');
+        await dialog.waitFor({state:'hidden'});
+      }
+      const legal=await context.newPage();
+      try {
+        for(const target of [privacyPath,english?'/en/cookies':'/cookies']) {
+          const response=await legal.goto(new URL(target+'/',base).href,{waitUntil:'domcontentloaded',timeout:40000});
+          if(!response?.ok()||await legal.locator('main.site-brand h1').count()!==1)throw new Error('Legal route/brand missing '+target);
+        }
+      } finally {await legal.close();}
+      results.push({engine,scope:'legal-footer',language,status:'PASS'});
+    } finally {await context.close();}
+  }
+}
+
 async function assertFooterMapGeometry(browser, engine) {
   const context = await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   const origin = new URL(base).origin;
@@ -975,7 +1033,7 @@ async function assertPublicContent(browser,engine){
       results.push({engine,scope:'navigation',status:'PASS'});
       continue;
     }
-    if (!bellaris && brandPreviewCandidate && runtimeScope==='full') { await assertFooterMapGeometry(browser, engine); await assertBilingualNavigation(browser,engine); }
+    if (!bellaris && brandPreviewCandidate && runtimeScope==='full') { await assertBilingualLegalFooter(browser, engine); await assertFooterMapGeometry(browser, engine); await assertBilingualNavigation(browser,engine); }
     for (const restricted of (runtimeScope==='aria-visual'?[false]:[false,true])) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
       // Each URL must start without a saved choice from the preceding URL.
