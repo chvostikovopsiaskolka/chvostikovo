@@ -317,9 +317,13 @@ assert(campaignOrder.indexOf('{leadPhotoGallery}') >= 0 &&
        campaignOrder.indexOf('{pricingSection}') < campaignOrder.indexOf('{firstVisitSection}') &&
        campaignOrder.indexOf('{firstVisitSection}') < campaignOrder.indexOf('{heroFormSection}') &&
        campaignOrder.indexOf('{heroFormSection}') < campaignOrder.indexOf('{caretakersSection}') &&
-       campaignOrder.indexOf('{caretakersSection}') < campaignOrder.indexOf('{conditionsSection}') &&
-       campaignOrder.indexOf('{conditionsSection}') < campaignOrder.indexOf('{campaignFaqSection}') &&
-       campaignOrder.indexOf('{campaignFaqSection}') < campaignOrder.indexOf('{puppyChecker}') &&
+       campaignOrder.indexOf('{caretakersSection}') < campaignOrder.indexOf('{benefitsSection}') &&
+       campaignOrder.indexOf('{benefitsSection}') < campaignOrder.indexOf('{conditionsSection}') &&
+       campaignOrder.indexOf('{conditionsSection}') < campaignOrder.indexOf('{puppyChecker}') &&
+       campaignOrder.indexOf('{puppyChecker}') < campaignOrder.indexOf('<AriaMosaicGallery paidLead />') &&
+       campaignOrder.indexOf('<AriaMosaicGallery paidLead />') < campaignOrder.indexOf('{friendshipSection}') &&
+       campaignOrder.indexOf('{friendshipSection}') < campaignOrder.indexOf('{campaignFaqSection}') &&
+       campaignOrder.indexOf('{campaignFaqSection}') < campaignOrder.indexOf('</> : <>') &&
        paid.includes('data-lead-benefits') && paid.includes('id="lead-photo-carousel"'),
        "Campaign keeps the existing forms and puts the full-width carousel above pricing");
 assert(hero.includes('data-home-hero-photos') &&
