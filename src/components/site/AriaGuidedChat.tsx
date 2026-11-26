@@ -9,6 +9,7 @@ import { AriaPuppyChecker } from "./AriaPuppyChecker";
 import type { PuppyCheckInput } from "@/lib/inquiry";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { trackCookielessInteraction, trackAriaChatAction } from "@/lib/cookieless-interactions";
+import { hasAnalyticsConsent } from "@/lib/consent";
 
 type ChatMessage = { id: number; side: "person" | "aria"; text: string; questionId?: string; widget?: "puppy" | "puppy_contact" | "interest" | "other" };
 type Question = { id: string; title: string; answer: string };
@@ -29,7 +30,7 @@ function renderChatText(value: string, visibleLength = Number.POSITIVE_INFINITY)
 
 const priceOne = PRICING.find((item) => !item.highlight)?.price || "25 €";
 const pricePass = PRICING.find((item) => item.highlight)?.price || "200 €";
-// Two approved 4-question waves; keep IDs stable for cookieless analytics.
+// Ordered ten-question catalogue; keep IDs stable for analytics.
 const chatQuestions: Question[] = [
   {
     id: "pricing",
@@ -57,14 +58,9 @@ const chatQuestions: Question[] = [
     answer: "Haf! 🐾 Áno, prijímame aj očkované šteniatka **približne od 4 mesiacov**.\n\nZáleží na ich veku, kompletnom očkovaní a pripravenosti na kolektív.\n\nPoďme si spolu **orientačne overiť, či tvoje šteniatko spĺňa základné podmienky**. Konečné rozhodnutie o prijatí urobíme až po úvodnej návšteve.",
   },
   {
-    id: "location",
-    title: "Kde sa škôlka nachádza?",
-    answer: "Haf! 🐾 Nájdeš nás v **Košiciach na " + ADDRESS.street + "**.\n\nMáme vlastné vnútorné priestory aj vonkajší výbeh, kde si naši škôlkari môžu užívať deň plný hier, pohybu a oddychu.\n\nNa našej stránke nájdeš aj **mapu a kontakt**, aby si nás jednoducho našiel.",
-  },
-  {
-    id: "space",
-    title: "Aké priestory má škôlka?",
-    answer: "Haf! 🐾 Naši škôlkari majú k dispozícii **vyhrievané vnútorné priestory** na hru aj oddych a vlastný **vonkajší výbeh s rozlohou približne 80 m²**.\n\nPočas dňa sa striedajú spoločné hry, aktivity a čas na odpočinok. Psíkov nenechávame hrať sa bez prestávky – všetko prispôsobujeme ich potrebám, veku aj aktuálnemu počasiu.",
+    id: "eligibility",
+    title: "Pre akých psíkov je škôlka určená?",
+    answer: "Haf! 🐾 Naša škôlka je určená najmä pre **stredné a veľké psíky, spravidla nad 15 kg**.\n\nPrijímame aj očkované šteniatka približne od 4 mesiacov.\n\nDôležitá je povaha psíka, jeho zdravotný stav a schopnosť fungovať v kolektíve.\n\nTo, či je naša škôlka vhodná aj pre tvojho psíka, spoločne zistíme počas **bezplatnej úvodnej návštevy**.",
   },
   {
     id: "first_visit",
@@ -73,8 +69,23 @@ const chatQuestions: Question[] = [
   },
   {
     id: "reservation",
-    title: "Ako si rezervujem miesto v škôlke?",
-    answer: "Haf! 🐾 Miesto v škôlke si rezervuješ vopred prostredníctvom našej **zákazníckej aplikácie**.\n\nRezervácie na nasledujúci týždeň je potrebné vytvoriť **do nedele 20:00**, aby sme vedeli naplánovať počet psíkov a zabezpečiť im bezpečný a príjemný pobyt.\n\nAk si však kvôli práci alebo iným povinnostiam nevieš naplánovať návštevy na celý týždeň dopredu, **vieme sa dohodnúť aj individuálne**, podľa voľnej kapacity. Stačí nám napísať alebo zavolať.\n\nAk ešte nie si naším škôlkarom, najprv spolu absolvujeme **bezplatnú úvodnú návštevu**.",
+    title: "Je potrebné rezervovať miesto vopred?",
+    answer: "Haf! 🐾 Áno, **miesto v škôlke je potrebné rezervovať vopred**, pretože máme obmedzenú kapacitu a chceme každému psíkovi zabezpečiť dostatok pozornosti.\n\nNaši škôlkari si rezervujú návštevy jednoducho cez **zákaznícku aplikáciu**, do nedele 20:00 na nasledujúci týždeň.\n\nAk máš nepravidelný pracovný rozvrh, **vieme sa dohodnúť aj individuálne** podľa voľnej kapacity.\n\nAk k nám tvoj psík ešte nechodí, najprv spolu absolvujeme bezplatnú úvodnú návštevu.",
+  },
+  {
+    id: "location",
+    title: "Kde sa škôlka nachádza?",
+    answer: "Haf! 🐾 Nájdeš nás v **Košiciach na " + (ADDRESS.street === "Poľská 6" ? "Poľskej 6" : ADDRESS.street) + "**.\n\nMáme vlastné vnútorné priestory aj vonkajší výbeh, kde si naši škôlkari môžu užívať deň plný hier, pohybu a oddychu.\n\nNa našej stránke nájdeš aj **mapu a kontakt**, aby si nás jednoducho našiel.",
+  },
+  {
+    id: "space",
+    title: "Aké priestory má škôlka?",
+    answer: "Haf! 🐾 Naši škôlkari majú k dispozícii **vyhrievané vnútorné priestory** na hru aj oddych a vlastný **vonkajší výbeh s rozlohou približne 80 m²**.\n\nPočas dňa sa striedajú spoločné hry, aktivity a čas na odpočinok. Psíkov nenechávame hrať sa bez prestávky – všetko prispôsobujeme ich potrebám, veku aj aktuálnemu počasiu.",
+  },
+  {
+    id: "taxi",
+    title: "Ponúkate aj psie taxi?",
+    answer: "Haf! 🐾 Áno! Ak nestíhaš svojho psíka priviezť alebo vyzdvihnúť, moji rodičia ti s tým môžu pomôcť.\n\nPonúkame **vyzdvihnutie aj odvoz psíka za 5 € za jednu jazdu**.\n\nSlužbu si môžeš dohodnúť pri rezervácii návštevy. Podrobnosti doladíme individuálne.",
   },
 ];
 
@@ -127,12 +138,17 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   const nextId = useRef(0);
   const chatId = useId();
   const unanswered = chatQuestions.filter(question => !answered.includes(question.id));
-  // Always offer the next four unanswered FAQ choices. The original ordered
-  // 4+4 catalogue stays intact, but later questions refill vacancies immediately.
+  // Always offer the next four unanswered FAQ choices in the approved order.
   const visibleQuestions = unanswered.slice(0, 4);
   const introFinished = !introComposing && introLength >= introText.length;
   const menuReady = introFinished && typingId === null &&
     !(initialQuestionId && !answered.includes(initialQuestionId));
+
+  // A rendered menu offer is not an answer or a CTA click. Only with analytics consent.
+  useEffect(() => {
+    if (!open || !menuReady || trackingPrefix !== "lead_landing_aria_chat" || !hasAnalyticsConsent()) return;
+    for (const question of visibleQuestions) trackAriaChatAction("question_offer", question.id);
+  }, [open, menuReady, answered, trackingPrefix]);
 
   // Typewriter animation is visual only. Screen readers receive a complete
   // response in a single accessible text node; respect reduced motion.
