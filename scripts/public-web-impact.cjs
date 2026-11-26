@@ -48,7 +48,39 @@ function introCopyOnly(before,after){
   try{if(typeof JSON.parse(old[0][1])!=='string'||typeof JSON.parse(next[0][1])!=='string')return false;}catch{return false;}
   return before.replace(pattern,'<display greeting>')===after.replace(pattern,'<display greeting>');
 }
+
+const navMarker="/* HOME navigation and paid LEAD return control — scoped overrides. */";
+const navPaths=new Set(['src/components/site/MobileDock.tsx','src/components/site/AriaLeadAssistant.tsx','src/components/site/AriaReturnToTop.tsx','src/styles.css']);
+function navigationCssOnly(before,after) {
+  if(typeof before!=='string'||typeof after!=='string')return false;
+  const section=s=>{const i=s.indexOf(navMarker);return i<0?{prefix:s,body:''}:s.indexOf(navMarker,i+1)<0?{prefix:s.slice(0,i),body:s.slice(i+navMarker.length)}:null;};
+  const old=section(before),next=section(after);
+  if(!old||!next||old.prefix.trimEnd()!==next.prefix.trimEnd()||!next.body.trim())return false;
+  return [old.body,next.body].every(body=>{
+    const css=body.replace(/\/\*[\s\S]*?\*\//g,'');
+    if(/@(?!media\b|supports\b)/i.test(css)||/\\/.test(css))return false;
+    return [...css.matchAll(/([^{}]+)\{/g)].map(m=>m[1].trim()).every(h=>/^@(media|supports)\b/.test(h)||
+      splitSelectors(h).every(s=>!/[+~]/.test(s)&&(/^(?:\.mobile-dock\[data-(?:home-dock|desktop-home-dock)\](?:[\s.:[\[]|$)|\.site-brand #top \[data-home-hero-photo="1"\] img$|\.lead-brand-live(?:\s+\[data-aria-back-top\]|:has\(\[data-form-dialog\], \[role="dialog"\]\[data-state="open"\]\) \[data-aria-back-top\])(?:[\s.:[\[]|$))/.test(s))));
+  });
+}
+function homeDockOnly(before,after){
+  if(typeof before!=='string'||typeof after!=='string')return false;
+  return after.replace("    ...(desktopHome ? [{label:english ? \"Why choose us?\" : \"Prečo si vybrať nás?\", icon:Heart, href:homePath+(english ? \"#en-benefits\" : \"#preco-chvostikovo\"), desktopOnly:true}] : []),\n",'').replace("              {homeMenuEntries.map(({href,label,icon:Icon,...entry}) => <a key={href} href={href} data-desktop-only-shortcut={\"desktopOnly\" in entry ? true : undefined} onClick={event => go(event, href)}><Icon size={17} strokeWidth={1.9} aria-hidden=\"true\" /><span>{label}</span></a>)}","              {homeMenuEntries.map(({href,label,icon:Icon}) => <a key={href} href={href} onClick={event => go(event, href)}><Icon size={17} strokeWidth={1.9} aria-hidden=\"true\" /><span>{label}</span></a>)}")===before;
+}
+function ariaReturnOnly(before,after){
+  if(typeof before!=='string'||typeof after!=='string')return false;
+  return after.replace("import { AriaReturnToTop } from \"./AriaReturnToTop\";\n",'').replace("          {leadChat && <AriaReturnToTop enabled={!hidden && !chatOpen && !panel} />}\n",'')===before;
+}
+function navigationOnly(files,css={}){
+  return files.some(f=>navPaths.has(f))&&files.every(f=>navPaths.has(f)||plumbing.has(f))&&
+    (!files.includes('src/styles.css')||navigationCssOnly(css.before,css.after))&&
+    (!files.includes('src/components/site/MobileDock.tsx')||homeDockOnly(css.dockBefore,css.dockAfter))&&
+    (!files.includes('src/components/site/AriaLeadAssistant.tsx')||ariaReturnOnly(css.ariaBefore,css.ariaAfter))&&
+    (!files.includes('src/components/site/AriaReturnToTop.tsx')||files.includes('src/components/site/AriaLeadAssistant.tsx'));
+}
+
 function selectScope(files, css={}) {
+  if(navigationOnly(files,css))return 'navigation';
   if(!files.length)return 'full';
   const scopedCss=files.includes('src/styles.css')&&scopedLeadCss(css.before,css.after);
   if(files.every(file=>tooling.has(file)||(file==='src/styles.css'&&scopedCss)||(file==='src/components/site/AriaGuidedChat.tsx'&&introCopyOnly(css.copyBefore,css.copyAfter))) &&
@@ -61,7 +93,7 @@ function formChecksRequired(files, css={}) {
   const presentation=new Set([...tooling,'src/styles.css','src/assets/aria-assistant-head-lead.webp']);
   return !files.length||files.some(file=>!presentation.has(file)&&!(file==='src/components/site/AriaGuidedChat.tsx'&&introCopyOnly(css.copyBefore,css.copyAfter)));
 }
-module.exports={selectScope,scopedLeadCss,introCopyOnly,formChecksRequired,ARIA_ROUTES};
+module.exports={selectScope,scopedLeadCss,introCopyOnly,formChecksRequired,ARIA_ROUTES,navigationCssOnly,homeDockOnly,ariaReturnOnly};
 if(require.main===module){
 (async()=>{
   const [base,head]=process.argv.slice(2);
@@ -77,12 +109,12 @@ if(require.main===module){
     if(!Array.isArray(comparison.files))throw new Error('Impact compare omitted changed files');
     files=comparison.files.length>=300?['unknown/truncated-comparison']:comparison.files.flatMap(file=>file.previous_filename?[file.filename,file.previous_filename]:[file.filename]);
     const read=async (path,ref)=>{const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path+'?ref='+ref,{headers:{...headers,Accept:'application/vnd.github.raw+json'}});if(!r.ok)throw new Error('Source impact HTTP '+r.status);return r.text();};
-    for(const [path,beforeKey,afterKey] of [['src/styles.css','before','after'],['src/components/site/AriaGuidedChat.tsx','copyBefore','copyAfter']]){
+    for(const [path,beforeKey,afterKey] of [['src/styles.css','before','after'],['src/components/site/AriaGuidedChat.tsx','copyBefore','copyAfter'],['src/components/site/MobileDock.tsx','dockBefore','dockAfter'],['src/components/site/AriaLeadAssistant.tsx','ariaBefore','ariaAfter']]){
       if(files.includes(path))[css[beforeKey],css[afterKey]]=await Promise.all([read(path,base),read(path,head)]);
     }
   }else{
     files=execFileSync('git',['diff','--name-only','--no-renames',base,head,'--'],{encoding:'utf8'}).trim().split(/\r?\n/).filter(Boolean);
-    for(const [path,beforeKey,afterKey] of [['src/styles.css','before','after'],['src/components/site/AriaGuidedChat.tsx','copyBefore','copyAfter']]){
+    for(const [path,beforeKey,afterKey] of [['src/styles.css','before','after'],['src/components/site/AriaGuidedChat.tsx','copyBefore','copyAfter'],['src/components/site/MobileDock.tsx','dockBefore','dockAfter'],['src/components/site/AriaLeadAssistant.tsx','ariaBefore','ariaAfter']]){
       if(files.includes(path))for(const [key,ref] of [[beforeKey,base],[afterKey,head]])css[key]=execFileSync('git',['show',ref+':'+path],{encoding:'utf8'});
     }
   }

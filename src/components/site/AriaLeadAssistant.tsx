@@ -1,5 +1,6 @@
 import { Component, lazy, Suspense, useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, UsersRound, X, ArrowRight, ArrowUp } from "lucide-react";
+import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, UsersRound, X, ArrowRight } from "lucide-react";
+import { AriaReturnToTop } from "./AriaReturnToTop";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 // Keep the chat chunk cached; preload on LEAD for an immediate first open.
 const loadAriaChat = () => import("./AriaGuidedChat").then((module) => ({ default: module.AriaGuidedChat }));
@@ -108,8 +109,6 @@ export function AriaLeadAssistant({
   const [panel, setPanel] = useState<Panel>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatReady, setChatReady] = useState(false);
-  const [showBackToTop, setShowBackToTop] = useState(false);
-  const returningToTop = useRef(false);
   useEffect(() => {
     if (!leadChat) return;
     let active = true;
@@ -164,57 +163,6 @@ export function AriaLeadAssistant({
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, [hidden, stage, guidedChatPreview, rightAlignedBubble, chatOpen, panel]);
-
-  // Paid LEAD only: hide on downward movement; reveal when stationary or
-  // moving upward. Read the real scroll position synchronously so resize and
-  // scroll events cannot cancel one another's scheduled RAF.
-  useEffect(() => {
-    setShowBackToTop(false);
-    if (!leadChat || hidden || chatOpen || panel) return;
-    const mobile = window.matchMedia("(max-width: 1023px)");
-    let lastY = Math.max(0, window.scrollY);
-    let timer = 0;
-    const eligible = () => mobile.matches && window.scrollY > 160 &&
-      !document.querySelector('[data-form-dialog], [role="dialog"][data-state="open"]');
-    const settle = () => {
-      window.clearTimeout(timer);
-      if (eligible()) timer = window.setTimeout(() => setShowBackToTop(eligible() && !returningToTop.current), 350);
-      else setShowBackToTop(false);
-    };
-    const onScroll = () => {
-      const y = Math.max(0, window.scrollY);
-      const delta = y - lastY;
-      lastY = y;
-      if (y <= 160) returningToTop.current = false;
-      if (!eligible()) {
-        window.clearTimeout(timer);
-        setShowBackToTop(false);
-        return;
-      }
-      if (delta > 0) { returningToTop.current = false; setShowBackToTop(false); }
-      else if (delta < 0 && !returningToTop.current) setShowBackToTop(true);
-      settle();
-    };
-    const onResize = () => { lastY = Math.max(0, window.scrollY); settle(); };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
-    mobile.addEventListener("change", onResize);
-    settle();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-      mobile.removeEventListener("change", onResize);
-      window.clearTimeout(timer);
-    };
-  }, [leadChat, hidden, chatOpen, panel]);
-
-  function returnToTop() {
-    void trackCookielessInteraction("nav_click", "mobile_dock_lead_back_to_top", "sk");
-    returningToTop.current = true;
-    setShowBackToTop(false);
-    if (window.location.hash) window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
-    window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-  }
 
   // Stable sections rather than flipping a bubble on every scroll pixel.
   // Hysteresis keeps iOS browser chrome resizing from thrashing the dock.
@@ -698,7 +646,7 @@ export function AriaLeadAssistant({
         )}
 
         <div className={leadChat ? "pointer-events-none relative mx-auto h-0 w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (rightAlignedBubble || sectionNavigation ? "mx-auto w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
-          {leadChat && <button type="button" data-aria-back-top data-visible={showBackToTop && !chatOpen && !panel ? "true" : "false"} disabled={!showBackToTop || chatOpen || !!panel} aria-label="Späť hore" title="Späť hore" onClick={returnToTop}><ArrowUp aria-hidden="true" size={18} strokeWidth={2} /></button>}
+          {leadChat && <AriaReturnToTop enabled={!hidden && !chatOpen && !panel} />}
           {!leadChat && <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />}
           {leadChat ? (
             <button type="button" data-aria-chat-trigger aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}

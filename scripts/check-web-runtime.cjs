@@ -6,12 +6,12 @@ const path = require('node:path');
 const bellaris = process.env.WEB_SITE === 'bellaris';
 const { ARIA_ROUTES } = require('./public-web-impact.cjs');
 const runtimeScope = process.env.WEB_RUNTIME_SCOPE || 'full';
-if(!['full','aria','aria-visual'].includes(runtimeScope)||bellaris&&runtimeScope!=='full')throw new Error('Invalid public web runtime scope');
+if(!['full','aria','aria-visual','navigation'].includes(runtimeScope)||bellaris&&runtimeScope!=='full')throw new Error('Invalid public web runtime scope');
 const base = process.env.WEB_BASE_URL || (bellaris ? 'https://bellaris.sk' : 'https://chvostikovo.sk');
 const fullRoutes = bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/', '/test-aria/'];
 const urls = (runtimeScope === 'aria-visual' ? ['/psia-skolka-kosice/'] : runtimeScope === 'aria' ? ARIA_ROUTES : fullRoutes).map(route => new URL(route, base));
 const brandPreviewCandidate = new URL(base).hostname === '127.0.0.1';
-if(runtimeScope==='aria-visual'&&!brandPreviewCandidate)throw new Error('Visual assertions require a freshly built local candidate');
+if(['aria-visual','navigation'].includes(runtimeScope)&&!brandPreviewCandidate)throw new Error('Visual assertions require a freshly built local candidate');
 const out = process.env.RUNTIME_REPORT_DIR || 'runtime-report';
 fs.mkdirSync(out, { recursive: true });
 const results = [];
@@ -280,6 +280,57 @@ async function assertPaidAriaChat(page, {visualOnly=false}={}) {
   }
 }
 
+async function assertPaidReturnArrow(page) {
+  // Paid-only scroll shortcut: same-document scroll, no chat open or CTA conversion.
+  await page.setViewportSize({width:390,height:844});
+  const back=page.locator('[data-aria-back-top]');
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+  await back.waitFor({state:'hidden'});
+  await page.waitForFunction(()=>window.scrollY<5);
+  await page.evaluate(()=>window.scrollTo({top:650,behavior:'instant'}));
+  await page.waitForFunction(()=>window.scrollY>160);
+  await back.waitFor({state:'visible',timeout:4000}).catch(async error=>{throw new Error('Paid arrow idle visibility: '+JSON.stringify(await back.evaluate(el=>({scrollY,innerWidth,visible:el.dataset.visible,disabled:el.disabled,visibility:getComputedStyle(el).visibility,dialog:!!document.querySelector('[data-form-dialog], [role="dialog"][data-state="open"]')}))),{cause:error});});
+  const arrowGeometry=await back.evaluate(el=>{const a=el.getBoundingClientRect(),p=document.querySelector('[data-aria-chat-trigger]').getBoundingClientRect();return a.height>=44&&a.width>=44&&a.bottom<=p.top-4&&Math.abs(a.left-p.left)<=2&&a.top>=0;});
+  if(!arrowGeometry)throw new Error('Return arrow must sit above Aria without covering her');
+  await page.evaluate(()=>window.scrollTo({top:450,behavior:'instant'}));
+  await page.waitForFunction(()=>Math.abs(scrollY-450)<8);
+  await back.waitFor({state:'visible'});
+  // Fixed shortcut must be hit directly without centering/scrolling the document.
+  const hit=await back.evaluate(el=>{const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;if(el.disabled||!el.contains(document.elementFromPoint(x,y)))throw new Error('Aria return arrow is occluded or disabled');return {x,y};});
+  const prior=await page.evaluate(()=>({search:location.search,path:location.pathname}));
+  if(await page.evaluate(()=>navigator.maxTouchPoints>0))await page.touchscreen.tap(hit.x,hit.y);else await page.mouse.click(hit.x,hit.y);
+  await page.waitForFunction(()=>window.scrollY<5,null,{timeout:5000}).catch(async error=>{throw new Error('Paid return click did not reach top: '+JSON.stringify(await page.evaluate(()=>({scrollY,hash:location.hash,visible:document.querySelector('[data-aria-back-top]')?.dataset.visible}))),{cause:error});});
+  if(!await page.evaluate(p=>location.search===p.search&&location.pathname===p.path&&!location.hash,prior))throw new Error('Arrow must preserve attribution and route');
+  await back.waitFor({state:'hidden'});
+  await page.setViewportSize({width:1280,height:900});
+  await page.evaluate(()=>window.scrollTo({top:650,behavior:'instant'}));
+  await page.waitForFunction(()=>scrollY>160);
+  if(await back.isVisible())throw new Error('Paid arrow must stay hidden on desktop');
+  await page.setViewportSize({width:390,height:844});
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+  await page.waitForFunction(()=>scrollY<5);
+  if(await page.locator('[data-aria-chat-trigger]').getAttribute('aria-expanded')!=='false')throw new Error('Return arrow must not open chat');
+
+}
+async function assertPaidReturnNavigation(browser,engine) {
+  const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+  try {
+    await context.addInitScript(()=>localStorage.setItem('chvostikovo-cookies',JSON.stringify({version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,functional:false,analytics:false,marketing:false})));
+    await context.route('**/*',route=>{const req=route.request(),u=new URL(req.url());return u.origin===new URL(base).origin&&['GET','HEAD'].includes(req.method())?route.continue():route.abort();});
+    const page=await context.newPage();
+    const errors=[];page.on('pageerror',e=>errors.push(e.message));
+    const response=await page.goto(new URL('/psia-skolka-kosice/?utm_source=fixture&utm_campaign=arrow',base).href,{waitUntil:'domcontentloaded'});
+    if(response?.status()!==200)throw new Error('Paid LEAD HTTP '+response?.status());
+    await page.locator('[data-aria-speech] [data-aria-tail]').waitFor({state:'attached'});
+    const cookie=page.getByRole('button',{name:/Len nevyhnutné|Odmietnuť/}).first();
+    if(await cookie.isVisible())await cookie.click();
+    await page.evaluate(()=>history.replaceState(history.state,'',location.pathname+location.search+'#lead-pricing'));
+    await assertPaidReturnArrow(page);
+    if(errors.length)throw new Error('Paid navigation runtime errors: '+errors.join('; '));
+    console.log('PASS paid LEAD mobile return arrow and desktop absence '+engine);
+  }finally{await context.close();}
+}
+
 async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
   await page.locator('[data-aria-lead-chat] img[alt^="Aria"]').evaluate(async image=>{
     await image.decode();
@@ -359,33 +410,7 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
     if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.actionFg!=='rgb(255, 255, 255)'||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.greetingFit||!fold.compactLauncher||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
-  // Paid-only scroll shortcut: same-document scroll, no chat open or CTA conversion.
-  await page.setViewportSize({width:390,height:844});
-  const back=page.locator('[data-aria-back-top]');
-  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
-  await back.waitFor({state:'hidden'});
-  await page.waitForFunction(()=>window.scrollY<5);
-  await page.evaluate(()=>window.scrollTo({top:650,behavior:'instant'}));
-  await page.waitForFunction(()=>window.scrollY>160);
-  await back.waitFor({state:'visible',timeout:4000}).catch(async error=>{throw new Error('Paid arrow idle visibility: '+JSON.stringify(await back.evaluate(el=>({scrollY,innerWidth,visible:el.dataset.visible,disabled:el.disabled,visibility:getComputedStyle(el).visibility,dialog:!!document.querySelector('[data-form-dialog], [role="dialog"][data-state="open"]')}))),{cause:error});});
-  const arrowGeometry=await back.evaluate(el=>{const a=el.getBoundingClientRect(),p=document.querySelector('[data-aria-chat-trigger]').getBoundingClientRect();return a.height>=44&&a.width>=44&&a.bottom<=p.top-4&&Math.abs(a.left-p.left)<=2&&a.top>=0;});
-  if(!arrowGeometry)throw new Error('Return arrow must sit above Aria without covering her');
-  await page.evaluate(()=>window.scrollTo({top:450,behavior:'instant'}));
-  await page.waitForFunction(()=>Math.abs(scrollY-450)<8);
-  await back.waitFor({state:'visible'});
-  // Fixed shortcut must be hit directly without centering/scrolling the document.
-  await back.evaluate(el=>{const r=el.getBoundingClientRect();if(!el.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)))throw new Error('Aria return arrow is occluded');});
-  if(await page.evaluate(()=>navigator.maxTouchPoints>0))await back.tap({timeout:5000});else await back.click({timeout:5000});
-  await page.waitForFunction(()=>window.scrollY<5);
-  await back.waitFor({state:'hidden'});
-  await page.setViewportSize({width:1280,height:900});
-  await page.evaluate(()=>window.scrollTo({top:650,behavior:'instant'}));
-  await page.waitForFunction(()=>scrollY>160);
-  if(await back.isVisible())throw new Error('Paid arrow must stay hidden on desktop');
-  await page.setViewportSize({width:390,height:844});
-  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
-  await page.waitForFunction(()=>scrollY<5);
-  if(await page.locator('[data-aria-chat-trigger]').getAttribute('aria-expanded')!=='false')throw new Error('Return arrow must not open chat');
+  await assertPaidReturnArrow(page);
   if(await page.locator('#lead-requirements h2').innerText()!=='Podmienky prijatia psíka')throw new Error('Campaign conditions heading differs');
   if(visualOnly){
     await page.setViewportSize({width:390,height:844});
@@ -679,7 +704,7 @@ async function assertApplicationPreview(page,en) {
   console.log('PASS application preview '+(en?'EN':'SK'));
 }
 
-async function assertBilingualNavigation(browser,engine) {
+async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={}) {
   const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
   const captured=[];
   try {
@@ -709,7 +734,7 @@ async function assertBilingualNavigation(browser,engine) {
       await assertHomeDockActivePink(page,false);
       await page.screenshot({path:path.join(out,'compact-sk-menu-'+engine+'-'+width+'.png')});
     }
-    await assertApplicationPreview(page,false);
+    if(!navigationOnly)await assertApplicationPreview(page,false);
     await page.locator('[data-home-menu] a[href="/#aria-puppy-check"]').click();
     await page.waitForFunction(()=>location.hash==='#aria-puppy-check');
     await page.locator('[data-home-menu] a[href="/#faq"]').click();
@@ -723,7 +748,7 @@ async function assertBilingualNavigation(browser,engine) {
     await page.locator('[data-home-menu] [data-language-switch] a[lang="en"]').click();
     await page.waitForURL(/\/en\/dog-daycare-kosice\/?$/);
     await page.waitForFunction(()=>document.documentElement.lang==='en');
-    await assertApplicationPreview(page,true);
+    if(!navigationOnly)await assertApplicationPreview(page,true);
     if(captured.some(r=>r.path.endsWith('/web-form-submit')))throw new Error('Collapsed application posted to receiver');
     if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Language switch reloaded document');
     if(await page.evaluate(()=>window.__bilingualPixel.some(a=>a[0]==='track')))throw new Error('Pixel fired without consent');
@@ -803,6 +828,12 @@ async function assertBilingualNavigation(browser,engine) {
   for (const [engine, browserType] of selectedEngines) {
     const browser = await browserType.launch();
     try {
+    if(runtimeScope==='navigation'){
+      await assertBilingualNavigation(browser,engine,{navigationOnly:true});
+      await assertPaidReturnNavigation(browser,engine);
+      results.push({engine,scope:'navigation',status:'PASS'});
+      continue;
+    }
     if (!bellaris && brandPreviewCandidate && runtimeScope==='full') { await assertFooterMapGeometry(browser, engine); await assertBilingualNavigation(browser,engine); }
     for (const restricted of (runtimeScope==='aria-visual'?[false]:[false,true])) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
