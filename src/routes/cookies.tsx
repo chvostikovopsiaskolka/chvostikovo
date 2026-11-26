@@ -25,18 +25,18 @@ export const Route = createFileRoute("/cookies")({
 });
 
 function H2({ children }: { children: React.ReactNode }) {
-  return <h2 className="pt-3 font-display text-xl font-bold text-forest">{children}</h2>;
+  return <h2 className="pt-3 font-display text-xl font-bold text-[#26322b]">{children}</h2>;
 }
 
 function Cookies() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-16">
-      <Link to="/" className="font-display text-sm font-semibold text-coral">
+    <main className="site-brand mx-auto min-h-screen max-w-3xl px-4 py-10 sm:px-8 sm:py-16">
+      <Link to="/" className="font-display text-sm font-semibold text-[#a95400]">
         ← Späť na hlavnú stránku
       </Link>
-      <h1 className="section-title mt-4 text-3xl sm:text-4xl">Pravidlá používania cookies</h1>
+      <h1 className="section-title mt-4 border-b-2 border-[#ffa414] pb-4 text-3xl text-[#26322b] sm:text-4xl">Pravidlá používania cookies</h1>
 
-      <div className="mt-6 space-y-4 text-forest/85">
+      <div className="mt-6 space-y-4 text-[#26322b]">
         <H2>1. Čo sú cookies?</H2>
         <p>
           Cookies sú malé textové súbory, ktoré sa ukladajú do vášho zariadenia pri návšteve našej

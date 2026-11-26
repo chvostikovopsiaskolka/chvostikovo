@@ -25,19 +25,19 @@ export const Route = createFileRoute("/ochrana-osobnych-udajov")({
 });
 
 function H2({ children }: { children: React.ReactNode }) {
-  return <h2 className="pt-3 font-display text-xl font-bold text-forest">{children}</h2>;
+  return <h2 className="pt-3 font-display text-xl font-bold text-[#26322b]">{children}</h2>;
 }
 
 function Privacy() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-16">
-      <Link to="/" className="font-display text-sm font-semibold text-coral">
+    <main className="site-brand mx-auto min-h-screen max-w-3xl px-4 py-10 sm:px-8 sm:py-16">
+      <Link to="/" className="font-display text-sm font-semibold text-[#a95400]">
         ← Späť na hlavnú stránku
       </Link>
-      <h1 className="section-title mt-4 text-3xl sm:text-4xl">Zásady ochrany osobných údajov</h1>
-      <p className="mt-2 text-sm text-forest/70">Pre web a zákaznícku aplikáciu Chvostíkovo · aktualizované 1. 11. 2026</p>
+      <h1 className="section-title mt-4 border-b-2 border-[#ffa414] pb-4 text-3xl text-[#26322b] sm:text-4xl">Zásady ochrany osobných údajov</h1>
+      <p className="mt-2 text-sm text-[#59675c]">Pre web a zákaznícku aplikáciu Chvostíkovo · aktualizované 26. 11. 2026</p>
 
-      <div className="mt-6 space-y-4 text-forest/85">
+      <div className="mt-6 space-y-4 text-[#26322b]">
         <H2>1. Úvod</H2>
         <p>
           Tieto zásady vysvetľujú, ako spracúvame osobné údaje pri používaní webu
@@ -54,7 +54,7 @@ function Privacy() {
         <p>Spracovávame nasledujúce kategórie osobných údajov:</p>
         <ul className="list-disc space-y-2 pl-5">
           <li>
-            <strong>Kontaktné údaje:</strong> meno, priezvisko, e-mailová adresa, telefónne číslo.
+            <strong>Kontaktné a objednávkové údaje:</strong> meno, priezvisko, e-mail, telefón, údaje z dopytových formulárov, prípadná dodacia adresa a údaje o objednanom výrobku.
           </li>
           <li>
             <strong>Údaje o návštevách:</strong> IP adresa, údaje o vašich aktivitách na našej
@@ -73,8 +73,9 @@ function Privacy() {
           na doručovanie push správ.
         </p>
 
+        <p><strong>Vlastná analytika návštevnosti:</strong> na zlepšovanie webu meriame návštevy a interakcie aj bez analytických a reklamných cookies. Spracúvame technické údaje o návštevách, zdrojoch a interakciách vrátane otázok otvorených v sprievodcovi Aria. Na rozlíšenie a deduplikáciu záznamov používame technické identifikátory, napríklad hash reklamného identifikátora a dočasné údaje v úložisku relácie prehliadača (sessionStorage).</p>
         <H2>3. Účely spracovania osobných údajov</H2>
-        <p>Vaše osobné údaje spracovávame na tieto účely:</p>
+        <p>Vaše osobné údaje spracovávame na tieto účely vrátane vybavenia záujmu o stojany a targety, dohodnutia objednávky, dodania, platieb a reklamácií.</p>
         <ul className="list-disc space-y-2 pl-5">
           <li>
             <strong>Poskytovanie služieb:</strong> Aby sme mohli vybaviť vaše požiadavky,
@@ -159,10 +160,10 @@ function Privacy() {
             oprávneného záujmu.
           </li>
         </ul>
-        <p>Svoje práva môžete uplatniť prostredníctvom e-mailu: {EMAIL}.</p>
+        <p>Svoje práva môžete uplatniť prostredníctvom e-mailu: {EMAIL}. Máte tiež právo odvolať súhlas bez vplyvu na zákonnosť predchádzajúceho spracúvania a podať sťažnosť Úradu na ochranu osobných údajov Slovenskej republiky.</p>
 
         <section id="vymazanie-uctu" aria-labelledby="vymazanie-uctu-nadpis" className="scroll-mt-6 space-y-3">
-          <h3 id="vymazanie-uctu-nadpis" className="font-display text-lg font-bold text-forest">
+          <h3 id="vymazanie-uctu-nadpis" className="font-display text-lg font-bold text-[#26322b]">
             Vymazanie zákazníckeho účtu Chvostíkovo
           </h3>
           <p>
@@ -170,7 +171,7 @@ function Privacy() {
             údajov môžete požiadať aj bez prihlásenia. Pošlite e-mail s predmetom
             „Žiadosť o vymazanie účtu Chvostíkovo“ na{" "}
             <a href={"mailto:" + EMAIL + "?subject=Ziadost%20o%20vymazanie%20uctu%20Chvostikovo"}
-              className="font-semibold text-coral underline">{EMAIL}</a>.
+              className="font-semibold text-[#a95400] underline">{EMAIL}</a>.
             Uveďte e-mail používaný pri registrácii. Heslo ani fotografie dokladov
             neposielajte. V prípade potreby si bezpečným spôsobom overíme, že účet patrí vám.
           </p>
@@ -221,7 +222,7 @@ function Privacy() {
         <p>
           Používame cookies na zlepšenie vašej používateľskej skúsenosti a analýzu návštevnosti.
           Podrobné informácie o používaní cookies nájdete v našich{" "}
-          <Link to="/cookies" className="font-semibold text-coral underline">
+          <Link to="/cookies" className="font-semibold text-[#a95400] underline">
             Pravidlách používania cookies
           </Link>
           .

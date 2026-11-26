@@ -11,7 +11,7 @@ type Language = "sk" | "en";
 
 function SlovakPolicy() {
   return (
-    <div className="space-y-4 text-sm leading-relaxed text-forest/85">
+    <div className="space-y-4 text-sm leading-relaxed text-[#26322b]">
       <p>
         Tieto informácie sa týkajú osobných údajov spracúvaných pri používaní webu
         chvostikovo.sk a zákazníckej aplikácie Chvostíkovo.
@@ -23,9 +23,7 @@ function SlovakPolicy() {
       <div>
         <h3 className="font-display font-bold text-forest">Aké údaje spracovávame</h3>
         <p className="mt-1">
-          Kontaktné údaje, najmä meno, priezvisko, telefón a údaje, ktoré nám dobrovoľne
-          uvediete vo formulári. Pri používaní webu môžu byť spracúvané aj technické údaje
-          o návšteve v súlade s nastavením cookies.
+          Kontaktné údaje, najmä meno, telefón, prípadne e-mail, a údaje uvedené vo formulári vrátane údajov potrebných na vybavenie dopytu na výrobok alebo jeho dodanie. Podrobnosti o technických údajoch a nastaveniach súkromia sú v úplných zásadách.
         </p>
       </div>
       <div>
@@ -58,7 +56,7 @@ function SlovakPolicy() {
           href="/ochrana-osobnych-udajov"
           target="_blank"
           rel="noreferrer"
-          className="font-semibold text-coral underline underline-offset-2"
+          className="font-semibold text-[#a95400] underline underline-offset-2"
         >
           Zásady ochrany osobných údajov
         </a>.
@@ -69,7 +67,7 @@ function SlovakPolicy() {
 
 function EnglishPolicy() {
   return (
-    <div className="space-y-4 text-sm leading-relaxed text-forest/85">
+    <div className="space-y-4 text-sm leading-relaxed text-[#26322b]">
       <p>
         This notice explains how we process personal data through chvostikovo.sk
         and the Chvostíkovo customer app.
@@ -81,9 +79,7 @@ function EnglishPolicy() {
       <div>
         <h3 className="font-display font-bold text-forest">Data we process</h3>
         <p className="mt-1">
-          Contact details such as your name and phone number, plus information you choose
-          to provide in the form. Technical visit data may also be processed according to
-          your cookie settings.
+          Contact details such as your name, phone number and, where applicable, email, and information you provide for a product enquiry or delivery. Details about technical data and privacy settings are in the full policy.
         </p>
       </div>
       <div>
@@ -108,7 +104,7 @@ function EnglishPolicy() {
           href="/en/privacy"
           target="_blank"
           rel="noreferrer"
-          className="font-semibold text-coral underline underline-offset-2"
+          className="font-semibold text-[#a95400] underline underline-offset-2"
         >
           Privacy Policy
         </a>.
@@ -142,7 +138,7 @@ export function PrivacyConsentCheckbox({
               event.stopPropagation();
               setOpen(true);
             }}
-            className="font-semibold text-coral underline underline-offset-2 hover:text-coral-dark"
+            className="font-semibold text-[#a95400] underline underline-offset-2 hover:text-coral-dark"
           >
             {isEnglish ? "Privacy Policy" : "zásadami ochrany osobných údajov"}
           </button>
@@ -151,7 +147,7 @@ export function PrivacyConsentCheckbox({
       </label>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[88vh] w-[calc(100%-1.25rem)] max-w-2xl overflow-y-auto rounded-3xl border-none bg-card p-5 shadow-2xl sm:p-7">
+        <DialogContent className="site-brand max-h-[88vh] w-[calc(100%-1.25rem)] max-w-2xl overflow-y-auto rounded-3xl border-none bg-card p-5 shadow-2xl sm:p-7">
           <DialogHeader>
             <DialogTitle className="pr-7 font-display text-xl text-forest sm:text-2xl">
               {isEnglish ? "Privacy Policy" : "Spracovanie osobných údajov"}

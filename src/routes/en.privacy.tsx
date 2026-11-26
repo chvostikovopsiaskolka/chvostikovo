@@ -24,19 +24,19 @@ export const Route = createFileRoute("/en/privacy")({
 });
 
 function H2({ children }: { children: React.ReactNode }) {
-  return <h2 className="pt-3 font-display text-xl font-bold text-forest">{children}</h2>;
+  return <h2 className="pt-3 font-display text-xl font-bold text-[#26322b]">{children}</h2>;
 }
 
 function EnglishPrivacy() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-16">
-      <Link to="/en/dog-daycare-kosice" className="font-display text-sm font-semibold text-coral">
+    <main className="site-brand mx-auto min-h-screen max-w-3xl px-4 py-10 sm:px-8 sm:py-16">
+      <Link to="/en/dog-daycare-kosice" className="font-display text-sm font-semibold text-[#a95400]">
         ← Back to the English page
       </Link>
-      <h1 className="section-title mt-4 text-3xl sm:text-4xl">Privacy Policy</h1>
-      <p className="mt-2 text-sm text-forest/70">Website and customer app · updated 1 November 2026</p>
+      <h1 className="section-title mt-4 border-b-2 border-[#ffa414] pb-4 text-3xl text-[#26322b] sm:text-4xl">Privacy Policy</h1>
+      <p className="mt-2 text-sm text-[#59675c]">Website and customer app · updated 26 November 2026</p>
 
-      <div className="mt-6 space-y-4 text-forest/85">
+      <div className="mt-6 space-y-4 text-[#26322b]">
         <H2>1. Introduction</H2>
         <p>
           This Privacy Policy applies to the website chvostikovo.sk, enquiry forms and the Chvostíkovo customer portal at app.chvostikovo.sk, including the mobile app.
@@ -48,7 +48,7 @@ function EnglishPrivacy() {
         <H2>2. Personal data we process</H2>
         <p>We may process the following categories of personal data:</p>
         <ul className="list-disc space-y-2 pl-5">
-          <li><strong>Contact details:</strong> name, surname, e-mail address and telephone number.</li>
+          <li><strong>Contact and order details:</strong> name, surname, email, telephone number, enquiry details, delivery address where applicable and details of the ordered product.</li>
           <li><strong>Visit data:</strong> IP address, information about activity on our website, cookies, browser and device information.</li>
         </ul>
 
@@ -61,7 +61,9 @@ function EnglishPrivacy() {
           may be processed to maintain the service.
         </p>
 
+        <p><strong>First-party website analytics:</strong> to improve the website we also measure visits and interactions without analytics or advertising cookies. We process technical visit, referral and interaction data, including questions opened in the Aria guide. To distinguish and deduplicate records we use technical identifiers, such as a hash of the advertising click identifier and temporary browser session storage (sessionStorage).</p>
         <H2>3. Purposes of processing</H2>
+        <p>This includes handling enquiries about bowl stands and targets, arranging orders, delivery, payments and complaints.</p>
         <ul className="list-disc space-y-2 pl-5">
           <li><strong>Providing services:</strong> to respond to enquiries, communicate with you and provide website functionality.</li>
           <li><strong>Marketing communications:</strong> to send informational or advertising messages where you have given consent.</li>
@@ -104,16 +106,16 @@ function EnglishPrivacy() {
           <li><strong>Portability:</strong> receive data you provided in a structured, commonly used and machine-readable format where applicable.</li>
           <li><strong>Object:</strong> object to processing based on legitimate interests where applicable.</li>
         </ul>
-        <p>You can exercise your rights by contacting us at {EMAIL}.</p>
+        <p>You can exercise your rights by contacting us at {EMAIL}. You also have the right to withdraw consent without affecting prior lawful processing and to lodge a complaint with the Office for Personal Data Protection of the Slovak Republic.</p>
 
         <section id="account-deletion" aria-labelledby="account-deletion-heading" className="scroll-mt-6 space-y-3">
-          <h3 id="account-deletion-heading" className="font-display text-lg font-bold text-forest">
+          <h3 id="account-deletion-heading" className="font-display text-lg font-bold text-[#26322b]">
             Delete your Chvostíkovo customer account
           </h3>
           <p>
             You can request deletion of your Chvostíkovo customer app account and associated
             personal data without signing in. Email{" "}
-            <a className="font-semibold text-coral underline"
+            <a className="font-semibold text-[#a95400] underline"
               href={"mailto:" + EMAIL + "?subject=Chvostikovo%20account%20deletion"}>{EMAIL}</a>{" "}
             with the subject “Chvostíkovo account deletion” and include the email address
             registered with your account. Do not send your password or identity documents.
@@ -162,7 +164,7 @@ function EnglishPrivacy() {
         <H2>9. Cookies</H2>
         <p>
           We use cookies to improve your experience and analyse website traffic. More information is available in our{" "}
-          <Link to="/en/cookies" className="font-semibold text-coral underline">Cookie Policy</Link>.
+          <Link to="/en/cookies" className="font-semibold text-[#a95400] underline">Cookie Policy</Link>.
         </p>
 
         <H2>10. Contact</H2>
