@@ -3194,7 +3194,7 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
                     singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===8 && !faq.querySelector('a[href="/caste-otazky"]') && !!faq.querySelector('[data-home-faq-contact]') && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
                     applicationAfterPricing:document.getElementById('cennik').nextElementSibling?.id==='psie-priatelstva' && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='cennik' && document.getElementById('psie-priatelstva').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
-                    approvedMainDock:(()=>{const style=getComputedStyle(dock.querySelector('.mobile-dock-bar'));return innerWidth<1024?style.boxShadow==='none':style.boxShadow.includes('inset');})(),
+                    approvedMainDock:(()=>{const style=getComputedStyle(dock.querySelector('.mobile-dock-bar'));return style.boxShadow.includes('inset') && style.backgroundImage.includes('gradient') && (style.backdropFilter||style.webkitBackdropFilter||'').includes('blur');})(),
                     mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].filter(el=>el.getClientRects().length).map(el=>el.getAttribute('href')).join('|')===(innerWidth<1024?'/|/#cennik|/#podmienky|/#priestory|/produkty':'/|/#o-nas|/#cennik|/#podmienky|/produkty') && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2 &&
@@ -4400,8 +4400,11 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
               if (await productsLink.count() !== 1 || await productsLink.getAttribute('href') !== '/produkty') {
                 throw new Error('Main mobile dock Products link must go to /produkty');
               }
-              if (await dock.getByText('Priestory', { exact: true }).count()) {
-                throw new Error('Retired Spaces shortcut should not occupy mobile dock');
+              // PR538 restored the mobile-only Spaces shortcut before Products.
+              const spacesLink = dock.getByRole('link', { name: 'Priestory', exact: true });
+              if (await spacesLink.count() !== 1 || await spacesLink.getAttribute('href') !== '/#priestory' ||
+                  !await spacesLink.isVisible() || !await spacesLink.evaluate(el=>el.getBoundingClientRect().height>=44)) {
+                throw new Error('Approved mobile Spaces shortcut must remain visible and usable');
               }
             }
             for (const route of ['/stojan-na-misky-pre-psa', '/target-na-cvicenie-pre-psov']) {
