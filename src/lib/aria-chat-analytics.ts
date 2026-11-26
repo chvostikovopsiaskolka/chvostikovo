@@ -1,11 +1,11 @@
 // In-memory, LEAD-only conversational analytics; no cookie, storage or contact data.
 export const ARIA_CHAT_PREFIX = "lead_landing_aria_chat_";
 export const ARIA_IDLE_MS = 30 * 60 * 1000;
-export const ARIA_QUESTIONS = ["pricing","requirements","caretakers","puppy","location","space","first_visit","reservation"] as const;
+export const ARIA_QUESTIONS = ["pricing","requirements","caretakers","puppy","eligibility","first_visit","reservation","location","space","taxi"] as const;
 export const ARIA_FORMS = ["interest","other","puppy_contact"] as const;
-export type AriaAction = "open" | "reopen" | "resume" | "close" | "leave" | "question" | "auto_question" | "interest_open" | "other_open" | "puppy_check_open" | "puppy_precheck_passed" | "puppy_precheck_info" | "form_open" | "form_start" | "form_attempt" | "form_error" | "form_submit";
+export type AriaAction = "open" | "reopen" | "resume" | "close" | "leave" | "question" | "auto_question" | "question_offer" | "interest_open" | "other_open" | "puppy_check_open" | "puppy_precheck_passed" | "puppy_precheck_info" | "form_open" | "form_start" | "form_attempt" | "form_error" | "form_submit";
 export type AriaEvent = { chat_id: string; visit_id: string; sequence: number; action: AriaAction; detail: string | null; form_attempt_id: string | null };
-type Conversation = { id: string; seq: number; lastAt: number; open: boolean };
+type Conversation = { id: string; seq: number; lastAt: number; open: boolean; offered: Set<string> };
 const simpleActions = new Set(["open","resume","close","leave","interest_open","other_open","puppy_check_open","puppy_precheck_passed","puppy_precheck_info"]);
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export function ariaEventSource(action: AriaAction, detail: string | null) {
@@ -25,10 +25,10 @@ export function createAriaChatAnalytics(now = () => Date.now(), uuid = () => glo
   const attempts = new Map<string, { conversation: Conversation; at: number; detail: string }>();
   function newConversation(at: number): Conversation {
     visitId ||= uuid();
-    return { id: uuid(), seq: 0, lastAt: at, open: true };
+    return { id: uuid(), seq: 0, lastAt: at, open: true, offered: new Set<string>() };
   }
   function record(action: AriaAction, detail: string | null = null, attemptId?: string): AriaEvent | undefined {
-    const question = action === "question" || action === "auto_question";
+    const question = action === "question" || action === "auto_question" || action === "question_offer";
     const form = action.startsWith("form_");
     if (question ? !ARIA_QUESTIONS.some(q => q === detail) : form ? !ARIA_FORMS.some(k => k === detail) : !simpleActions.has(action) || detail !== null) return;
     if (attemptId && (!uuidPattern.test(attemptId) || !["form_attempt","form_error","form_submit"].includes(action))) return;
@@ -60,6 +60,10 @@ export function createAriaChatAnalytics(now = () => Date.now(), uuid = () => glo
       }
       if (!target || !visitId) return;
       if (target.seq >= 10000) return;
+      if (action === "question_offer" && detail) {
+        if (target.offered.has(detail)) return;
+        target.offered.add(detail);
+      }
       if (action === "close" || action === "leave") {
         if (!target.open) return;
         target.open = false;

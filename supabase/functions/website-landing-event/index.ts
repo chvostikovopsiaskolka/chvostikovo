@@ -257,7 +257,7 @@ async function notifyFormError(input: Json, path: string, attemptId: string | nu
 
 
 const ARIA_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const ARIA_QUESTION_IDS = new Set(["pricing","requirements","caretakers","puppy","location","space","first_visit","reservation"]);
+const ARIA_QUESTION_IDS = new Set(["pricing","requirements","caretakers","puppy","eligibility","first_visit","reservation","location","space","taxi"]);
 const ARIA_FORM_IDS = new Set(["interest","other","puppy_contact"]);
 const ARIA_SIMPLE = new Set(["open","reopen","resume","close","leave","interest_open","other_open","puppy_check_open","puppy_precheck_passed","puppy_precheck_info"]);
 const ARIA_FORM_ACTIONS = new Set(["form_open","form_start","form_attempt","form_error","form_submit"]);
@@ -270,7 +270,7 @@ function parseAriaEvent(input: Json, path: string, origin: string) {
   if (typeof a.chat_id !== "string" || !ARIA_UUID.test(a.chat_id) || typeof a.visit_id !== "string" || !ARIA_UUID.test(a.visit_id) ||
       typeof a.sequence !== "number" || !Number.isInteger(a.sequence) || a.sequence < 1 || a.sequence > 10000 ||
       typeof a.action !== "string") return null;
-  const question = a.action === "question" || a.action === "auto_question";
+  const question = a.action === "question" || a.action === "auto_question" || a.action === "question_offer";
   const form = ARIA_FORM_ACTIONS.has(a.action);
   if (question ? typeof a.detail !== "string" || !ARIA_QUESTION_IDS.has(a.detail) :
       form ? typeof a.detail !== "string" || !ARIA_FORM_IDS.has(a.detail) :
