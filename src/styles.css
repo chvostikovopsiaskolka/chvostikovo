@@ -1229,7 +1229,8 @@
      second dock. On short screens keep the content in normal scroll flow. */
   .lead-brand-live .hero-safe-top {
     --lead-hero-visible: calc(100svh - 112px - max(8px, env(safe-area-inset-bottom, 0px)));
-    --hero-content-top: clamp(28px, calc(20svh - 104px), 66px);
+    /* Keep a modest, stable top inset even in embedded browsers with top chrome. */
+    --hero-content-top: clamp(8px, calc(17svh - 100px), 36px);
     min-height: 100svh;
     justify-content: flex-start;
     padding-bottom: 0.75rem;
@@ -1678,7 +1679,13 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   [data-aria-chat-lead] { --aria-chat-warm-alpha: 46%; --aria-chat-rose-alpha: 42%; }
   /* Give the greeting real space rather than clipping it with nowrap.
      Rem limits preserve text resizing; enlarged text may naturally reflow. */
-  .lead-brand-live [data-aria-guide] { padding-inline: 8px; }
+  .lead-brand-live [data-aria-guide] {
+    padding-inline: 8px;
+  }
+  /* Raise only the collapsed paid launcher; preserve open chat positioning. */
+  .lead-brand-live [data-aria-guide][data-aria-lead-chat]:not(:has([data-aria-chat-lead], [data-aria-chat], [data-aria-panel])) {
+    bottom: calc(max(0px, calc(env(safe-area-inset-bottom, 0px) - 6px)) + clamp(12px, calc(18svh - 110px), 52px));
+  }
   .lead-brand-live [data-aria-lead-chat] [data-aria-dock] { width: 100%; max-width: none; margin-inline: 0; }
   .lead-brand-live [data-aria-lead-chat] [data-aria-chat-trigger] { left: 0; width: clamp(60px, calc(20vw - 4px), 84px); height: clamp(60px, calc(20vw - 4px), 84px); }
   .lead-brand-live [data-aria-lead-chat] [data-aria-message] { left: 0; width: 100%; max-width: none; margin-inline: 0; padding-left: calc(clamp(60px, calc(20vw - 4px), 84px) + 4px); }
@@ -1732,6 +1739,16 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .lead-brand-live [data-lead-hero-photo] { height: clamp(120px, calc(0.35 * (var(--lead-hero-visible) - 285px)), 175px); }
   .lead-brand-live [data-lead-hero-action] { grid-area: action; margin-top: 16px; }
   .lead-brand-live [data-aria-lead-review-spacing] { margin-top: clamp(24px, calc(6svh - 16px), 34px); }
+}
+
+/* Compact the first fold on short mobile browser viewports without hiding
+   copy, review cards or tap targets. Leave the existing gallery in flow. */
+@media (max-width: 639px) and (max-height: 740px) {
+  .lead-brand-live .hero-safe-top { --hero-content-top: 8px; }
+  .lead-brand-live [data-lead-hero-pills] { margin-block-start: 16px; }
+  .lead-brand-live [data-lead-hero-photos] { margin-top: 12px; }
+  .lead-brand-live [data-lead-hero-photo] { height: clamp(100px, calc(0.35 * (var(--lead-hero-visible) - 285px)), 140px); }
+  .lead-brand-live [data-lead-hero-action] { margin-top: 12px; }
 }
 
 .lead-brand-live [data-lead-faq-cta] { background: #ffa414; color: #26322b; }
