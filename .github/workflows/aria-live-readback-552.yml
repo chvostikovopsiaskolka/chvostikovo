@@ -1,0 +1,51 @@
+name: Aria production artifact readback (PR 552)
+on:
+  push:
+    branches: ['qa/aria-552-live-20261126']
+    paths: ['.github/workflows/aria-live-readback-552.yml']
+permissions:
+  contents: read
+jobs:
+  readback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify published LEAD assets and admin release (read-only)
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          const origin='https://chvostikovo.sk';
+          const admin='https://chvostikovo-app.vercel.app';
+          const markers=['Ponúkate aj psie taxi?','Pre akých psíkov je škôlka určená?','Je potrebné rezervovať miesto vopred?','question_offer'];
+          async function get(url) {
+            const response=await fetch(url,{headers:{'Cache-Control':'no-cache','User-Agent':'Mozilla/5.0 Aria-release-QA'},signal:AbortSignal.timeout(15000)});
+            assert.equal(response.status,200,url+' HTTP '+response.status);return response.text();
+          }
+          function assets(text) {
+            return [...text.matchAll(/(?:\/assets\/|\.\/|assets\/)([A-Za-z0-9_.-]+\.js)\b/g)].map(m=>origin+'/assets/'+m[1]);
+          }
+          let webOK=false;
+          for(let attempt=0;attempt<12&&!webOK;attempt++){
+            try{
+              const html=await get(origin+'/psia-skolka-kosice/?release_qa=552');
+              const queue=assets(html), seen=new Set(), found=new Set();
+              while(queue.length&&seen.size<180){
+                const url=queue.shift();if(seen.has(url))continue;seen.add(url);
+                const js=await get(url);
+                for(const m of markers)if(js.includes(m))found.add(m);
+                if(found.size===markers.length){webOK=true;console.log('LEAD HTTP200: all 4 release markers in served assets; checked '+seen.size+' modules');break;}
+                for(const u of assets(js))if(!seen.has(u))queue.push(u);
+              }
+              if(!webOK)console.log('Release markers found '+found.size+'/4, attempt '+(attempt+1));
+            }catch(e){console.log('Readback attempt '+(attempt+1)+': '+e.message)}
+            if(!webOK)await new Promise(r=>setTimeout(r,10000));
+          }
+          assert.ok(webOK,'LEAD candidate markers not served');
+          const html=await get(admin+'/?release_qa=50');
+          const release=JSON.parse(await get(admin+'/admin-release.json'));
+          assert.match(release.release,/^[a-f0-9]{64}$/);
+          assert.ok(html.includes('name="chvo-admin-release" content="'+release.release+'"'),'Admin HTML and release manifest mismatch');
+          for(const m of markers)assert.ok(html.includes(m),'Admin missing '+m);
+          console.log('Admin HTTP200: new question labels and offer action; matching release '+release.release);
+          JS
