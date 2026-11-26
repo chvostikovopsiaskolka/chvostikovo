@@ -1748,7 +1748,17 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .lead-brand-live [data-lead-hero-pills] { margin-block-start: 16px; }
   .lead-brand-live [data-lead-hero-photos] { margin-top: 12px; }
   .lead-brand-live [data-lead-hero-photo] { height: clamp(100px, calc(0.35 * (var(--lead-hero-visible) - 285px)), 140px); }
+  /* Portrait originals need a higher focal point in the shallow in-app crop. */
+  .lead-brand-live [data-lead-hero-photo] img { object-position: 50% 20%; }
   .lead-brand-live [data-lead-hero-action] { margin-top: 12px; }
+}
+
+/* The wider short phone has room for a modest taller crop; keep the narrow
+   320/375px fallback and the taller Safari layout as already approved. */
+@media (min-width: 390px) and (max-width: 639px) and (max-height: 740px) {
+  .lead-brand-live [data-lead-hero-photo] { height: clamp(108px, calc(0.35 * (var(--lead-hero-visible) - 285px) + 8px), 148px); }
+  .lead-brand-live [data-lead-hero-action] { margin-top: 14px; }
+  .lead-brand-live [data-aria-lead-review-spacing] { margin-top: 24px; }
 }
 
 .lead-brand-live [data-lead-faq-cta] { background: #ffa414; color: #26322b; }
