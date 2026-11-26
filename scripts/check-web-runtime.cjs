@@ -2143,7 +2143,7 @@ async function assertPublicContent(browser,engine){
                      !await chat.getByText(/ušetríš 50 €/).count()||
                      !await chat.getByText(/200 €/).count())
                     throw new Error('Pass must state 20 €/day, saving 50 € and pass price 200 €');
-                  if(JSON.stringify(await ids())!==JSON.stringify(['requirements','caretakers','puppy','location'])||
+                  if(JSON.stringify(await ids())!==JSON.stringify(['requirements','caretakers','puppy','eligibility'])||
                      await chat.locator('[data-aria-chat-followup-prompt]').count())
                     throw new Error('Four next unanswered questions must show without redundant followup');
                   await questionMenu.locator('[data-aria-chat-question="requirements"]').click();
@@ -2174,7 +2174,7 @@ async function assertPublicContent(browser,engine){
                     throw new Error('Puppy contact must extend the same conversation, not require going back');
                   await questionMenu.locator('[data-aria-chat-question="caretakers"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
-                  if(JSON.stringify(await ids())!==JSON.stringify(['location','space','first_visit','reservation']))
+                  if(JSON.stringify(await ids())!==JSON.stringify(['eligibility','first_visit','reservation','location']))
                     throw new Error('New questions must fill all 4 available slots after the first four selections');
                   await questionMenu.locator('[data-aria-chat-question="reservation"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
@@ -2182,6 +2182,13 @@ async function assertPublicContent(browser,engine){
                   if(!await booking.locator('strong').filter({hasText:'do nedele 20:00'}).count()||
                      !await booking.locator('strong').filter({hasText:'vieme sa dohodnúť aj individuálne'}).count())
                     throw new Error('Booking must preserve approved Sunday deadline and individual agreement');
+                  if(JSON.stringify(await ids())!==JSON.stringify(['eligibility','first_visit','location','space']))throw new Error('Reservation refills with space in correct order');
+                  await questionMenu.locator('[data-aria-chat-question="eligibility"]').click();
+                  await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
+                  if(!(await chat.locator('[data-aria-chat-turn="aria"]').last().innerText()).includes('nad 15 kg')||JSON.stringify(await ids())!==JSON.stringify(['first_visit','location','space','taxi']))throw new Error('Eligibility answer and taxi refill must follow ten-question order');
+                  await questionMenu.locator('[data-aria-chat-question="taxi"]').click();
+                  await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
+                  if(!(await chat.locator('[data-aria-chat-turn="aria"]').last().innerText()).includes('5 € za jednu jazdu')||JSON.stringify(await ids())!==JSON.stringify(['first_visit','location','space']))throw new Error('Taxi answer and final three remaining choices must be correct');
                   await otherCta.click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
                   const other=chat.locator('[data-aria-chat-other]');
