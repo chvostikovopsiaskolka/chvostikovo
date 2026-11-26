@@ -207,7 +207,14 @@ async function scenario(count){
   assert.equal(lateDay.dataset.contact,'false','Sunday planning reminder no longer blocks a normal request');
   assert.equal(lateDay.dataset.capacityLevel,'limited');
   assert.equal(lateDay.querySelector('span').textContent,'6/8','late day shows actual occupancy');
-  assert(lateDay.querySelector('.design-capacity-dot'),'late day retains capacity dot');
+  assert(!lateDay.querySelector('.design-capacity-dot'),'capacity dot is removed');
+  run("state.data.availability.days[1].capacity=11;state.data.availability.days[1].available=6;state.data.availability.days[1].occupied=5;window.customerDesignRefreshCalendarV351()");
+  let threshold=w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]');
+  assert.equal(threshold.dataset.capacityLevel,'free');assert(threshold.querySelector('span').classList.contains('calendar-count-hidden-v439'));
+  run("state.data.availability.days[1].available=5;state.data.availability.days[1].occupied=6;window.customerDesignRefreshCalendarV351()");
+  threshold=w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]');
+  assert.equal(threshold.dataset.capacityLevel,'limited');assert.equal(threshold.querySelector('span').textContent,'6/11');assert(!threshold.querySelector('span').classList.contains('calendar-count-hidden-v439'));
+  run("state.data.availability.days[1].capacity=8;state.data.availability.days[1].available=2;state.data.availability.days[1].occupied=6;window.customerDesignRefreshCalendarV351()");
   run('globalThis.beforeDeadlineFixture=JSON.stringify(state.data)');w.__savedDeadlineApi=run('api');
   // An explicit manual single-date booking first clears the optional preselection.
   for(const date of [...w.document.querySelectorAll('.booking-day-v37.selected')].map(b=>b.dataset.date))w.document.querySelector('.booking-day-v37[data-date="'+date+'"]').click();

@@ -1185,3 +1185,22 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 
 /* Preserve the tested outer inset, without adding spacing between later rows. */
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-later-v438{padding:10px 6px 7px!important}
+
+/* v439: full-tile capacity colors; constant geometry, no dot, visual counts from six dogs. */
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37{
+ box-sizing:border-box!important;height:48px!important;min-height:48px!important;max-height:48px!important;
+}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled)[data-capacity-level=free]{
+ background:#21834e!important;border-color:#1b7544!important;color:#fff!important;
+ box-shadow:inset 0 1px 0 #ffffff35,inset 0 0 0 1px #146a3b,0 2px 5px #145a3320!important;
+}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled)[data-capacity-level=free] :is(strong,span){color:#fff!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled)[data-capacity-level=limited]{
+ background:#ffdf75!important;border-color:#dfb43c!important;color:#694908!important;
+ box-shadow:inset 0 1px 0 #ffffff80,inset 0 0 0 1px #e6b948,0 2px 5px #80601a16!important;
+}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled)[data-capacity-level=limited] :is(strong,span){color:#694908!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37>.calendar-count-hidden-v439,.compact-overview-grid-v437 button>.calendar-count-hidden-v439{display:none!important}
+.compact-overview-grid-v437 button{box-sizing:border-box;height:49px;min-height:49px;max-height:49px}
+.compact-overview-grid-v437 button[data-level=free]:not([aria-pressed=true]){background:#21834e;color:#fff;border-color:#1b7544}
+.compact-overview-grid-v437 button[data-level=limited]:not([aria-pressed=true]){background:#ffdf75;color:#694908;border-color:#dfb43c}

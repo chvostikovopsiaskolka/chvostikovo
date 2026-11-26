@@ -181,22 +181,28 @@
   }
   // A locale switch doesn't change the account data; repaint just its pass presentation.
   window.customerDesignRefreshLocaleV420=()=>{if(state.data)ticket();};
+  // Presentation only; booking eligibility and capacity enforcement remain server-owned.
+  function calendarCapacityLevelV439(day){
+    return day.bookings_open===false?'closed':Number(day.available)<=0?'full':Number(day.occupied)>=6?'limited':'free';
+  }
   function compactOverviewV437(root){
     const model=window.customerCompactOverviewV437?.();
     const card=root.querySelector('.design-visit-empty');if(!card)return;if(!model?.days?.length){card.querySelector('.compact-overview-v437')?.remove();return;}
     let host=card.querySelector('.compact-overview-v437');
     if(!host){host=document.createElement('div');host.className='compact-overview-v437';card.append(host);}
     const selected=new Set(model.proposal?.dates||[]);
-    const key=JSON.stringify([model.days.map(d=>[d.date,d.occupied,d.capacity,d.bookings_open,d.selectable]),model.proposal]);
+    const key=JSON.stringify([model.days.map(d=>[d.date,d.occupied,d.capacity,d.available,d.bookings_open,d.selectable]),model.proposal]);
     if(host.dataset.key===key)return;host.dataset.key=key;
     host.innerHTML='';
     const grid=document.createElement('div');grid.className='compact-overview-grid-v437';
     for(const d of model.days){
       const button=document.createElement('button');button.type='button';button.disabled=!d.selectable;
-      button.dataset.overviewDate=d.date;button.dataset.level=d.bookings_open===false?'closed':Number(d.available)<=0?'full':Number(d.available)<=2?'limited':'free';
+      button.dataset.overviewDate=d.date;button.dataset.level=calendarCapacityLevelV439(d);
       button.setAttribute('aria-pressed',String(selected.has(d.date)));
       const title=document.createElement('strong');title.textContent=new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric'}).format(new Date(d.date+'T12:00:00'));
       const count=document.createElement('small');count.textContent=d.bookings_open===false?'Zatvorené':Number(d.available)<=0?'Plno':d.occupied+'/'+d.capacity;
+      count.classList.toggle('calendar-count-hidden-v439',button.dataset.level==='free');
+      button.setAttribute('aria-label',title.textContent+' · '+count.textContent);
       button.append(title,count);button.onclick=()=>window.openBookingPickerV37?.(null,d.date);grid.append(button);
     }
     const letters=document.createElement('div');letters.className='calendar-weekletters-v438';letters.setAttribute('aria-hidden','true');for(const s of (document.documentElement.lang==='en'?['M','T','W','T','F']:['P','U','S','Š','P'])){const span=document.createElement('span');span.textContent=s;letters.append(span);}host.append(letters,grid);
@@ -307,9 +313,13 @@
     const selectedSection=byId('bookingPickerTaxiSectionV91');
     const taxiTitle=byId('designSelectedDaysTitle')||selectedSection?.querySelector('.booking-picker-taxi-title-v37');
     if(taxiTitle){taxiTitle.id='designSelectedDaysTitle';taxiTitle.textContent='Vybraté dni ↓';taxiTitle.hidden=selectedSection.classList.contains('hidden');}
-    picker.querySelectorAll('.booking-day-v37').forEach(button=>{const day=state.data?.availability?.days?.find(d=>d.date===button.dataset.date);if(!day)return;button.dataset.capacityLevel=day.bookings_open===false?'closed':button.classList.contains('booked')?'reserved':Number(day.available)<=0?'full':Number(day.available)<=2?'limited':'free';button.title='Obsadené '+Number(day.occupied||0)+' z '+Number(day.capacity||0)+' miest';button.setAttribute('aria-label',new Intl.DateTimeFormat(document.documentElement.lang==='en'?'en':'sk-SK',{weekday:'long',day:'numeric',month:'numeric'}).format(new Date(day.date+'T12:00:00'))+' · '+(button.querySelector(':scope > span')?.textContent||'')+' · '+button.title);
-      const span=button.querySelector(':scope > span');if(span&&!button.disabled&&button.dataset.full!=='true')span.textContent=Number(day.occupied||0)+'/'+Number(day.capacity||0);
-      if(!button.disabled&&!button.classList.contains('booked')&&button.dataset.full!=='true'&&!button.querySelector('.design-capacity-dot')){const dot=document.createElement('i');dot.className='design-capacity-dot';dot.setAttribute('aria-hidden','true');span?.prepend(dot);}
+    picker.querySelectorAll('.booking-day-v37').forEach(button=>{const day=state.data?.availability?.days?.find(d=>d.date===button.dataset.date);if(!day)return;button.dataset.capacityLevel=day.bookings_open===false?'closed':button.classList.contains('booked')?'reserved':calendarCapacityLevelV439(day);button.title='Obsadené '+Number(day.occupied||0)+' z '+Number(day.capacity||0)+' miest';button.setAttribute('aria-label',new Intl.DateTimeFormat(document.documentElement.lang==='en'?'en':'sk-SK',{weekday:'long',day:'numeric',month:'numeric'}).format(new Date(day.date+'T12:00:00'))+' · '+(button.querySelector(':scope > span')?.textContent||'')+' · '+button.title);
+      const span=button.querySelector(':scope > span');if(span){
+        const showCapacity=!button.disabled&&!button.classList.contains('booked')&&button.dataset.full!=='true'&&button.dataset.capacityLevel!=='closed';
+        if(showCapacity)span.textContent=Number(day.occupied||0)+'/'+Number(day.capacity||0);
+        span.querySelector('.design-capacity-dot')?.remove();
+        span.classList.toggle('calendar-count-hidden-v439',showCapacity&&button.dataset.capacityLevel==='free');
+      }
     });
     // Keep repeated-days suggestions ahead of the calendar, without any reservations strip.
     byId('designCapacityLegend')?.remove();
