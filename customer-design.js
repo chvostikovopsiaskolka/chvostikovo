@@ -181,6 +181,30 @@
   }
   // A locale switch doesn't change the account data; repaint just its pass presentation.
   window.customerDesignRefreshLocaleV420=()=>{if(state.data)ticket();};
+  function compactOverviewV437(root){
+    const model=window.customerCompactOverviewV437?.();
+    const card=root.querySelector('.design-visit-empty');if(!card||!model?.days?.length)return;
+    let host=card.querySelector('.compact-overview-v437');
+    if(!host){host=document.createElement('div');host.className='compact-overview-v437';card.append(host);}
+    const selected=new Set(model.proposal?.dates||[]);
+    const key=JSON.stringify([model.days.map(d=>[d.date,d.occupied,d.capacity,d.bookings_open,d.selectable]),model.proposal]);
+    if(host.dataset.key===key)return;host.dataset.key=key;
+    host.innerHTML='';
+    const grid=document.createElement('div');grid.className='compact-overview-grid-v437';
+    for(const d of model.days){
+      const button=document.createElement('button');button.type='button';button.disabled=!d.selectable;
+      button.dataset.overviewDate=d.date;button.dataset.level=d.bookings_open===false?'closed':Number(d.available)<=0?'full':Number(d.available)<=2?'limited':'free';
+      button.setAttribute('aria-pressed',String(selected.has(d.date)));
+      const title=document.createElement('strong');title.textContent=new Intl.DateTimeFormat('sk-SK',{weekday:'short',day:'numeric',month:'numeric'}).format(new Date(d.date+'T12:00:00'));
+      const count=document.createElement('small');count.textContent=d.bookings_open===false?'Zatvorené':Number(d.available)<=0?'Plno':d.occupied+'/'+d.capacity;
+      button.append(title,count);button.onclick=()=>window.openBookingPickerV37?.(null,d.date);grid.append(button);
+    }
+    host.append(grid);
+    if(model.proposal){
+      const reason=document.createElement('p');reason.className='compact-repeat-reason-v437';reason.textContent=model.proposal.sourceWeek==='previous'?'Predvybraté podľa minulého týždňa.':'Predvybraté podľa tohto týždňa.';host.append(reason);
+      const hint=document.createElement('small');hint.textContent='Výber môžete zmeniť. Rezerváciu odošlete sami.';host.append(hint);
+    }
+  }
   function nearest() {
     if(!state.data)return;
     if(!selectedDog()){byId('designNearest')?.remove();byId('designTicket')?.remove();byId('designBulletinTitle')?.remove();return;}
@@ -226,7 +250,7 @@
         root.dataset.date=key;root.innerHTML=`<div class="design-visits-title"><h2>📅 Moje rezervácie</h2></div><article class="design-visit-card design-visit-empty"><p class="design-empty-heading">${all.length?'Najbližšia rezervácia je neskôr než o dva týždne.':'Zatiaľ nemáte vytvorenú rezerváciu.'}</p><div class="design-empty-reminder"></div>${all.length?'<button type="button" class="btn full">Moje rezervácie</button>':''}</article>`;
         root.querySelector('button')?.addEventListener('click',()=>window.openBookingPickerV37?.());
       }
-      const target=root.querySelector('.design-empty-reminder'),notice=byId('deadlineText');target.textContent=notice?.textContent?.trim()||'Prosíme o rezerváciu miesta do nedele 20:00.';target.hidden=!!notice?.classList.contains('hidden');target.classList.remove('design-deadline-closed');
+      const target=root.querySelector('.design-empty-reminder'),notice=byId('deadlineText');target.textContent=notice?.textContent?.trim()||'Prosíme o rezerváciu miesta do nedele 20:00.';target.hidden=!!notice?.classList.contains('hidden');target.classList.remove('design-deadline-closed');compactOverviewV437(root);
     }
     byId('designBulletinTitle')?.remove();
     const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile');if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);

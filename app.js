@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v436';
-const APP_VERSION='2.0.109';
+const APP_BUILD='v437';
+const APP_VERSION='2.0.110';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -2977,6 +2977,43 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     }
     return null;
   }
+  // Compact calendar prefill: only the immediate next week and only real availability.
+  // For a pair, use the common historical days; never silently reserve the union.
+  function compactBookingProposalV437(dogs,days){
+    const from=smartShiftV199(smartMondayV199(bratislavaClockV95().date),7),to=smartShiftV199(from,6);
+    const candidates=days.filter(d=>d.date>=from&&d.date<=to&&Number(d.available)>=dogs.length);
+    if(!dogs.length||dogs.length>2)return null;
+    const proposals=dogs.map(dog=>smartProposalV199(dog,candidates));
+    if(proposals.some(p=>!p)||proposals.some(p=>p.sourceWeek!==proposals[0].sourceWeek))return null;
+    const dates=proposals[0].dates.filter(date=>proposals.every(p=>p.dates.includes(date)));
+    return dates.length?{dates,sourceWeek:proposals[0].sourceWeek}:null;
+  }
+  let compactSeedV437=null;
+  function compactEligibleV437(date,dogs,days){
+    const day=days.find(d=>d.date===date),today=bratislavaClockV95().date;
+    return !!day&&date>today&&date<=smartShiftV199(today,21)&&day.bookings_open!==false&&Number(day.available)>=dogs.length&&dogs.length>0&&dogs.every(d=>!bookingFor(d.id,date)&&!bookingDeadlineClosedV95(date,d));
+  }
+  function compactSeedPickerV437(days,extraDate=null){
+    const dogs=pickerDogsV254();
+    compactSeedV437=compactBookingProposalV437(dogs,days);
+    for(const date of [...(compactSeedV437?.dates||[]),...(extraDate?[extraDate]:[])]){
+      if(compactEligibleV437(date,dogs,days)){selectedDatesV37.add(date);selectedTaxiByDateV91.set(date,'none');}
+    }
+  }
+  window.customerCompactOverviewV437=()=>{
+    const dogs=(state.data?.dogs||[]).slice(0,2),all=state.data?.availability?.days||[];
+    const from=smartShiftV199(smartMondayV199(bratislavaClockV95().date),7),to=smartShiftV199(from,6);
+    const days=all.filter(d=>d.date>=from&&d.date<=to);
+    const proposal=dogs.every(d=>customerVaccinationsCompleteV96(d))?compactBookingProposalV437(dogs,days):null;
+    return {days:days.map(d=>({...d,selectable:compactEligibleV437(d.date,dogs,days)})),proposal};
+  };
+  function renderCompactSeedV437(){
+    const root=$('bookingPickerSmartDaysV199');if(!root)return;
+    const proposal=compactSeedV437;
+    const visible=!!proposal&&proposal.dates.some(date=>selectedDatesV37.has(date));
+    root.classList.toggle('hidden',!visible);
+    root.innerHTML=visible?'<strong>'+(proposal.sourceWeek==='previous'?'Predvybraté podľa minulého týždňa.':'Predvybraté podľa tohto týždňa.')+'</strong><p>Výber môžete zmeniť. Rezerváciu odošlete sami.</p>':'';
+  }
   function ensureSmartStyleV199(){
     if(document.getElementById('booking-smart-style-v199'))return;
     const style=document.createElement('style');
@@ -3230,10 +3267,11 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('bookingPickerDogV37').addEventListener('change',e=>{
       if(submittingV37)return;pairBookingV254=e.target.value==='both';e.target.blur();pairTaxiV254.clear();
       if(!pairBookingV254)state.selectedDogId=Number(e.target.value);
-      selectedDatesV37.clear();
+      const oldDates=[...selectedDatesV37];selectedDatesV37.clear();
       selectedTaxiByDateV91.clear();
       expandedTaxiDateV201=null;
-      smartDaysDismissedV199=false;
+      smartDaysDismissedV199=false;compactSeedV437=null;
+      for(const date of oldDates)if(compactEligibleV437(date,pickerDogsV254(),pickerDaysV393())){selectedDatesV37.add(date);selectedTaxiByDateV91.set(date,'none');}
       renderDogSelector();
       renderPassSummary();
       renderDog();
@@ -3277,7 +3315,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const attended=dogs.length>0&&dogs.every(d=>(state.data?.visits||[]).some(v=>Number(v.dog_id)===Number(d.id)&&v.visit_date>=monday&&v.visit_date<=today));
     // Obaja keeps the current week if either dog has not attended yet.
     const offset=attended&&days[0]?.date>=monday&&days[0]?.date<=sunday?5:0;
-    return days.slice(offset,offset+15);
+    return days.slice(offset,offset+20);
   }
   window.customerPickerDaysV393=pickerDaysV393;
   function renderPickerV37(){
@@ -3288,13 +3326,17 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     dogWrap.classList.toggle('hidden',dogs.length<=1);
     dogSelect.disabled=submittingV37;dogSelect.innerHTML=(dogs.length===2?'<option value="both" '+(pairBookingV254?'selected':'')+'>Obaja psíkovia</option>':'')+dogs.map(d=>`<option value="${d.id}" ${!pairBookingV254&&Number(d.id)===Number(dog.id)?'selected':''}>${esc(d.name)}</option>`).join('');
     $('bookingPickerRangeV37').textContent=days.length?skDate(days[0].date)+' – '+skDate(days[days.length-1].date):'Najbližšie dva týždne';
+    let choices=$('compactDogChoicesV437');
+    if(!choices){choices=document.createElement('div');choices.id='compactDogChoicesV437';choices.setAttribute('role','group');choices.setAttribute('aria-label','Psík');dogWrap.append(choices);}
+    choices.innerHTML=dogs.length===2?[['both','Obaja'],...dogs.map(d=>[String(d.id),d.name])].map(([id,label])=>'<button type="button" data-compact-dog="'+esc(id)+'" aria-pressed="'+String(dogSelect.value===id)+'" '+(submittingV37?'disabled':'')+'>'+esc(label)+'</button>').join(''):'';
+    choices.querySelectorAll('button').forEach(button=>button.onclick=()=>{if(dogSelect.value===button.dataset.compactDog)return;dogSelect.value=button.dataset.compactDog;dogSelect.dispatchEvent(new Event('change'));});
     /* v281: renewal interest is offered only after a successful booking. */
     $('sharedPassChoiceV260')?.remove();
 
     updateBookingDeadlineNoticeV127();
-    if(pairBookingV254)$('bookingPickerSmartDaysV199').classList.add('hidden');else renderSmartDaysV199(dog,days);
+    renderCompactSeedV437();
     const groups=[];
-    for(let start=0;start<Math.min(days.length,15);start+=5){
+    for(let start=0;start<Math.min(days.length,20);start+=5){
       const week=days.slice(start,start+5);
       // v232: show the week-specific status ABOVE its days, not beneath them.
       const today=bratislavaClockV95().date,weekEnd=new Date(week[0].date+'T12:00:00Z');weekEnd.setUTCDate(weekEnd.getUTCDate()+6);
@@ -3302,10 +3344,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const weekNoticeFull=week.some(d=>Number(d.available)<pickerDogsV254().length);
       const weekNotice=currentWeek
         ? `<div id="designWeekDeadline" data-week-from="${week[0].date}" data-week-to="${weekEnd.toISOString().slice(0,10)}" ${hasWeekBookingV337(week[0].date,weekEnd.toISOString().slice(0,10))?'hidden':''}><strong>Nestihli ste rezervovať miesto do nedele?</strong><span>Kliknite na deň, odošlite žiadosť a počkajte na schválenie. Pri plnej kapacite nám napíšte správu.</span></div>`
-        : weekNoticeFull
+        : start<10&&weekNoticeFull
         ? '<div class="booking-week-closed-note-v127"><strong>Niektoré dni nemajú dostatok voľných miest.</strong><span>Kliknite na požadovaný deň a napíšte nám správu. O možnosti prihlásenia vás budeme informovať.</span></div>'
         : '';
-      const futureWeek=start>=10;
+      const futureWeek=false; // All available weeks stay visible in one compact calendar.
       const futureOpen=!futureWeek||futureWeekExpandedV235||week.some(d=>selectedDatesV37.has(d.date));
       groups.push(`<div class="booking-picker-week-v127 ${futureWeek?'booking-picker-future-v235':''}" data-week-from="${week[0].date}" data-week-to="${weekEnd.toISOString().slice(0,10)}"><div class="booking-picker-week-label-v127">${futureWeek?`<button type="button" class="booking-picker-future-toggle-v235" data-future-toggle="true" aria-expanded="${futureOpen?'true':'false'}">${pickerWeekLabelV393(week[0].date)} <span aria-hidden="true">${futureOpen?'⌃':'⌄'}</span></button>`:pickerWeekLabelV393(week[0].date)}</div><div class="booking-picker-future-body-v235 ${futureOpen?'':'hidden'}">${weekNotice}<div class="booking-picker-week-days-v127">${week.map(d=>{
         const existing=pickerDogsV254().some(x=>bookingFor(x.id,d.date)),deadlineClosed=pickerDogsV254().some(x=>bookingDeadlineClosedV95(d.date,x)),closed=d.bookings_open===false,full=Number(d.available)<pickerDogsV254().length;
@@ -3375,7 +3417,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     window.customerDesignPickerRender?.();
   }
 
-  function openPickerV37(preferredDogId=null){
+  function openPickerV37(preferredDogId=null,extraDate=null){
     const dogs=state.data?.dogs||[];
     const readySingle=(typeof preferredDogId==='number'&&Number.isInteger(preferredDogId))
       ?dogs.find(d=>Number(d.id)===preferredDogId&&customerVaccinationsCompleteV96(d)):null;
@@ -3386,6 +3428,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays();
     }
     selectedDatesV37.clear();selectedTaxiByDateV91.clear();expandedTaxiDateV201=null;renewalCheckedDogV157=null;smartDaysDismissedV199=false;futureWeekExpandedV235=false;pickerErrorV95('');
+    compactSeedPickerV437(pickerDaysV393(),extraDate);
     renderPickerV37();
     $('bookingPickerV37').classList.remove('hidden');
     document.documentElement.classList.add('booking-picker-open-v37');

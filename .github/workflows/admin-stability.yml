@@ -119,6 +119,7 @@ jobs:
           node tests/customer-image-network-v404.cjs
           node tests/customer-push-routing-v363.cjs
           node tests/customer-mobile-v393.cjs
+          node tests/customer-compact-booking-v437.cjs
           node tests/customer-design.cjs
           node tests/customer-surface-v361.cjs
           node tests/customer-magnetic-board-v362.cjs

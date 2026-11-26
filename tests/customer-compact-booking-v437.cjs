@@ -1,0 +1,18 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const src=fs.readFileSync('app.js','utf8');
+const state={data:{requests:[],booking_history:[],reservations:[]}};
+const c={state,window:{},bratislavaClockV95:()=>({date:'2026-11-26'}),bookingFor:()=>false,bookingDeadlineClosedV95:()=>false,Date,Set,Map};vm.createContext(c);
+vm.runInContext(src.slice(src.indexOf('  function smartShiftV199('),src.indexOf('  function ensureSmartStyleV199(')),c);
+const days=['2026-11-30','2026-12-01','2026-12-02','2026-12-03','2026-12-04'].map(date=>({date,available:2,bookings_open:true}));
+const dogs=[{id:1},{id:2}];
+state.data.booking_history=[{dog_id:1,reservation_date:'2026-11-18',status:'attended'},{dog_id:2,reservation_date:'2026-11-18',status:'attended'},{dog_id:2,reservation_date:'2026-11-19',status:'attended'}];
+const dates=()=>JSON.parse(JSON.stringify(c.compactBookingProposalV437(dogs,days)?.dates||[]));
+assert.deepEqual(dates(),['2026-12-02']);
+days[2].available=1;assert.deepEqual(dates(),[]);days[2].available=2;
+days[2].bookings_open=false;assert.deepEqual(dates(),[]);days[2].bookings_open=true;
+assert.equal(c.compactEligibleV437('2026-12-18',dogs,[{date:'2026-12-18',available:2,bookings_open:true}]),false);
+assert.equal(c.compactEligibleV437('2026-12-17',dogs,[{date:'2026-12-17',available:2,bookings_open:true}]),true);
+assert.match(src,/compactSeedPickerV437\(pickerDaysV393\(\),extraDate\);/);
+assert.match(src,/if\(pairBookingV254\)return submitPairV254\(dates\)/);
+assert.match(fs.readFileSync('supabase/functions/customer-portal-api/index.ts','utf8'),/nextWeekdays\(firstMonday, 20\)\.filter\(date => date <= addDays\(today,21\)\)/);
+console.log('PASS compact booking common history, capacity, closed, and existing horizon');
