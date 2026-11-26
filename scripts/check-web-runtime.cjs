@@ -616,10 +616,24 @@ async function assertBilingualLegalFooter(browser, engine) {
       await page.goto(new URL(route,base).href,{waitUntil:'domcontentloaded',timeout:40000});
       const reject=page.getByRole('button',{name:english?'Necessary only':'Len nevyhnutné',exact:true});
       await reject.waitFor({state:'visible',timeout:15000});
-      const copy=page.locator('[data-cookie-panel] p').filter({hasText:english?"I'm Aria and welcome to Chvostíkovo!":"Som Aria a vítam ťa v Chvostíkove!"});
-      if(await copy.count()!==1 || await copy.locator('br').count()!==1 ||
-          Number(await copy.evaluate(el=>getComputedStyle(el).fontWeight))<500)
-        throw new Error('Bilingual cookie greeting/line break/weight missing: '+language);
+      const greeting=english?"My name is Aria and welcome to our website!":"Volám sa Aria a vítam ťa na našom webe!";
+      const necessary=english?"Necessary cookies help the website work.":"Nevyhnutné cookies pomáhajú webu fungovať.";
+      const optional=english?"You decide whether to allow functional, analytics and marketing cookies.":"O funkčných, analytických a marketingových cookies rozhoduješ ty.";
+      const copy=page.locator('[data-cookie-panel] p').filter({hasText:greeting});
+      if(await copy.count()!==1 || await copy.locator('br').count()!==2 ||
+          Number(await copy.evaluate(el=>getComputedStyle(el).fontWeight))<500 ||
+          !await copy.evaluate((el,expected)=>{
+            const parts=[''];for(const node of el.childNodes){if(node.nodeName==='BR')parts.push('');else if(node.nodeType===3)parts[parts.length-1]+=node.textContent;}
+            return parts.length===3&&parts.every((part,i)=>part.trim()===expected[i]);
+          },[greeting,necessary,optional]))
+        throw new Error('Bilingual cookie greeting/three separate sentences/weight missing: '+language);
+      for(const width of [320,390,1440]){
+        await page.setViewportSize({width,height:844});
+        const portrait=await page.locator('[data-aria-cookie-head]').boundingBox();
+        if(!portrait||Math.abs(portrait.width-(width>=640?94:80))>1)throw new Error('Cookie portrait size mismatch: '+language+' '+width);
+        await assertCookieBrandSurface(page);
+      }
+      await page.setViewportSize({width:320,height:844});
       await activateFixtureControl(reject);
       const nav=page.locator('footer [data-footer-legal]');
       await nav.waitFor({state:'visible'});
