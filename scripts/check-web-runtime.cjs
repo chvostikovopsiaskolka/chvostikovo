@@ -170,7 +170,7 @@ async function assertHeroAriaEntry(page) {
   await chat.getByRole('button',{name:'Close',exact:true}).click();
   await chat.waitFor({state:'hidden'});
   // Radix may keep the exit overlay and body pointer lock briefly after close.
-  await page.waitForFunction(()=>getComputedStyle(document.body).pointerEvents!=='none'&&!document.querySelector('[data-state="closed"][role="dialog"]'));
+  await page.waitForFunction(()=>getComputedStyle(document.body).pointerEvents!=='none'&&!document.querySelector('[data-state="closed"][role="dialog"], [data-state="closed"].fixed.inset-0'));
 }
 async function assertPaidAriaChat(page, {visualOnly=false}={}) {
   const posted=[];
