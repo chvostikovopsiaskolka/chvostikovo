@@ -346,7 +346,8 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
   const today = localDateIso();
   const weekday = new Date(today + 'T12:00:00Z').getUTCDay();
   const firstMonday = addDays(today, weekday === 0 ? 1 : 1 - weekday);
-  const dates = nextWeekdays(firstMonday, 15);
+  // Read up to four calendar rows, never beyond the existing 21-day write limit.
+  const dates = nextWeekdays(firstMonday, 20).filter(date => date <= addDays(today,21));
   const monday = dates[0];
   const friday = dates[dates.length - 1];
   const results = await Promise.all([

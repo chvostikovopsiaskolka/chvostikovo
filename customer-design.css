@@ -1119,3 +1119,34 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 #authView[data-auth-mode="login"] #loginForm #forgotPasswordBtn:focus-visible{
   outline:2px solid #a64b0c;outline-offset:2px;
 }
+
+/* v437: compact, one continuous calendar; no horizontal carousel or nested selected-day scroll. */
+.customer-design #bookingPickerV37 #bookingPickerDogWrapV37>label,.customer-design #bookingPickerV37 #bookingPickerDogV37{display:none!important}
+#compactDogChoicesV437{display:flex;align-items:stretch;gap:0;border:1px solid #e4d9d1;border-radius:12px;overflow:hidden;background:#ffffffb0}
+#compactDogChoicesV437>button{flex:1;min-width:0;min-height:44px;border:0;border-right:1px solid #e4d9d1;background:none;color:#53605b;font:inherit;font-size:12px;font-weight:750;overflow-wrap:anywhere;-webkit-tap-highlight-color:transparent}
+#compactDogChoicesV437>button:last-child{border-right:0}
+#compactDogChoicesV437>button[aria-pressed=true]{background:#e2f2e6;color:#235b3c}
+#compactDogChoicesV437>button:focus-visible,.compact-overview-grid-v437 button:focus-visible{outline:2px solid #f57916;outline-offset:-2px}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-picker-week-v127{padding:10px 6px!important;margin:0!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-day-v37{display:grid!important;grid-template-columns:auto auto;grid-template-rows:auto auto;align-content:center;justify-content:center;align-items:baseline;column-gap:2px;row-gap:2px;min-height:52px!important;padding:5px 1px!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-day-v37 strong{font-size:clamp(10px,3.3vw,14px)!important;white-space:nowrap}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-day-v37 small{font-size:clamp(8px,2.5vw,10px)!important;white-space:nowrap}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-day-v37>span{grid-column:1/-1;justify-self:center;font-size:9px!important;max-width:100%}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-day-v37[data-capacity-level=free]:not(.selected):not(.booked):not(:disabled){background:#e3f5e8!important;border-color:#b5d9bf!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-picker-week-label-v127{font-size:12px!important;margin:4px 0!important}
+.customer-design #bookingPickerV37 .design-selected-days,.customer-design #bookingPickerV37.has-selected-days-v393 .design-selected-days{max-height:none!important;overflow:visible!important}
+.customer-design #bookingPickerV37 .design-selected-day{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:center;gap:7px}
+.customer-design #bookingPickerV37 .design-selected-day>strong{font-size:12px;overflow-wrap:anywhere}
+.customer-design #bookingPickerV37 .design-taxi-disclosure{min-height:44px!important;border:1px solid #e4c772!important;background:#fff2ca!important;border-radius:8px;padding:5px!important;font-size:10px!important;color:#77531d!important}
+.customer-design #bookingPickerV37 .design-selected-day>.booking-taxi-inline-v201{grid-column:1/-1}
+.customer-design #bookingPickerSmartDaysV199.booking-smart-v199 strong{font-size:clamp(10px,3.1vw,13px)!important;white-space:nowrap}
+.compact-overview-v437{margin-top:10px}
+.compact-overview-grid-v437{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.compact-overview-grid-v437 button{min-width:0;min-height:49px;border:1px solid #badcc4;background:#e6f4e9;color:#255b3c;border-radius:9px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;padding:3px 0;font:inherit;-webkit-tap-highlight-color:transparent}
+.compact-overview-grid-v437 button strong{font-size:clamp(8px,2.6vw,11px);white-space:nowrap}
+.compact-overview-grid-v437 button small{font-size:9px}
+.compact-overview-grid-v437 button[data-level=limited]{background:#fff2c0;border-color:#e4ca72;color:#795715}
+.compact-overview-grid-v437 button[data-level=full],.compact-overview-grid-v437 button[data-level=closed]{background:#eee;color:#6c6f75;border-color:#d9dadd}
+.compact-overview-grid-v437 button[aria-pressed=true]{background:#fce6ce;border-color:#f57b19;color:#8b4b12;box-shadow:inset 0 0 0 1px #f57b19}
+.compact-overview-v437 .compact-repeat-reason-v437{border-top:1px dashed #d5c5b7;margin:10px 0 4px;padding-top:8px;white-space:nowrap;font-size:clamp(10px,3.1vw,13px);font-weight:750;color:#315d43}
+.compact-overview-v437>small{font-size:10px;color:#66716b}

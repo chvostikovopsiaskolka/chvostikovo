@@ -120,7 +120,7 @@
     ['Prehľad','Overview'],['Hlavná navigácia','Main navigation'],
     ['Otvoriť produkty Chvostíkova v prehliadači','Open Chvostíkovo products in the browser'],
     ['Rezervácia škôlky','Daycare booking'],['Vyberte deň alebo dni','Choose a day or days'],
-    ['Najbližšie dva týždne','Next two weeks'],['Psík','Dog'],['Obaja psíkovia','Both dogs'],
+    ['Najbližšie dva týždne','Next two weeks'],['Psík','Dog'],['Obaja psíkovia','Both dogs'],['Obaja','Both'],['Predvybraté podľa minulého týždňa.','Preselected from last week.'],['Predvybraté podľa tohto týždňa.','Preselected from this week.'],['Výber môžete zmeniť. Rezerváciu odošlete sami.','You can change the selection. Submit the booking yourself.'],
     ['Opakované dni rezervácie','Recurring booking days'],['Tento týždeň','This week'],
     ['Budúci týždeň','Next week'],['O dva týždne','In two weeks'],
     ['Vybraté dni ↓','Selected days ↓'],['Taxi podľa vybraného dňa','Taxi for the selected day'],
