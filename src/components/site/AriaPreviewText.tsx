@@ -1,19 +1,13 @@
 import { REQUIREMENTS } from "@/content/site";
 
-// Preview-specific copy: the published lead and other pages keep their own content.
-export const ARIA_PREVIEW_REQUIREMENTS = REQUIREMENTS.map((item) => ({
-  ...item,
-  text: item.title === "Zdravotný stav"
-    ? item.text
-      .replace("klinicky zdravých psíkov bez krátkodobých či prenosných ochorení", "klinicky zdravých psíkov bez prenosných ochorení")
-    : item.text,
-}));
+// One admission contract for home, paid LEAD and Aria.
+export const ARIA_PREVIEW_REQUIREMENTS = REQUIREMENTS;
 
 const IMPORTANT = [
   "platný očkovací preukaz",
   "Psík musí mať základné hygienické návyky v interiéri",
-  "Prijímame len klinicky zdravých psíkov bez krátkodobých či prenosných ochorení",
-  "Feny počas hárania neprijímame",
+  "Prijímame psíkov bez prenosných ochorení",
+  "Hárajúce feny do škôlky neprijímame",
   "stredné a veľké psy",
   "približne od 4 mesiacov",
   "očkované šteniatka",
@@ -36,9 +30,7 @@ const IMPORTANT = [
   "Neprijímame agresívne psy",
   "psy označené ako nebezpečné alebo ťažko zvládnuteľné v kolektíve",
   "základné hygienické návyky",
-  "klinicky zdravých psíkov bez prenosných ochorení",
-  "V prípade chronických ochorení nás prosím informujte vopred",
-  "Feny počas hárania",
+  "V prípade chronických ochorení nás, prosím, informujte vopred",
   "celodenným dohľadom",
   "minimálne dvaja skúsení opatrovatelia",
   "úvodná návšteva",

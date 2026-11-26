@@ -34,7 +34,7 @@ function EnglishPrivacy() {
         ← Back to the English page
       </Link>
       <h1 className="section-title mt-4 border-b-2 border-[#ffa414] pb-4 text-3xl text-[#26322b] sm:text-4xl">Privacy Policy</h1>
-      <p className="mt-2 text-sm text-[#59675c]">Website and customer app · updated 25 November 2026</p>
+      <p className="mt-2 text-sm text-[#59675c]">Website and customer app · updated 26 November 2026</p>
 
       <div className="mt-6 space-y-4 text-[#26322b]">
         <H2>1. Introduction</H2>
@@ -61,7 +61,7 @@ function EnglishPrivacy() {
           may be processed to maintain the service.
         </p>
 
-        <p><strong>First-party website analytics:</strong> to improve the website we also measure visits and interactions without analytics or advertising cookies. We process technical visit, referral and interaction data, including technical identifiers used to distinguish and deduplicate records.</p>
+        <p><strong>First-party website analytics:</strong> to improve the website we also measure visits and interactions without analytics or advertising cookies. We process technical visit, referral and interaction data, including questions opened in the Aria guide. To distinguish and deduplicate records we use technical identifiers, such as a hash of the advertising click identifier and temporary browser session storage (sessionStorage).</p>
         <H2>3. Purposes of processing</H2>
         <p>This includes handling enquiries about bowl stands and targets, arranging orders, delivery, payments and complaints.</p>
         <ul className="list-disc space-y-2 pl-5">

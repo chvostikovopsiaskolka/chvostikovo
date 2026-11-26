@@ -64,8 +64,8 @@ const footerStart = footerSource.indexOf("export function Footer");
 const footerEnd = footerSource.indexOf("</footer>", footerStart);
 const footerContent = footerSource.slice(footerStart, footerEnd);
 assert(footerStart >= 0 && footerEnd > footerStart, "Footer component missing");
-assert(footerContent.includes("flex-nowrap items-center justify-between"), "One-row legal nav missing");
-assert(footerContent.includes("whitespace-nowrap"), "Legal nav should not wrap");
+assert(footerContent.includes("grid-cols-2"), "Two-column legal nav missing");
+assert(footerContent.includes("Obchodné informácie") && footerContent.includes("Business information"), "Bilingual legal headings missing");
 assert(footerContent.includes('setLegalDialog("cookies")'), "Cookies dialog missing");
 assert(footerContent.includes('setLegalDialog("operator")'), "Operator dialog missing");
 assert(footerContent.includes('href={isEnglish ? "/en/privacy" : "/ochrana-osobnych-udajov"}'), "Bilingual GDPR URL missing");
@@ -78,7 +78,7 @@ assert(footerContent.includes("utm_source=chvostikovo&utm_medium=referral&utm_ca
 assert(footerContent.includes("footer_bellaris_credit"), "Bellaris event name changed");
 assert(footerContent.includes('isEnglish ? "All rights reserved." : "Všetky práva vyhradené."'), "EN copyright missing");
 assert(footerContent.includes("min-h-11"), "Legal links must be touch accessible");
-console.log("[seo] PASS: one-row legal GDPR, centered copyright, Bellaris badge and tracking intact");
+console.log("[seo] PASS: two-column legal GDPR, centered copyright, Bellaris badge and tracking intact");
 
 
 // FAQ alias must remain crawlable as a noindex redirect; the home owns the FAQ.

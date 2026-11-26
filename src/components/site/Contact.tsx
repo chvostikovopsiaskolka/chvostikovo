@@ -232,20 +232,30 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
           </div>
           <nav
             aria-label={isEnglish ? "Legal information" : "Právne informácie"}
-            className="mt-5 flex w-full min-w-0 flex-nowrap items-center justify-between gap-x-1.5 text-[9px] leading-tight min-[360px]:text-[10px] min-[390px]:text-[11px] sm:gap-x-4 sm:text-xs"
+            data-footer-legal
+            className="mt-5 grid w-full min-w-0 grid-cols-2 gap-3 text-xs leading-snug sm:gap-8 sm:text-sm"
           >
-            <button type="button" onClick={() => setLegalDialog("cookies")} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap underline underline-offset-4 hover:text-cream">
-              Cookies
-            </button>
-            <button type="button" onClick={() => setLegalDialog("operator")} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap underline underline-offset-4 hover:text-cream">
-              {isEnglish ? "Operator details" : "Údaje prevádzkovateľa"}
-            </button>
-            <a href={isEnglish ? "/en/privacy" : "/ochrana-osobnych-udajov"} aria-label={isEnglish ? "Privacy policy – GDPR" : "Ochrana osobných údajov – GDPR"} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap underline underline-offset-4 hover:text-cream">
-              GDPR
-            </a>
-            <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap underline underline-offset-4 hover:text-cream">
-              {isEnglish ? "Cookie settings" : "Nastavenia cookies"}
-            </button>
+            <div className="min-w-0 space-y-0.5">
+              <h3 className="mb-1 font-display text-sm font-bold">{isEnglish ? "Website information" : "Informácie o webe"}</h3>
+              <a href={isEnglish ? "/en/privacy" : "/ochrana-osobnych-udajov"} aria-label={isEnglish ? "Privacy policy – GDPR" : "Ochrana osobných údajov – GDPR"} className="flex min-h-11 items-center underline underline-offset-4">
+                GDPR
+              </a>
+              <button type="button" onClick={() => setLegalDialog("cookies")} className="flex min-h-11 items-center text-left underline underline-offset-4">
+                Cookies
+              </button>
+              <button type="button" onClick={() => setLegalDialog("operator")} className="flex min-h-11 items-center text-left underline underline-offset-4">
+                {isEnglish ? "Operator details" : "Údaje prevádzkovateľa"}
+              </button>
+              <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))} className="flex min-h-11 items-center text-left underline underline-offset-4">
+                {isEnglish ? "Cookie settings" : "Nastavenia cookies"}
+              </button>
+            </div>
+            <div className="min-w-0 space-y-0.5">
+              <h3 className="mb-1 font-display text-sm font-bold">{isEnglish ? "Business information" : "Obchodné informácie"}</h3>
+              <button type="button" onClick={() => setLegalDialog("complaints")} className="flex min-h-11 items-center text-left underline underline-offset-4">
+                {isEnglish ? "Complaints policy – goods" : "Reklamačný poriadok – tovar"}
+              </button>
+            </div>
           </nav>
           <p className="mt-1 text-center text-[10px] leading-relaxed sm:text-xs">
             <span className="block">© {new Date().getFullYear()} Chvostíkovo</span>

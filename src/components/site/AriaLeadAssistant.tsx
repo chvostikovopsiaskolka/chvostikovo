@@ -1,5 +1,6 @@
 import { Component, lazy, Suspense, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, UsersRound, X, ArrowRight } from "lucide-react";
+import { AriaReturnToTop } from "./AriaReturnToTop";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 // Keep the chat chunk cached; preload on LEAD for an immediate first open.
 const loadAriaChat = () => import("./AriaGuidedChat").then((module) => ({ default: module.AriaGuidedChat }));
@@ -115,7 +116,7 @@ export function AriaLeadAssistant({
     return () => { active = false; };
   }, [leadChat]);
   const [chatActivated, setChatActivated] = useState(false);
-  const [requestedChatQuestion, setRequestedChatQuestion] = useState<"pricing" | null>(null);
+  const [requestedChatQuestion, setRequestedChatQuestion] = useState<"pricing" | "requirements" | null>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
   const [pricingVisitOpen, setPricingVisitOpen] = useState(false);
   const [activeLeadSection, setActiveLeadSection] = useState("");
@@ -347,7 +348,7 @@ export function AriaLeadAssistant({
     return () => { window.removeEventListener("pagehide", leave); window.removeEventListener("pageshow", resume); };
   }, [chatOpen, trackingPrefix]);
 
-  function openChat(questionId?: "pricing") {
+  function openChat(questionId?: "pricing" | "requirements") {
     if ((!guidedChatPreview && !leadChat) || chatOpen) return;
     if (trackingPrefix === "lead_landing_aria") trackAriaChatAction("open");
     setPanel(null);
@@ -360,7 +361,7 @@ export function AriaLeadAssistant({
 
   const outlineReady = speechGeometry !== null;
   const { width: sw, height: sh, tipX, tipY } =
-    speechGeometry ?? { width: 0, height: 0, tipX: 0, tipY: 0 };
+    speechGeometry ?? (leadChat ? { width: 240, height: 104, tipX: -12, tipY: 52 } : { width: 0, height: 0, tipX: 0, tipY: 0 });
   // The preview portrait stays ABOVE the centered floating menu.
   // Keep the balloon's full rounded bottom border. Its right edge opens into
   // a short pair of Bezier curves: broad at the balloon, tapering to Aria's face.
@@ -583,8 +584,8 @@ export function AriaLeadAssistant({
             className={rightAlignedBubble ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : sectionNavigation ? "pointer-events-none mx-auto mb-3 flex w-[calc(100%-12px)] max-w-[440px] justify-start pl-[106px] sm:max-w-[500px] sm:pl-[120px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
             <div ref={speechRef} data-aria-speech data-aria-outline-ready={outlineReady}
               className={"relative isolate inline-flex min-h-[48px] w-fit max-w-[min(75vw,390px)] items-center px-3 py-2 text-forest sm:max-w-[390px]" +
-                (outlineReady ? "" : " rounded-[16px] bg-card ring-2 ring-forest/70")}>
-              {outlineReady && <svg aria-hidden="true" data-aria-tail data-tip-x={guidedChatPreview ? previewTipX : tipX} data-tip-y={guidedChatPreview ? previewTipY : sectionNavigation && !portraitOnRight ? paidTipY : tipY}
+                (outlineReady || leadChat ? "" : " rounded-[16px] bg-card ring-2 ring-forest/70")}>
+              {(outlineReady || leadChat) && <svg aria-hidden="true" data-aria-initial-outline={leadChat && !outlineReady ? true : undefined} data-aria-tail={outlineReady ? true : undefined} data-tip-x={guidedChatPreview ? previewTipX : tipX} data-tip-y={guidedChatPreview ? previewTipY : sectionNavigation && !portraitOnRight ? paidTipY : tipY}
                 data-tail-base-top={guidedChatPreview ? previewBaseTop : sectionNavigation && !portraitOnRight ? paidLeftBaseTop : rightAlignedBubble ? tailTopY : undefined}
                 data-tail-base-bottom={guidedChatPreview ? previewBaseBottom : sectionNavigation && !portraitOnRight ? paidLeftBaseBottom : rightAlignedBubble ? tailBottomY : undefined}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
@@ -603,14 +604,35 @@ export function AriaLeadAssistant({
               {stage === "intro" ? (
                 (guidedChatPreview || leadChat) ? (
                   <div className={"pointer-events-auto relative z-10 min-w-0" + (leadChat ? " w-full" : "")}>
-                    <p className="font-display text-[11px] font-semibold leading-[1.4] tracking-normal sm:text-[13px]">
-                      Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
-                      <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
-                    </p>
-                    <button type="button" data-aria-bubble-chat-cta onClick={() => openChat()}
-                      className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#ffa414] px-3 py-2 text-center text-[11px] font-extrabold leading-snug text-[#26322b] shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9e336f] sm:text-xs">
-                      Klikni a zisti viac <ArrowRight aria-hidden size={15} className="shrink-0" />
-                    </button>
+                    {leadChat ? (
+                      <>
+                        <p data-aria-bubble-greeting className="rounded-[14px_14px_14px_5px] bg-white/90 px-2 py-1.5 font-display font-medium text-[#26322b] shadow-sm">
+                          Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
+                          <strong className="font-extrabold sm:hidden">Čo ťa zaujíma?</strong><strong className="hidden font-extrabold sm:inline">Čo ťa zaujíma v našej škôlke?</strong>
+                        </p>
+                        <div data-aria-bubble-choices className="mt-1.5 grid grid-cols-2 gap-1.5">
+                          <button type="button" data-aria-bubble-question="pricing" onClick={() => openChat("pricing")}
+                            className="min-h-11 min-w-0 rounded-xl border border-[#b82e7f]/25 bg-white/85 px-1 py-1 text-center font-display text-[11px] font-bold leading-tight text-[#26322b] shadow-sm hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9e336f] sm:text-xs">
+                            Aký je cenník škôlky?
+                          </button>
+                          <button type="button" data-aria-bubble-question="requirements" onClick={() => openChat("requirements")}
+                            className="min-h-11 min-w-0 rounded-xl border border-[#b82e7f]/25 bg-white/85 px-1 py-1 text-center font-display text-[11px] font-bold leading-tight text-[#26322b] shadow-sm hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9e336f] sm:text-xs">
+                            Aké sú podmienky prijatia?
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-display text-[11px] font-semibold leading-[1.4] tracking-normal sm:text-[13px]">
+                          Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
+                          <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
+                        </p>
+                        <button type="button" data-aria-bubble-chat-cta onClick={() => openChat()}
+                          className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#ffa414] px-3 py-2 text-center text-[11px] font-extrabold leading-snug text-[#26322b] shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9e336f] sm:text-xs">
+                          Klikni a zisti viac <ArrowRight aria-hidden size={15} className="shrink-0" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <p className="relative z-10 font-display text-[12px] leading-[1.4] font-semibold tracking-normal sm:text-[13px]">
@@ -645,6 +667,7 @@ export function AriaLeadAssistant({
         )}
 
         <div className={leadChat ? "pointer-events-none relative mx-auto h-0 w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (rightAlignedBubble || sectionNavigation ? "mx-auto w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
+          {leadChat && <AriaReturnToTop enabled={!hidden && !chatOpen && !panel} />}
           {!leadChat && <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />}
           {leadChat ? (
             <button type="button" data-aria-chat-trigger aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}

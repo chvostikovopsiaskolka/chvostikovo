@@ -6,7 +6,7 @@ import { ContextFaq } from "./ContextFaq";
 import { LeadStepForm } from "./LeadStepForm";
 import { LongForm } from "./Forms";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
-import { CARE, DAYCARE_GALLERY_EXTRAS, WHY, GARDEN_PHOTO, APPLICATION_TITLE } from "@/content/site";
+import { CARE, DAYCARE_GALLERY_EXTRAS, WHY, GARDEN_PHOTO, APPLICATION_TITLE, INQUIRY_TITLE, INQUIRY_SUBTITLE } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
 import dogsPair from "@/assets/dogs-pair.jpg";
 import certAdriana from "@/assets/cert-adriana.jpg";
@@ -190,11 +190,11 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
       <FormDialog
         open={infoOpen}
         onOpenChange={setInfoOpen}
-        title={isEnglish ? "Enquire about dog daycare" : "Čo hľadáte pre svojho psíka?"}
+        title={isEnglish ? "Enquire about dog daycare" : INQUIRY_TITLE}
         subtitle={
           isEnglish
             ? "Leave your contact details. We will get in touch, talk about your dog and answer your questions. If you are interested, we will arrange a free introductory visit."
-            : "Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu."
+            : INQUIRY_SUBTITLE
         }
       >
         {isEnglish ? (

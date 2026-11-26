@@ -147,7 +147,7 @@ export function PrivacyConsentCheckbox({
       </label>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[88vh] w-[calc(100%-1.25rem)] max-w-2xl overflow-y-auto rounded-3xl border-none bg-card p-5 shadow-2xl sm:p-7">
+        <DialogContent className="site-brand max-h-[88vh] w-[calc(100%-1.25rem)] max-w-2xl overflow-y-auto rounded-3xl border-none bg-card p-5 shadow-2xl sm:p-7">
           <DialogHeader>
             <DialogTitle className="pr-7 font-display text-xl text-forest sm:text-2xl">
               {isEnglish ? "Privacy Policy" : "Spracovanie osobných údajov"}

@@ -1,17 +1,20 @@
 import { EMAIL, PHONE, PHONE_PRETTY } from "@/content/site";
 import { ContentDialog } from "./ContentDialog";
+import { GOODS_COMPLAINTS_POLICY, SOI_DISPUTE_URL } from "@/content/complaints-policy";
 
-export type LegalDialogType = "cookies" | "operator";
+export type LegalDialogType = "cookies" | "operator" | "complaints";
 type Language = "sk" | "en";
 
 const TITLES: Record<Language, Record<LegalDialogType, string>> = {
   sk: {
     cookies: "Pravidlá používania cookies",
     operator: "Údaje prevádzkovateľa",
+    complaints: "Reklamačný poriadok – tovar",
   },
   en: {
     cookies: "Cookie Policy",
     operator: "Operator details",
+    complaints: "Complaints policy – goods",
   },
 };
 
@@ -31,9 +34,10 @@ export function LegalDialog({
   language?: Language;
 }) {
   return (
-    <ContentDialog open={open} onOpenChange={onOpenChange} title={TITLES[language][kind]}>
+    <ContentDialog open={open} onOpenChange={onOpenChange} title={TITLES[language][kind]} appearance="legal">
       {kind === "cookies" && <CookiesContent language={language} />}
       {kind === "operator" && <OperatorContent language={language} />}
+      {kind === "complaints" && <ComplaintsContent language={language} />}
     </ContentDialog>
   );
 }
@@ -230,6 +234,36 @@ function OperatorContent({ language }: { language: Language }) {
           <li>E-mail: <a href={`mailto:${EMAIL}`} className="font-semibold text-[#a95400] hover:underline">{EMAIL}</a></li>
           <li>Telefón: <a href={`tel:${PHONE}`} className="font-semibold text-[#a95400] hover:underline">{PHONE_PRETTY}</a></li>
         </ul>
+      </div>
+    </div>
+  );
+}
+
+function ComplaintsContent({ language }: { language: Language }) {
+  const policy = GOODS_COMPLAINTS_POLICY[language];
+  const english = language === "en";
+  return (
+    <div data-goods-complaints className="space-y-5 break-words text-sm leading-relaxed text-forest sm:text-base">
+      <p className="text-sm text-forest/75">{policy.version}</p>
+      {policy.sections.map(({ heading, body }) => {
+        const [before, after] = body.split(SOI_DISPUTE_URL);
+        return (
+          <section key={heading}>
+            <H2>{heading}</H2>
+            <p className="mt-2">
+              {before}
+              {after !== undefined && <>
+                <a href={SOI_DISPUTE_URL} target="_blank" rel="noopener noreferrer" className="font-semibold text-coral-dark underline underline-offset-2">{english ? "Slovak Trade Inspection – ADR application form" : "SOI – formulár na začatie alternatívneho riešenia sporu"}</a>
+                {after}
+              </>}
+            </p>
+          </section>
+        );
+      })}
+      <div className="border-t border-forest/15 pt-4">
+        <a href={policy.pdf} download className="inline-flex min-h-11 items-center rounded-xl border border-forest/20 bg-secondary px-4 py-3 text-sm font-semibold text-forest focus-visible:outline-2 focus-visible:outline-offset-2">
+          {english ? "Download complaints policy (PDF)" : "Stiahnuť reklamačný poriadok (PDF)"}
+        </a>
       </div>
     </div>
   );

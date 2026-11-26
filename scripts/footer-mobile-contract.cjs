@@ -8,16 +8,16 @@ const start=content.indexOf("export function Footer");
 const footer=content.slice(start);
 assert.ok(start>=0,"Footer component missing");
 const nav=footer.slice(footer.indexOf("<nav"),footer.indexOf("</nav>"));
-assert.ok(nav.includes("flex-nowrap items-center justify-between"),"Four legal links must remain on one row");
-assert.ok(nav.includes("whitespace-nowrap"),"Legal links should not break");
+assert.ok(nav.includes("grid-cols-2"),"Legal footer must have two columns");
+assert.ok(nav.includes("Website information") && nav.includes("Obchodné informácie"),"Bilingual legal headings missing");
 let previous=-1;
-for(const x of ['setLegalDialog("cookies")','setLegalDialog("operator")','href={isEnglish ? "/en/privacy" : "/ochrana-osobnych-udajov"}',"chvostikovo-open-cookie-settings"]){
+for(const x of ['href={isEnglish ? "/en/privacy" : "/ochrana-osobnych-udajov"}','setLegalDialog("cookies")','setLegalDialog("operator")',"chvostikovo-open-cookie-settings",'setLegalDialog("complaints")']){
  const pos=nav.indexOf(x,previous+1);
  assert.ok(pos>previous,"Missing or out of order legal action: "+x);
  previous=pos;
 }
 assert.ok(nav.includes("Ochrana osobných údajov – GDPR"),"GDPR accessible label absent");
-assert.ok(nav.includes(">\n              GDPR\n"),"Visible GDPR link absent");
+assert.ok(nav.includes(">\n                GDPR\n"),"Visible GDPR link absent");
 assert.ok(footer.includes("mt-1 text-center"),"Copyright must be centered");
 assert.ok(footer.indexOf("© {new Date().getFullYear()} Chvostíkovo") < footer.indexOf("mt-5 border-t border-cream/25"),"Copyright must precede divider");
 assert.ok(footer.includes("footer-bellaris-liquid"),"Original branded Bellaris badge not restored");
@@ -28,4 +28,10 @@ assert.ok(footer.includes('trackCookielessInteraction("nav_click", "footer_bella
 assert.ok(footer.includes('isEnglish ? "All rights reserved." : "Všetky práva vyhradené."'),"EN footer not preserved");
 assert.ok(footer.includes('chvostikovo-open-cookie-settings'),"Cookie settings handler missing");
 assert.ok(footer.includes("min-h-11"),"Tap target missing");
-console.log("PASS four legal links on one row, GDPR, copyright center, restored Bellaris badge (SK/EN)");
+console.log("PASS two-column legal links, GDPR, copyright center, restored Bellaris badge (SK/EN)");
+
+const legal=fs.readFileSync(path.join(__dirname,"../src/components/site/LegalDialog.tsx"),"utf8");
+const policy=fs.readFileSync(path.join(__dirname,"../src/content/complaints-policy.ts"),"utf8");
+assert.ok(legal.includes("SOI_DISPUTE_URL")&&legal.includes("download"),"ADR or PDF link missing");
+assert.ok(policy.includes("Reklamačný poriadok")&&policy.includes("Complaints policy"),"Bilingual policy missing");
+for(const pdf of ["reklamacny-poriadok-tovar.pdf","complaints-policy-goods-en.pdf"]){assert.equal(fs.readFileSync(path.join(__dirname,"../public/documents",pdf)).subarray(0,5).toString(),"%PDF-","Invalid policy PDF");}

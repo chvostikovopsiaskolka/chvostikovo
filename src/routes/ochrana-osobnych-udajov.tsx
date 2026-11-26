@@ -35,7 +35,7 @@ function Privacy() {
         ← Späť na hlavnú stránku
       </Link>
       <h1 className="section-title mt-4 border-b-2 border-[#ffa414] pb-4 text-3xl text-[#26322b] sm:text-4xl">Zásady ochrany osobných údajov</h1>
-      <p className="mt-2 text-sm text-[#59675c]">Pre web a zákaznícku aplikáciu Chvostíkovo · aktualizované 25. 11. 2026</p>
+      <p className="mt-2 text-sm text-[#59675c]">Pre web a zákaznícku aplikáciu Chvostíkovo · aktualizované 26. 11. 2026</p>
 
       <div className="mt-6 space-y-4 text-[#26322b]">
         <H2>1. Úvod</H2>
@@ -73,7 +73,7 @@ function Privacy() {
           na doručovanie push správ.
         </p>
 
-        <p><strong>Vlastná analytika návštevnosti:</strong> na zlepšovanie webu meriame návštevy a interakcie aj bez analytických a reklamných cookies. Spracúvame technické údaje o návštevách, zdrojoch a interakciách vrátane technických identifikátorov na rozlíšenie a deduplikáciu záznamov.</p>
+        <p><strong>Vlastná analytika návštevnosti:</strong> na zlepšovanie webu meriame návštevy a interakcie aj bez analytických a reklamných cookies. Spracúvame technické údaje o návštevách, zdrojoch a interakciách vrátane otázok otvorených v sprievodcovi Aria. Na rozlíšenie a deduplikáciu záznamov používame technické identifikátory, napríklad hash reklamného identifikátora a dočasné údaje v úložisku relácie prehliadača (sessionStorage).</p>
         <H2>3. Účely spracovania osobných údajov</H2>
         <p>Vaše osobné údaje spracovávame na tieto účely vrátane vybavenia záujmu o stojany a targety, dohodnutia objednávky, dodania, platieb a reklamácií.</p>
         <ul className="list-disc space-y-2 pl-5">

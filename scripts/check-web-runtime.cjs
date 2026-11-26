@@ -5,13 +5,14 @@ const path = require('node:path');
 // Run in CI, without submitting forms or emitting analytics traffic.
 const bellaris = process.env.WEB_SITE === 'bellaris';
 const { ARIA_ROUTES } = require('./public-web-impact.cjs');
+const {readPublicContent}=require('./public-content-impact.cjs');
 const runtimeScope = process.env.WEB_RUNTIME_SCOPE || 'full';
-if(!['full','aria','aria-visual'].includes(runtimeScope)||bellaris&&runtimeScope!=='full')throw new Error('Invalid public web runtime scope');
+if(!['full','aria','aria-visual','navigation','content'].includes(runtimeScope)||bellaris&&runtimeScope!=='full')throw new Error('Invalid public web runtime scope');
 const base = process.env.WEB_BASE_URL || (bellaris ? 'https://bellaris.sk' : 'https://chvostikovo.sk');
 const fullRoutes = bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/', '/test-aria/'];
 const urls = (runtimeScope === 'aria-visual' ? ['/psia-skolka-kosice/'] : runtimeScope === 'aria' ? ARIA_ROUTES : fullRoutes).map(route => new URL(route, base));
 const brandPreviewCandidate = new URL(base).hostname === '127.0.0.1';
-if(runtimeScope==='aria-visual'&&!brandPreviewCandidate)throw new Error('Visual assertions require a freshly built local candidate');
+if(['aria-visual','navigation','content'].includes(runtimeScope)&&!brandPreviewCandidate)throw new Error('Visual assertions require a freshly built local candidate');
 const out = process.env.RUNTIME_REPORT_DIR || 'runtime-report';
 fs.mkdirSync(out, { recursive: true });
 const results = [];
@@ -185,23 +186,17 @@ async function assertPaidAriaChat(page, {visualOnly=false}={}) {
       return storageAvailable;
     });
     const trigger=page.locator('[data-aria-lead-chat] [data-aria-chat-trigger]');
-    // Verify the 44px hit area beyond the visibly shorter orange surface.
-    const launcher=page.locator('[data-aria-lead-chat] [data-aria-bubble-chat-cta]');
-    const hit=await launcher.evaluate(el=>{const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.bottom+2};});
-    if(await page.evaluate(()=>navigator.maxTouchPoints>0))await page.touchscreen.tap(hit.x,hit.y);
-    else await page.mouse.click(hit.x,hit.y);
+    const launcher=page.locator('[data-aria-lead-chat] [data-aria-bubble-question="pricing"]');
+    await launcher.click();
     const chat=page.locator('[data-aria-chat]');
     await chat.waitFor({state:'visible',timeout:1500});
     const surface=await chat.evaluate(el=>({background:getComputedStyle(el).backgroundColor,blur:getComputedStyle(el).getPropertyValue('backdrop-filter')||getComputedStyle(el).getPropertyValue('-webkit-backdrop-filter')}));
-    if(surface.background!=='rgba(255, 255, 255, 0.9)'||!surface.blur.includes('blur'))throw new Error('Paid chat must retain its 90 percent frosted surface');
+    if(surface.background!=='rgba(255, 255, 255, 0.82)'||!surface.blur.includes('blur'))throw new Error('Paid chat must retain its lighter frosted surface');
+    if(!await chat.locator('[data-aria-chat-status]').getByText('Labky na klávesnici').count())throw new Error('Paid chat presence label missing');
     if(await trigger.evaluate(el=>getComputedStyle(el).backgroundColor)!=='rgba(0, 0, 0, 0)')throw new Error('Expanded portrait inherited a colored navigation background');
-    await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'visible'});
-    if(await chat.locator('[data-aria-chat-question]').count()!==4)throw new Error('Paid chat must reuse four FAQ choices');
-    if(brandPreviewCandidate){
-      const greeting=(await chat.locator('[id$="-intro"] > [aria-hidden="true"]').innerText()).replace(/\s+/g,' ').trim();
-      if(!greeting.includes('Ahoj, volám sa Aria.')||!greeting.endsWith('Haf! 🐾'))throw new Error('Chat greeting must introduce Aria and finish with Haf and paws');
-    }
-    await chat.locator('[data-aria-chat-question="pricing"]').click();
+    await chat.locator('[data-aria-chat-turn="person"]').getByText('Aký je cenník škôlky?',{exact:true}).waitFor({state:'visible'});
+    const greeting=(await chat.locator('[id$="-intro"] > [aria-hidden="true"]').innerText()).replace(/\s+/g,' ').trim();
+    if(greeting!=='Ahoj, volám sa Aria. Čo ťa zaujíma o našej škôlke?')throw new Error('Paid direct chat must show the full greeting without Haf');
     const typing=chat.locator('[data-aria-typing="true"]');
     await typing.locator('[data-aria-composing]').waitFor({state:'visible',timeout:2500});
     if(!await typing.locator('.aria-composing-dot').first().evaluate(el=>el.getAnimations().some(a=>a.playState==='running')))throw new Error('Paid composing dots are static');
@@ -212,6 +207,26 @@ async function assertPaidAriaChat(page, {visualOnly=false}={}) {
     await chat.locator('[data-aria-chat-questions]').waitFor({state:'visible',timeout:20000});
     if(await chat.locator('[data-aria-chat-question]').count()!==4||!(await chat.innerText()).includes('20 €/deň'))throw new Error('Paid chat must reuse pricing answer and refill four FAQ');
     if(visualOnly){
+      await chat.locator('[data-aria-chat-interest-cta]').click();
+      const widget=chat.locator('[data-aria-chat-inline="interest"]');
+      await widget.waitFor({state:'visible',timeout:20000});
+      const viewport=page.viewportSize();
+      for(const width of [320,390,1280]){
+        await page.setViewportSize({width,height:844});
+        await widget.evaluate(el=>el.getBoundingClientRect());
+        const geometry=await widget.evaluate(el=>{
+          const history=el.closest('[data-aria-chat-history]'),r=el.getBoundingClientRect(),h=history.getBoundingClientRect(),s=getComputedStyle(history);
+          const left=h.left+history.clientLeft+parseFloat(s.paddingLeft),right=h.left+history.clientLeft+history.clientWidth-parseFloat(s.paddingRight);
+          return {leftGap:r.left-left,rightGap:right-r.right,overflow:history.scrollWidth-history.clientWidth,widgetOverflow:el.scrollWidth-el.clientWidth,width:r.width};
+        });
+        if(Math.abs(geometry.leftGap)>2||Math.abs(geometry.rightGap)>2||geometry.overflow>2||geometry.widgetOverflow>2)throw new Error('Paid Aria inline card must fill chat at '+width+': '+JSON.stringify(geometry));
+      }
+      await page.setViewportSize(viewport);
+      await chat.getByRole('button',{name:'Close',exact:true}).click();
+      await chat.waitFor({state:'hidden'});
+      await page.locator('[data-aria-bubble-question="requirements"]').click();
+      await chat.locator('[data-aria-chat-requirements] article').first().waitFor({state:'visible',timeout:20000});
+      if(await chat.locator('[data-aria-chat-requirements] article').count()!==4||await chat.locator('[data-aria-chat-question]').count()!==4)throw new Error('Requirements quick launcher must reuse the canonical cards and refill questions');
       await chat.getByRole('button',{name:'Close',exact:true}).click();
       await chat.waitFor({state:'hidden'});return;
     }
@@ -280,27 +295,84 @@ async function assertPaidAriaChat(page, {visualOnly=false}={}) {
   }
 }
 
+async function assertPaidReturnArrow(page) {
+  // Paid-only scroll shortcut: same-document scroll, no chat open or CTA conversion.
+  await page.setViewportSize({width:390,height:844});
+  const back=page.locator('[data-aria-back-top]');
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+  await back.waitFor({state:'hidden'});
+  await page.waitForFunction(()=>window.scrollY<5);
+  await page.evaluate(()=>window.scrollTo({top:650,behavior:'instant'}));
+  await page.waitForFunction(()=>window.scrollY>160);
+  await back.waitFor({state:'visible',timeout:4000}).catch(async error=>{throw new Error('Paid arrow idle visibility: '+JSON.stringify(await back.evaluate(el=>({scrollY,innerWidth,visible:el.dataset.visible,disabled:el.disabled,visibility:getComputedStyle(el).visibility,dialog:!!document.querySelector('[data-form-dialog], [role="dialog"][data-state="open"]')}))),{cause:error});});
+  const arrowGeometry=await back.evaluate(el=>{const a=el.getBoundingClientRect(),p=document.querySelector('[data-aria-chat-trigger]').getBoundingClientRect();return a.height>=44&&a.width>=44&&a.bottom<=p.top-4&&Math.abs(a.left-p.left)<=2&&a.top>=0;});
+  if(!arrowGeometry)throw new Error('Return arrow must sit above Aria without covering her');
+  await page.evaluate(()=>window.scrollTo({top:450,behavior:'instant'}));
+  await page.waitForFunction(()=>Math.abs(scrollY-450)<8);
+  await back.waitFor({state:'visible'});
+  // Fixed shortcut must be hit directly without centering/scrolling the document.
+  const hit=await back.evaluate(el=>{const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;if(el.disabled||!el.contains(document.elementFromPoint(x,y)))throw new Error('Aria return arrow is occluded or disabled');return {x,y};});
+  const prior=await page.evaluate(()=>({search:location.search,path:location.pathname}));
+  if(await page.evaluate(()=>navigator.maxTouchPoints>0))await page.touchscreen.tap(hit.x,hit.y);else await page.mouse.click(hit.x,hit.y);
+  await page.waitForFunction(()=>window.scrollY<5,null,{timeout:5000}).catch(async error=>{throw new Error('Paid return click did not reach top: '+JSON.stringify(await page.evaluate(()=>({scrollY,hash:location.hash,visible:document.querySelector('[data-aria-back-top]')?.dataset.visible}))),{cause:error});});
+  if(!await page.evaluate(p=>location.search===p.search&&location.pathname===p.path&&!location.hash,prior))throw new Error('Arrow must preserve attribution and route');
+  await back.waitFor({state:'hidden'});
+  await page.setViewportSize({width:1280,height:900});
+  await page.evaluate(()=>window.scrollTo({top:650,behavior:'instant'}));
+  await page.waitForFunction(()=>scrollY>160);
+  if(await back.isVisible())throw new Error('Paid arrow must stay hidden on desktop');
+  await page.setViewportSize({width:390,height:844});
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+  await page.waitForFunction(()=>scrollY<5);
+  if(await page.locator('[data-aria-chat-trigger]').getAttribute('aria-expanded')!=='false')throw new Error('Return arrow must not open chat');
+
+}
+async function assertPaidReturnNavigation(browser,engine) {
+  const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+  try {
+    await context.addInitScript(()=>localStorage.setItem('chvostikovo-cookies',JSON.stringify({version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,functional:false,analytics:false,marketing:false})));
+    await context.route('**/*',route=>{const req=route.request(),u=new URL(req.url());return u.origin===new URL(base).origin&&['GET','HEAD'].includes(req.method())?route.continue():route.abort();});
+    const page=await context.newPage();
+    const errors=[];page.on('pageerror',e=>errors.push(e.message));
+    const response=await page.goto(new URL('/psia-skolka-kosice/?utm_source=fixture&utm_campaign=arrow',base).href,{waitUntil:'domcontentloaded'});
+    if(response?.status()!==200)throw new Error('Paid LEAD HTTP '+response?.status());
+    await page.locator('[data-aria-speech] [data-aria-tail]').waitFor({state:'attached'});
+    const cookie=page.getByRole('button',{name:/Len nevyhnutné|Odmietnuť/}).first();
+    if(await cookie.isVisible())await cookie.click();
+    await page.evaluate(()=>history.replaceState(history.state,'',location.pathname+location.search+'#lead-pricing'));
+    await assertPaidReturnArrow(page);
+    if(errors.length)throw new Error('Paid navigation runtime errors: '+errors.join('; '));
+    console.log('PASS paid LEAD mobile return arrow and desktop absence '+engine);
+  }finally{await context.close();}
+}
+
 async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
   await page.locator('[data-aria-lead-chat] img[alt^="Aria"]').evaluate(async image=>{
     await image.decode();
     if(image.naturalWidth<400||image.naturalHeight<400)throw new Error("Paid Aria must use the approved high-resolution head");
   });
-  const structure=await page.evaluate(()=>({
+  const expected=readPublicContent();
+  const structure=await page.evaluate(expected=>({
     order:[...document.querySelector('main').children].map(el=>el.id),
     faq:[...document.querySelectorAll('[data-lead-faq]')].map(el=>el.dataset.leadFaq),
     forms:document.querySelectorAll('main [data-lead-step-form]').length,
     benefits:document.querySelectorAll('[data-lead-benefits] h3').length,
     requirements:document.querySelectorAll('#lead-requirements article').length,
     carousel:document.querySelectorAll('#lead-photo-carousel [data-gesture-track="photos"]').length,
-    checker:document.querySelector('#lead-faq')?.nextElementSibling?.id === 'aria-puppy-check',
+    checker:document.querySelector('#lead-knowledge')?.nextElementSibling?.id === 'aria-puppy-check',
+    faqLast:document.querySelector('main')?.lastElementChild?.id === 'lead-faq',
+    health:document.querySelector('#lead-requirements')?.textContent.includes(expected.health),
+    mapLinks:[...document.querySelectorAll('#aria-mosaic a[href*="maps"], footer a[href*="maps"]')].map(a=>a.getAttribute('href')),
+    inquiryHeadings:document.querySelector('#aria-hero-form h2')?.textContent.trim()===expected.INQUIRY_TITLE && document.querySelector('#lead-friendship-form h3')?.textContent.trim()===expected.INQUIRY_TITLE,
+    inquirySubtitles:['#aria-hero-form','#lead-friendship-form'].every(id=>document.querySelector(id+' p[data-lead-form-intro], '+id+' [data-lead-form-intro] p')?.textContent.trim()===expected.INQUIRY_SUBTITLE),
     separated:!!document.querySelector('#lead-knowledge [data-lead-faq-cta]') && !document.querySelector('#lead-knowledge #lead-faq'),
     robots:document.querySelector('meta[name="robots"]')?.content,
     daily:document.querySelector('[data-lead-price-per-day]')?.textContent.replace(/\s+/g,' ').trim(),
     single:document.querySelector('#lead-pricing article')?.textContent,
-  }));
-  if(structure.order.slice(1,11).join('|')!=='lead-photo-carousel|lead-pricing|lead-first-visit|aria-hero-form|aria-caretakers|lead-knowledge|lead-faq|aria-puppy-check|lead-benefits|aria-mosaic'||
+  }),expected);
+  if(structure.order.filter(id=>expected.order.includes(id)).join('|')!==expected.order.join('|')||
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==2||structure.benefits!==3||structure.requirements!==4||
-    structure.carousel!==1||!structure.checker||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
+    structure.carousel!==1||!structure.checker||!structure.faqLast||!structure.health||!structure.inquiryHeadings||!structure.inquirySubtitles||structure.mapLinks.length<2||structure.mapLinks.some(link=>link!==expected.MAP_LINK)||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
   for(const [width,height] of [[320,720],[360,780],[375,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
     await page.setViewportSize({width,height});
@@ -342,13 +414,16 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
         pillRows:new Set(visiblePills.map(el=>Math.round(el.getBoundingClientRect().top))).size,
         actionBg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).backgroundColor,
         actionFg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).color,
+        actionBorder:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).borderTopColor,
+        actionArrow:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]'),'::after').backgroundColor,
+        actionArrowDecorative:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]'),'::after').pointerEvents==='none',
         pillBold:visiblePills.every(el=>Number(getComputedStyle(el).fontWeight)>=700),
         pillGap:parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pills]')).columnGap),
         photoCrop:[...document.querySelectorAll('[data-lead-hero-photo] img')].length===2&&[...document.querySelectorAll('[data-lead-hero-photo] img')].every(el=>getComputedStyle(el).objectPosition==='50% 50%'),
         reviewGap:parseFloat(getComputedStyle(document.querySelector('[data-aria-lead-review-spacing]')).marginTop),
         galleryBelow:box('#lead-photo-carousel').top>=innerHeight-2,
-        greetingFit:(()=>{if(innerWidth>=640)return true;const p=document.querySelector('[data-aria-message] p'),range=document.createRange();range.selectNodeContents(p);const rects=[...range.getClientRects()].filter(r=>r.width>0);return new Set(rects.map(r=>Math.round(r.top))).size<=2&&p.getBoundingClientRect().height<parseFloat(getComputedStyle(p).lineHeight)*1.5&&p.scrollWidth<=p.clientWidth+1&&face.left>=6&&face.left<=10;})(),
-        compactLauncher:(()=>{const b=box('[data-aria-bubble-chat-cta]'),s=box('[data-aria-speech]');const c=document.querySelector('[data-aria-bubble-chat-cta]'),pseudo=getComputedStyle(c,'::before');return Math.abs(b.width-(s.width-parseFloat(getComputedStyle(document.querySelector('[data-aria-speech]')).paddingLeft)-parseFloat(getComputedStyle(document.querySelector('[data-aria-speech]')).paddingRight)))<3&&b.height>=36&&b.height<=40&&parseFloat(pseudo.top)<=-4&&parseFloat(pseudo.bottom)<=-4;})(),
+        greetingFit:(()=>{const p=document.querySelector('[data-aria-bubble-greeting]'),range=document.createRange();range.selectNodeContents(p);const rects=[...range.getClientRects()].filter(r=>r.width>0&&r.height>0);const expected=innerWidth<640?'Ahoj, volám sa Aria. Čo ťa zaujíma?':'Ahoj, volám sa Aria. Čo ťa zaujíma v našej škôlke?';return p.innerText.replace(/\s+/g,' ').trim()===expected&&new Set(rects.map(r=>Math.round(r.top))).size===1&&p.scrollWidth<=p.clientWidth+1&&Math.abs(p.getBoundingClientRect().right-Math.max(...rects.map(r=>r.right))-parseFloat(getComputedStyle(p).paddingRight))<=2&&(innerWidth>=640||face.left>=6&&face.left<=10);})(),
+        compactLauncher:(()=>{const buttons=[...document.querySelectorAll('[data-aria-bubble-question]')],s=box('[data-aria-speech]'),rs=buttons.map(e=>e.getBoundingClientRect());return rs.length===2&&Math.abs(rs[0].top-rs[1].top)<2&&rs[0].right<rs[1].left&&rs.every(r=>r.height>=44&&r.left>=s.left&&r.right<=s.right)&&buttons.every(e=>e.scrollWidth<=e.clientWidth+1);})(),
         dockInside:dock.top>=0&&dock.bottom<=innerHeight+1,
         ctaHeight:cta.height,proofBottom:proof.bottom,ariaTop:aria.top,faceWidth:face?.width,
         widget:(()=>{const speech=box('[data-aria-speech]');const tail=document.querySelector('[data-aria-speech] [data-aria-tail]');return dock.height<=1&&Math.abs(face.width-(innerWidth>=640?104:Math.min(84,Math.max(60,innerWidth*.2-4))))<2&&
@@ -356,9 +431,10 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
           (innerWidth<1024||speech.width>=455&&speech.width<=482)&&!!tail&&Number(tail.dataset.tipX)<-8&&
           document.querySelectorAll('[data-aria-section-navigation]').length===0&&document.querySelectorAll('[data-aria-chat-trigger]').length===1&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
     });
-    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.actionFg!=='rgb(255, 255, 255)'||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.greetingFit||!fold.compactLauncher||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
+    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 255, 255)'||fold.actionFg!=='rgb(169, 84, 0)'||fold.actionBorder!=='rgb(255, 164, 20)'||fold.actionArrow!=='rgb(184, 46, 127)'||!fold.actionArrowDecorative||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.greetingFit||!fold.compactLauncher||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
+  await assertPaidReturnArrow(page);
   if(await page.locator('#lead-requirements h2').innerText()!=='Podmienky prijatia psíka')throw new Error('Campaign conditions heading differs');
   if(visualOnly){
     await page.setViewportSize({width:390,height:844});
@@ -367,7 +443,11 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
   }
   const inquiry=page.locator('[data-lead-faq-cta]');
   await centerFixtureControl(inquiry);await inquiry.hover();
-  if(await inquiry.evaluate(el=>getComputedStyle(el).color)!=='rgb(255, 255, 255)')throw new Error('Rose inquiry hover needs white text');
+  const inquiryHover=await inquiry.evaluate(el=>{
+    const style=getComputedStyle(el), arrow=getComputedStyle(el,'::after');
+    return {fill:style.backgroundColor,text:style.color,border:style.borderTopColor,arrow:arrow.backgroundColor,decorative:arrow.pointerEvents==='none'};
+  });
+  if(inquiryHover.fill!=='rgb(255, 255, 255)'||inquiryHover.text!=='rgb(169, 84, 0)'||inquiryHover.border!=='rgb(255, 164, 20)'||inquiryHover.arrow!=='rgb(184, 46, 127)'||!inquiryHover.decorative)throw new Error('Public inquiry CTA hover palette '+JSON.stringify(inquiryHover));
   await page.mouse.move(0,0);
   await page.setViewportSize({width:390,height:844});
   await centerFixtureControl(page.locator('[data-lead-faq="first-visit"] > button'));
@@ -380,14 +460,14 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
   await centerFixtureControl(puppyLink);
   await puppyLink.click();
   await page.waitForFunction(()=>Math.abs(document.getElementById('aria-puppy-check').getBoundingClientRect().top)<140);
-  await centerFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
-  await page.locator('[data-aria-lead-hero-cta]').click();
+  await activateFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
-  await centerFixtureControl(page.locator('[data-lead-faq-cta]'));
-  await page.locator('[data-lead-faq-cta]').click();
+  await activateFixtureControl(page.locator('[data-lead-faq-cta]'));
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
   if(await page.getByRole('dialog').count())throw new Error('Campaign CTA must scroll to its in-page form');
   const form=page.locator('#aria-hero-form [data-lead-step-form]');
+  const formCircle=await form.getByRole('button',{name:'Pokračovať',exact:true}).evaluate(el=>{const icon=getComputedStyle(el,'::after');return {width:parseFloat(icon.width),height:parseFloat(icon.height),end:parseFloat(icon.right),button:el.getBoundingClientRect().height,decorative:icon.pointerEvents==='none'};});
+  if(formCircle.width!==36||formCircle.height!==36||formCircle.end!==5||formCircle.button<formCircle.height+2||!formCircle.decorative)throw new Error('Form CTA circle geometry '+JSON.stringify(formCircle));
   await advanceLeadContact(form);
   await assertLeadContactIntro(form);
   await form.getByRole('button',{name:'Späť',exact:true}).click();
@@ -417,7 +497,8 @@ async function assertApplicationDogLayout(surface, engine, label) {
   const two=form.getByRole('radio',{name:'Chcem prihlásiť dvoch psíkov'});
   const one=form.getByRole('radio',{name:'Chcem prihlásiť jedného psíka'});
   try {
-    await two.check();
+    await activateFixtureControl(form.locator('label:has(input[name="pocet_psikov"][value="2"])'));
+    if(!await two.isChecked())throw new Error('Two-dog choice did not select');
     await form.locator('input[name="pes2"]').waitFor({state:'visible'});
     for(const width of [320,375,390,430,1440]) {
       await page.setViewportSize({width,height:width>=1024?900:844});
@@ -458,32 +539,39 @@ async function assertApplicationDogLayout(surface, engine, label) {
     const next=form.getByRole('button',{name:'Pokračovať',exact:true});
     const owner=form.locator('input[name="meno"]');
     if(await owner.isVisible())throw new Error('Owner step visible before dog details');
-    await next.click();
+    await activateFixtureControl(next);
     if(await form.getAttribute('data-application-step')!=='1')throw new Error('Incomplete dogs passed step validation');
     for(const suffix of ['', '2']){
       for(const [name,value] of [['pes','Fixture dog '+suffix],['plemeno','Labrador'],['vek','2 roky'],['vaha','25 kg'],['povaha','Fixture only']])await form.locator('[name="'+name+suffix+'"]').fill(value);
       for(const name of ['pohlavie','kastrovana'])await form.locator('label:has(input[name="'+name+suffix+'"])').first().click();
     }
     await form.locator('label:has(input[name="duvod"])').first().click();
-    await next.click();
+    await activateFixtureControl(next);
     await owner.waitFor({state:'visible'});
     if(await form.locator('input[name="pes"]').isVisible())throw new Error('Both application steps visible');
     await owner.fill('Fixture owner');
     await form.locator('input[name="telefon"]').fill('912345678');
     const payload=await form.evaluate(el=>Object.fromEntries(new FormData(el)));
     if(payload.pes!=='Fixture dog '||payload.pes2!=='Fixture dog 2'||payload.meno!=='Fixture owner'||payload.duvod!=='Pravidelne – 1× alebo viackrát týždenne')throw new Error('Hidden step fields missing from application payload');
-    await form.getByRole('button',{name:'Späť',exact:true}).click();
+    await activateFixtureControl(form.getByRole('button',{name:'Späť',exact:true}));
     await form.locator('input[name="pes"]').waitFor({state:'visible'});
     if(await form.locator('input[name="pes2"]').inputValue()!=='Fixture dog 2'||await owner.inputValue()!=='Fixture owner')throw new Error('Step navigation lost application values');
-    await next.click();
+    await activateFixtureControl(next);
     await owner.waitFor({state:'visible'});
     if(await owner.inputValue()!=='Fixture owner')throw new Error('Owner values lost on return');
-    await form.getByRole('button',{name:'Späť',exact:true}).click();
+    await activateFixtureControl(form.getByRole('button',{name:'Späť',exact:true}));
     await form.locator('input[name="pes"]').waitFor({state:'visible'});
+    await activateFixtureControl(form.locator('label:has(input[name="pocet_psikov"][value="1"])'));
+    if(!await one.isChecked())throw new Error('One-dog choice did not select');
+    await form.locator('input[name="pes2"]').waitFor({state:'hidden',timeout:5000});
     console.log('PASS application step navigation and full FormData '+engine+' '+label);
+  } catch(error) {
+    // Do not mask the original failure by attempting to click a hidden dog
+    // selector during cleanup (e.g. when step two remains active in WebKit).
+    const state=await form.evaluate(el=>({step:el.dataset.applicationStep,selected:el.querySelector('input[name="pocet_psikov"]:checked')?.value,modal:!!el.closest('[role="dialog"]')})).catch(()=>null);
+    throw new Error('Application interaction '+engine+' '+label+' '+JSON.stringify(state)+'; cause: '+(error?.stack||String(error)),{cause:error});
   } finally {
     await page.setViewportSize(original);
-    await one.check();
   }
 }
 
@@ -602,26 +690,58 @@ async function assertFooterMapGeometry(browser, engine) {
 
 
 
+// APP-01: inset visual surfaces without shrinking navigation hit targets.
+async function assertHomeDockSurface(page) {
+  const state=await page.locator('.mobile-dock[data-home-dock] .mobile-dock-bar').evaluate(bar=>{
+    const menu=bar.querySelector('[data-home-menu]'),language=menu.querySelector('[data-language-switch]'),selected=language.querySelector('[aria-current="page"]'),active=bar.querySelector('.mobile-dock-item.is-active');
+    const m=menu.getBoundingClientRect(),lower=[...bar.querySelectorAll('.mobile-dock-item')].filter(e=>e.getClientRects().length).map(e=>e.getBoundingClientRect()),lang=selected.getBoundingClientRect();
+    const ms=getComputedStyle(menu),ls=getComputedStyle(selected),as=active&&getComputedStyle(active),bs=getComputedStyle(bar);
+    return {gap:Math.min(...lower.map(r=>r.top))-m.bottom,tray:parseFloat(ms.borderRadius)>=12&&ms.backgroundImage.includes('gradient'),
+      menuHeight:m.height,languageHeight:lang.height,languageWidth:lang.width,languageInset:parseFloat(ls.borderTopWidth),
+      activeInset:!!as&&parseFloat(as.borderTopWidth)>=2&&as.backgroundClip==='padding-box',
+      glass:bs.backgroundImage.includes('gradient')&&(bs.backdropFilter||bs.webkitBackdropFilter||'').includes('blur'),
+      lowerTargets:lower.every(r=>r.height>=44)};
+  });
+  if(brandPreviewCandidate){
+    const upper=await page.locator('[data-home-menu]').evaluate(el=>{const language=el.querySelector('[data-language-switch]'),selected=language.querySelector('[aria-current="page"]');return {radius:parseFloat(getComputedStyle(selected).borderTopLeftRadius),trackRadius:parseFloat(getComputedStyle(language,'::before').borderTopLeftRadius),desktop:innerWidth>=1024,labels:[...el.querySelectorAll('.mobile-dock-compact-links a span')].filter(s=>s.getClientRects().length).map(s=>({font:parseFloat(getComputedStyle(s).fontSize),nowrap:getComputedStyle(s).whiteSpace==='nowrap',fits:s.scrollWidth<=s.clientWidth+1}))};});
+    if(upper.radius<8||upper.radius>14||upper.trackRadius<8||upper.trackRadius>14||upper.desktop&&upper.labels.some(l=>l.font!==12||!l.nowrap||!l.fits))throw new Error('Upper dock labels/language shape '+JSON.stringify(upper));
+  }
+  if(state.gap<1||!state.tray||state.menuHeight>46||state.languageHeight<44||state.languageWidth<44||state.languageInset<5||!state.activeInset||!state.glass||!state.lowerTargets)throw new Error('Compact liquid home dock '+JSON.stringify(state));
+}
+
 async function assertCompactHomeMenu(page,en) {
   const menu=page.locator('[data-home-menu]');
   await menu.waitFor({state:'visible'});
   const state=await menu.evaluate(el=>{
     const bar=el.closest('.mobile-dock-bar'),nav=bar.closest('.mobile-dock'),p=el.getBoundingClientRect(),d=bar.getBoundingClientRect();
-    const links=[...el.querySelectorAll('.mobile-dock-compact-links a')];
+    const links=[...el.querySelectorAll('.mobile-dock-compact-links a')].filter(a=>a.getClientRects().length);
     const phone=el.querySelector('[data-home-dock-phone]');
     return {hrefs:links.map(a=>new URL(a.href).hash),labels:links.map(a=>a.textContent.trim()),
       targets:[...links,phone,...el.querySelectorAll('[data-language-switch] a')].every(a=>a&&a.getBoundingClientRect().height>=44&&a.scrollWidth<=a.clientWidth+1),
       height:p.height,total:d.height,inside:d.left>=0&&d.right<=innerWidth+1&&d.top>=0&&d.bottom<=innerHeight+1,
       noOverflow:el.scrollWidth<=el.clientWidth+1,arrow:!!nav.querySelector('.mobile-dock-back-top'),phone:phone?.getAttribute('href'),
-      main:[...bar.children].filter(a=>a.matches('a,button')).map(a=>a.textContent.trim()),
+      main:[...bar.children].filter(a=>a.matches('a,button')&&a.getClientRects().length).map(a=>a.textContent.trim()),
       dialog:!!nav.querySelector('button[aria-haspopup="dialog"]'),reserve:parseFloat(getComputedStyle(document.body).paddingBottom)};
   });
-  const main=en?['Home','About','Prices','Rules','Apply']:['Domov','O nás','Cenník','Podmienky','Produkty','Prihláška'];
-  if(JSON.stringify(state.hrefs)!==JSON.stringify(['#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['Have a puppy?','FAQ']:['Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>60||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
+  const main=en?['Home','Prices','Rules','Facilities','Apply']:['Domov','Cenník','Podmienky','Priestory','Produkty','Prihláška'];
+  if(JSON.stringify(state.hrefs)!==JSON.stringify([en?'#about':'#o-nas','#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['About','Have a puppy?','FAQ']:['O nás','Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>46||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
+  if(await menu.locator('[data-desktop-only-shortcut]:visible').count())throw new Error('Desktop shortcuts must remain hidden on mobile');
+  const crop=await page.locator('[data-home-hero-photo] img').evaluateAll(imgs=>imgs.map(img=>getComputedStyle(img).objectPosition));
+  if(crop.join('|')!=='50% 0%|50% 50%')throw new Error('Only the collies photo should use the top-biased crop: '+crop.join('|'));
   if(await page.locator('[data-home-hero-phone]').count())throw new Error('Duplicate mobile Hero phone');
   if(!await page.evaluate(()=>!!(document.querySelector('[data-home-puppy-checker]')?.compareDocumentPosition(document.querySelector('[data-home-pricing-columns]'))&Node.DOCUMENT_POSITION_FOLLOWING)))throw new Error('Puppy checker must precede pricing');
 }
 
+// Active section color is the same for both home languages and both dock layouts.
+async function assertHomeDockActivePink(page,en,section='top') {
+  await page.waitForFunction(({en,section})=>{
+    const active=document.querySelector('.mobile-dock[data-home-dock] .mobile-dock-item[aria-current="location"]');
+    const href=active&&new URL(active.href,location.href);
+    const expected=section==='top'?(en?'/en/dog-daycare-kosice':'/'):null;
+    return !!active&&(expected?href.pathname.replace(/\/$/,'')===expected.replace(/\/$/,'')&&!href.hash:href.hash==='#'+section)
+      &&getComputedStyle(active).backgroundColor==='rgb(248, 221, 236)';
+  },{en,section},{timeout:5000});
+}
 async function assertApplicationPreview(page,en) {
   const form=page.locator('[data-home-friendship-form] form[data-application-form]');
   const toggle=form.locator('#home-friendship-application');
@@ -641,7 +761,7 @@ async function assertApplicationPreview(page,en) {
   console.log('PASS application preview '+(en?'EN':'SK'));
 }
 
-async function assertBilingualNavigation(browser,engine) {
+async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={}) {
   const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
   const captured=[];
   try {
@@ -667,9 +787,18 @@ async function assertBilingualNavigation(browser,engine) {
     for(const width of [320,375,390,430]){
       await page.setViewportSize({width,height:844});
       await assertCompactHomeMenu(page,false);
+      await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+      await assertHomeDockActivePink(page,false);
+      await assertHomeDockSurface(page);
       await page.screenshot({path:path.join(out,'compact-sk-menu-'+engine+'-'+width+'.png')});
     }
-    await assertApplicationPreview(page,false);
+    await page.locator('[data-home-menu] [href$="#o-nas"]').click();
+    await page.waitForFunction(()=>location.hash==='#o-nas'&&Math.abs(document.getElementById('o-nas').getBoundingClientRect().top-8)<16);
+    await page.locator('.mobile-dock-item[data-mobile-only-home-item]').click();
+    await assertHomeDockActivePink(page,false,'priestory');
+    await page.locator('.mobile-dock').getByRole('link',{name:'Domov',exact:true}).click();
+    await page.waitForFunction(()=>scrollY<5);
+    if(!navigationOnly)await assertApplicationPreview(page,false);
     await page.locator('[data-home-menu] a[href="/#aria-puppy-check"]').click();
     await page.waitForFunction(()=>location.hash==='#aria-puppy-check');
     await page.locator('[data-home-menu] a[href="/#faq"]').click();
@@ -683,7 +812,7 @@ async function assertBilingualNavigation(browser,engine) {
     await page.locator('[data-home-menu] [data-language-switch] a[lang="en"]').click();
     await page.waitForURL(/\/en\/dog-daycare-kosice\/?$/);
     await page.waitForFunction(()=>document.documentElement.lang==='en');
-    await assertApplicationPreview(page,true);
+    if(!navigationOnly)await assertApplicationPreview(page,true);
     if(captured.some(r=>r.path.endsWith('/web-form-submit')))throw new Error('Collapsed application posted to receiver');
     if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Language switch reloaded document');
     if(await page.evaluate(()=>window.__bilingualPixel.some(a=>a[0]==='track')))throw new Error('Pixel fired without consent');
@@ -698,6 +827,9 @@ async function assertBilingualNavigation(browser,engine) {
         const selected=menu.locator('[data-language-switch] a[lang="en"]');
         if(await selected.getAttribute('aria-current')!=='page')throw new Error('EN active state missing');
         await assertCompactHomeMenu(page,true);
+        await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+        await assertHomeDockActivePink(page,true);
+        await assertHomeDockSurface(page);
         const buttons=await menu.locator('[data-language-switch] a').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
         if(buttons.some(b=>b.width<44||b.height<44))throw new Error('Language target too small');
         await page.screenshot({path:path.join(out,'bilingual-menu-'+engine+'-'+width+'.png')});
@@ -717,20 +849,132 @@ async function assertBilingualNavigation(browser,engine) {
     await page.waitForFunction(()=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='Contact'&&a[2]?.source==='en_mobile_dock_phone').length===1);
     if(await page.evaluate(()=>window.__bilingualGa.filter(a=>a[0]==='event'&&a[1]==='phone_click'&&a[2]?.cta_source==='en_mobile_dock_phone').length)!==1)throw new Error('EN phone GA4 must emit once');
     if(!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='home_mobile_dock_phone')||!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='en_mobile_dock_phone'))throw new Error('Cookieless phone sources missing');
+    await page.locator('[data-home-menu] [href$="#about"]').click();
+    await page.waitForFunction(()=>location.hash==='#about'&&Math.abs(document.getElementById('about').getBoundingClientRect().top-8)<16);
+    await page.locator('.mobile-dock-item[data-mobile-only-home-item]').click();
+    await assertHomeDockActivePink(page,true,'spaces');
     await page.setViewportSize({width:1440,height:900});
     const pv=await page.evaluate(()=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='PageView').length);
-    await page.locator('header [data-language-switch] a[lang="sk"]').click();
+    await page.locator('[data-desktop-home-dock] [data-language-switch] a[lang="sk"]').click();
     await page.waitForURL(u=>u.pathname==='/');
     await page.waitForFunction(n=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='PageView').length===n+1,pv);
     if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Desktop language switch reloaded document');
     if(await page.evaluate(()=>window.__bilingualPixel.some(a=>a[0]==='track'&&['Lead','CompleteRegistration'].includes(a[1]))))throw new Error('Language navigation emitted conversion');
+    for(const en of [false,true]){
+      if(en){await page.locator('[data-desktop-home-dock] [data-language-switch] a[lang="en"]').click();await page.waitForFunction(()=>document.documentElement.lang==='en');}
+      for(const width of [1024,1280,1440,1920]){
+        await page.setViewportSize({width,height:900});
+        await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+        const dock=page.locator('[data-desktop-home-dock]');
+        await dock.waitFor({state:'visible'});
+        await page.waitForFunction(()=>document.querySelector('[data-desktop-home-dock]')?.getAttribute('data-desktop-floating')==='false');
+        const geometry=await dock.evaluate(el=>{
+          const bar=el.querySelector('.mobile-dock-bar'),r=bar.getBoundingClientRect(),slot=el.getBoundingClientRect(),logo=el.querySelector('[data-desktop-dock-logo]'),links=[...el.querySelectorAll('a,button')].filter(x=>x.getClientRects().length);
+          const boxes=links.map(x=>x.getBoundingClientRect()), upper=el.querySelector('[data-home-menu]').getBoundingClientRect(), logoBox=logo.getBoundingClientRect(), lower=[...bar.querySelectorAll('.mobile-dock-item')].filter(x=>x.getClientRects().length).map(x=>x.getBoundingClientRect()), hero=el.previousElementSibling?.getBoundingClientRect();
+          return {centered:Math.abs((upper.left+upper.right-r.left-r.right)/2)<2,width:r.width<=980.5,shortcut:el.querySelector('[data-desktop-only-shortcut]')?.getBoundingClientRect().width>0,upperLinks:[...el.querySelectorAll('[data-home-menu] .mobile-dock-compact-links a')].filter(a=>a.getClientRects().length).map(a=>new URL(a.href).hash),fits:r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&bar.scrollWidth<=bar.clientWidth+1&&r.bottom<=slot.bottom+1,targets:boxes.every(b=>b.height>=44),separate:boxes.every((b,i)=>boxes.every((a,j)=>i===j||a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1)),header:!!document.querySelector('header.fixed'),logo:logoBox.width>0&&logoBox.right<=upper.left+1&&logoBox.bottom<=lower[0].top+1,rows:lower.length>=5&&lower.every(b=>b.top>=upper.bottom-1&&Math.abs(b.top-lower[0].top)<2),slot:el.previousElementSibling?.id==='top'&&slot.height>=108&&r.top>=hero.bottom-1};
+        });
+        await assertHomeDockActivePink(page,en);
+        await assertHomeDockSurface(page);
+        if(!geometry.centered||!geometry.width||!geometry.shortcut||geometry.upperLinks.join('|')!==('#aria-puppy-check|'+(en?'#en-benefits':'#preco-chvostikovo')+'|'+(en?'#spaces':'#priestory')+'|#faq')||!geometry.fits||!geometry.targets||!geometry.separate||geometry.header||!geometry.logo||!geometry.rows||!geometry.slot)throw new Error('Desktop home dock '+width+' '+JSON.stringify(geometry));
+        await page.evaluate(()=>window.scrollTo({top:900,behavior:'instant'}));
+        await page.waitForFunction(()=>document.querySelector('[data-desktop-home-dock]')?.getAttribute('data-desktop-floating')==='true');
+        if(!await dock.evaluate(el=>Math.abs(innerHeight-el.querySelector('.mobile-dock-bar').getBoundingClientRect().bottom-12)<2))throw new Error('Desktop dock not floating at bottom');
+        await page.screenshot({path:path.join(out,'desktop-home-dock-'+engine+'-'+(en?'en':'sk')+'-'+width+'.png')});
+      }
+      const priceId=en?'pricing':'cennik';
+      await page.locator('[data-desktop-home-dock] .mobile-dock-item[href$="#'+priceId+'"]').click();
+      await assertHomeDockActivePink(page,en,priceId);
+      await page.locator('[data-desktop-home-dock] .mobile-dock-item[href$="#'+priceId+'"]').hover();
+      await assertHomeDockActivePink(page,en,priceId);
+      const why=page.locator('[data-desktop-home-dock] [data-desktop-only-shortcut][href$="#'+(en?'en-benefits':'preco-chvostikovo')+'"]');
+      await why.click();
+      await page.waitForFunction(id=>Math.abs(document.getElementById(id).getBoundingClientRect().top-8)<16,en?'en-benefits':'preco-chvostikovo');
+      const spacesId=en?'spaces':'priestory';
+      await page.locator('[data-desktop-home-dock] [data-desktop-only-shortcut][href$="#'+spacesId+'"]').click();
+      await page.waitForFunction(id=>location.hash==='#'+id&&Math.abs(document.getElementById(id).getBoundingClientRect().top-8)<16,spacesId);
+    }
     console.log('PASS bilingual navigation, responsive menu and consented PageView '+engine);
   } finally {await context.close();}
+}
+
+
+// The shared public-content scope verifies actual affected DOM and enquiry
+// interaction in both engines, with external network and submissions blocked.
+async function assertPublicContent(browser,engine){
+  const expected=readPublicContent();
+  const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+  try{
+    await context.addInitScript(()=>localStorage.setItem('chvostikovo-cookies',JSON.stringify({version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,functional:false,analytics:false,marketing:false})));
+    await context.route('**/*',route=>{const req=route.request(),u=new URL(req.url());return u.origin===new URL(base).origin&&['GET','HEAD'].includes(req.method())?route.continue():route.abort();});
+    for(const route of [...fullRoutes,'/produkty/','/stojan-na-misky-pre-psa/','/target-na-cvicenie-pre-psov/','/blog/','/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/']){
+      const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+      try{
+        const res=await page.goto(new URL(route,base).href,{waitUntil:'domcontentloaded'});if(res?.status()!==200)throw new Error('Content route HTTP '+route);
+        const checkMap=async selector=>{const links=page.locator(selector+' a[href*="maps"]');if(await links.count()<1||!(await links.evaluateAll(es=>es.map(e=>e.getAttribute('href')))).every(h=>h===expected.MAP_LINK))throw new Error('Map differs '+route+' '+selector);};
+        const checkCopy=async(selector,heading)=>{
+          const box=page.locator(selector);await box.waitFor({state:'attached'});
+          const actual=await box.locator('[data-lead-form-intro]').evaluateAll(es=>es.flatMap(e=>e.matches('h2,h3,p')?[e.textContent.trim()]:[...e.querySelectorAll('h2,h3,p')].map(n=>n.textContent.trim())));
+          if(!actual.includes(heading)||!actual.includes(expected.INQUIRY_SUBTITLE))throw new Error('Enquiry copy '+route+' '+selector+' '+actual);
+        };
+        const checkHealth=async(selector,value)=>{if(!(await page.locator(selector).textContent()).includes(value))throw new Error('Admission content '+route);};
+        const rejectCookie=async()=>{const button=page.getByRole('button',{name:/Len nevyhnutné|Odmietnuť|Necessary only|Reject/}).first();if(await button.isVisible())await activateFixtureControl(button);};
+        const fit=async(selector)=>{const box=page.locator(selector);await box.waitFor({state:'visible'});const ok=await box.evaluate(el=>{const r=el.getBoundingClientRect();return r.left>=-1&&r.right<=innerWidth+1&&el.scrollWidth<=el.clientWidth+2;});if(!ok)throw Error('Content overflow '+route+' '+selector);};
+        await checkMap('footer');
+        if(route==='/'){
+          await page.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});await rejectCookie();
+          await checkMap('#priestory');await checkHealth('#podmienky',expected.health);await checkCopy('#informujte-sa',expected.INQUIRY_TITLE);await checkCopy('#prva-navsteva-form',expected.VISIT_INQUIRY_TITLE);
+          await page.setViewportSize({width:320,height:844});
+          await activateFixtureControl(page.locator('[data-home-hero-interest-cta]'));await checkCopy('#home-hero-interest',expected.INQUIRY_TITLE);await fit('#home-hero-interest [data-lead-form-shell]');
+          const form=page.locator('#home-hero-interest [data-lead-step-form]');await advanceLeadContact(form);await assertLeadContactIntro(form);
+          await page.setViewportSize({width:1440,height:900});await checkCopy('#home-hero-inline-form',expected.INQUIRY_TITLE);await fit('#home-hero-inline-form [data-lead-form-shell]');
+        }else if(route==='/psia-skolka-kosice/'){
+          await page.locator('[data-aria-speech] [data-aria-tail]').waitFor({state:'attached'});await rejectCookie();
+          await checkMap('#aria-mosaic');await checkHealth('#lead-requirements',expected.health);await checkCopy('#aria-hero-form',expected.INQUIRY_TITLE);await checkCopy('#lead-friendship-form',expected.INQUIRY_TITLE);
+          const order=await page.evaluate(ids=>[...document.querySelector('main').children].map(e=>e.id).filter(id=>ids.includes(id)).join('|')===ids.join('|'),expected.order);if(!order)throw Error('Paid section order');
+          if(await page.locator('main [data-lead-step-form]').count()!==2)throw Error('Paid enquiry missing or duplicated');
+          for(const width of [320,390,1440]){await page.setViewportSize({width,height:844});await fit('#aria-hero-form [data-lead-form-shell]');await fit('#lead-friendship-form [data-lead-form-shell]');}
+          await page.setViewportSize({width:390,height:844});
+          await activateFixtureControl(page.locator('[data-aria-lead-hero-cta]'));await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
+          const form=page.locator('#aria-hero-form [data-lead-step-form]');await advanceLeadContact(form);await assertLeadContactIntro(form);
+          await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+          await page.waitForFunction(()=>scrollY<5);
+          const launcher=page.locator('[data-aria-lead-chat] [data-aria-bubble-chat-cta]');
+          const hit=await launcher.evaluate(el=>{const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.bottom+2};});
+          if(await page.evaluate(()=>navigator.maxTouchPoints>0))await page.touchscreen.tap(hit.x,hit.y);else await page.mouse.click(hit.x,hit.y);
+          const chat=page.locator('[data-aria-chat]');await chat.waitFor({state:'visible'});
+          await chat.locator('[data-aria-chat-question="requirements"]').click();
+          await chat.locator('[data-aria-chat-requirements]').waitFor({state:'visible',timeout:20000});
+          if(!(await chat.locator('[data-aria-chat-requirements]').textContent()).includes(expected.health))throw Error('Aria admission copy differs');
+          await chat.getByRole('button',{name:'Close',exact:true}).click();
+        }else if(route==='/test-aria/'){
+          await checkMap('#aria-mosaic');await checkHealth('#lead-requirements',expected.health);await checkCopy('#aria-hero-form',expected.INQUIRY_TITLE);await checkCopy('#aria-first-visit-form',expected.VISIT_INQUIRY_TITLE);
+        }else if(route==='/en/dog-daycare-kosice/'){
+          await checkMap('#spaces');await checkHealth('#requirements',expected.englishHealth);
+        }else{
+          const health=page.locator('#podmienky,#lead-requirements');if(await health.count()===1)await checkHealth('#podmienky,#lead-requirements',expected.health);
+        }
+        if(errors.length)throw Error('Content runtime error '+route+' '+errors.join('; '));
+        console.log('PASS public content '+engine+' '+route);
+      }finally{await page.close();}
+    }
+  }finally{await context.close();}
 }
 
 (async () => {
   for (const [engine, browserType] of selectedEngines) {
     const browser = await browserType.launch();
+    try {
+    if(runtimeScope==='content'){
+      await assertPublicContent(browser,engine);
+      results.push({engine,scope:'content',status:'PASS'});
+      continue;
+    }
+    if(runtimeScope==='navigation'){
+      await assertBilingualNavigation(browser,engine,{navigationOnly:true});
+      await assertPaidReturnNavigation(browser,engine);
+      results.push({engine,scope:'navigation',status:'PASS'});
+      continue;
+    }
     if (!bellaris && brandPreviewCandidate && runtimeScope==='full') { await assertFooterMapGeometry(browser, engine); await assertBilingualNavigation(browser,engine); }
     for (const restricted of (runtimeScope==='aria-visual'?[false]:[false,true])) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -771,7 +1015,9 @@ async function assertBilingualNavigation(browser,engine) {
             const serverHtml = await response.text();
             if (!serverHtml.includes('data-aria-outline-ready="false"') ||
                 /<svg\b[^>]*\bdata-aria-tail\b/i.test(serverHtml))
-              throw new Error('Aria SSR must show rounded fallback, not an unmeasured SVG tail');
+              throw new Error('Aria SSR must not show an unmeasured SVG tail');
+            if(url.pathname==='/psia-skolka-kosice/'&&!serverHtml.includes('data-aria-initial-outline="true"'))
+              throw new Error('Paid Aria must have a complete stable outline on first paint');
           }
           // The server HTML is visible before effects run; wait for client hydration.
           await page.waitForTimeout(3000);
@@ -817,8 +1063,8 @@ async function assertBilingualNavigation(browser,engine) {
             if (url.pathname === '/test-aria/' || url.pathname === '/psia-skolka-kosice/') {
               if (palette.variant !== 'orange-rose' ||
                   palette.rose !== '#b82e7f' || palette.sage !== '#f3f8ef' ||
-                  palette.actionBg !== 'rgb(184, 46, 127)' ||
-                  palette.firstVisitAction !== 'rgb(184, 46, 127)' ||
+                  palette.actionBg !== 'rgb(255, 255, 255)' ||
+                  palette.firstVisitAction !== 'rgb(255, 255, 255)' ||
                   palette.badgeBg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgba(255, 181, 85, 0.38)' : 'rgb(255, 164, 20)') ||
                   palette.badgeFg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(38, 50, 43)' : 'rgb(255, 255, 255)') ||
                   palette.headline !== 'rgb(255, 164, 20)' ||
@@ -1051,7 +1297,7 @@ async function assertBilingualNavigation(browser,engine) {
                       heroDogs.querySelector('img')?.getAttribute('src') === firstVisitDogs.querySelector('img')?.getAttribute('src') &&
                       !!heroDogs.querySelector('[data-crown-ground]'),
                     liquidBadge: liquidGlass(badgeNode) && getComputedStyle(badgeNode).color === 'rgb(38, 50, 43)',
-                    liquidCta: liquidGlass(ctaNode) && getComputedStyle(ctaNode).color === 'rgb(38, 50, 43)' &&
+                    liquidCta: getComputedStyle(ctaNode).backgroundColor === 'rgb(255, 255, 255)' && getComputedStyle(ctaNode).color === 'rgb(169, 84, 0)' && getComputedStyle(ctaNode,'::after').backgroundColor === 'rgb(184, 46, 127)' &&
                       cta.width >= 225 && cta.width <= 300 &&
                       ctaNode.getAttribute('aria-controls') === 'aria-hero-form',
                     liquidDock: liquidGlass(dockNode) &&
@@ -2290,7 +2536,7 @@ async function assertBilingualNavigation(browser,engine) {
               await aria.getByRole('button', { name: 'Podmienky prijatia' }).click();
               if (await aria.locator('[data-aria-requirements] article').count() !== 4)
                 throw new Error('Aria must list the four conditions');
-              if (!await aria.locator('[data-aria-requirements]').getByText(/Feny počas hárania/).count() ||
+              if (!await aria.locator('[data-aria-requirements]').getByText(/Hárajúce feny/).count() ||
                   !await aria.locator('[data-aria-requirements] strong').count())
                 throw new Error('Preview-only hygiene/health wording or highlight missing');
               await aria.locator('[data-aria-requirements]').getByRole('button', { name: 'Chcem sa informovať o škôlke' }).click();
@@ -2478,7 +2724,7 @@ async function assertBilingualNavigation(browser,engine) {
               if (await page.locator('#lead-first-visit').getByText('Úvodná návšteva zadarmo', { exact: true }).count())
                 throw new Error('Duplicated first-visit ribbon returned to three-step section');
               const hero = page.locator('#aria-hero-form');
-              if (!await hero.getByRole('heading', { name: 'Chceli by ste sa informovať o škôlke?' }).count())
+              if (!await hero.getByRole('heading', { name: readPublicContent().INQUIRY_TITLE }).count())
                 throw new Error('New compact hero form heading missing');
               const enquiry = hero.locator('[data-lead-step-form]');
               const choiceLabels = enquiry.locator('label:has(input[name="zaujem"])');
@@ -2507,9 +2753,8 @@ async function assertBilingualNavigation(browser,engine) {
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               const hasCorrectOrder = await page.evaluate(() => {
                 const ids = window.location.pathname === '/psia-skolka-kosice/'
-                  ? ['recenzie', 'aria-hero-form', 'lead-photo-carousel', 'aria-caretakers', 'aria-about',
-                     'aria-early-faq', 'lead-pricing', 'lead-requirements', 'lead-benefits',
-                     'aria-mosaic', 'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form']
+                  ? ['recenzie', 'lead-photo-carousel', 'lead-pricing', 'lead-first-visit', 'aria-hero-form', 'aria-first-visit-form', 'aria-caretakers', 'aria-about',
+                      'lead-benefits', 'lead-requirements', 'aria-puppy-check', 'aria-mosaic', 'lead-friendship-form', 'lead-faq']
                   : ['recenzie', 'aria-caretakers', 'aria-about', 'aria-early-faq', 'aria-mosaic',
                      'lead-benefits', 'lead-pricing', 'lead-requirements', 'lead-faq',
                      'aria-puppy-check', 'lead-first-visit'];
@@ -2945,7 +3190,7 @@ async function assertBilingualNavigation(browser,engine) {
                 }
                 if (width >= 1024 && !await hero.locator('[data-lead-step-form]:visible').first().isVisible())
                   throw new Error('Desktop home guided form missing');
-                const layout = await page.evaluate(() => {
+                const layout = await page.evaluate(expectedTitle => {
                   const ids=['top','preco-chvostikovo','o-nas','aria-puppy-check','cennik','psie-priatelstva','podmienky','starostlivost','preco','priestory','prva-navsteva','prva-navsteva-form','faq','informujte-sa'];
                   const nodes=ids.map(id=>document.getElementById(id));
                   const photo=document.querySelector('#o-nas img'), benefits=document.querySelector('#o-nas [data-hero-benefits]');
@@ -2968,7 +3213,7 @@ async function assertBilingualNavigation(browser,engine) {
                     reviewsInHero:document.getElementById('top').contains(document.getElementById('recenzie')),
                     tickerAbsent:!document.querySelector('main .info-ticker-track'),
                     benefitsMoved:!!photo && !!benefits && benefits.getBoundingClientRect().top>=photo.getBoundingClientRect().bottom && !document.querySelector('#top [data-hero-benefits]'),
-                    bottomInquiry:document.querySelector('#kontakt #informujte-sa [data-lead-step-form]') && !document.querySelector('#kontakt [data-long-form]') && document.querySelector('#informujte-sa h3')?.textContent==='Chcete sa informovať o škôlke?',
+                    bottomInquiry:document.querySelector('#kontakt #informujte-sa [data-lead-step-form]') && !document.querySelector('#kontakt [data-long-form]') && document.querySelector('#informujte-sa h3')?.textContent===expectedTitle,
                     aboutWidth:(()=>{const copy=document.querySelector('#o-nas [data-about-expanded]').getBoundingClientRect();const pictures=document.querySelector('#o-nas [data-about-expanded]').parentElement.nextElementSibling.getBoundingClientRect();return Math.abs(copy.width-pictures.width)<2;})(),
                     forms:['informujte-sa','prva-navsteva-form'].every(id=>document.getElementById(id)?.querySelector('[data-lead-step-form]')),
                     uniqueFields:inputs.length===new Set(inputs).size,
@@ -3017,7 +3262,7 @@ async function assertBilingualNavigation(browser,engine) {
                       const third=document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] article')[2];
                       return !!third && getComputedStyle(third).borderTopWidth==='0px';
                     })(),
-                    warmExplore:innerWidth<1024||(()=>{const style=getComputedStyle(document.getElementById('home-hero-learn-more'));return style.backgroundColor==='rgb(255, 227, 174)'&&style.boxShadow!=='none';})(),
+                    warmExplore:innerWidth<1024||(()=>{const style=getComputedStyle(document.getElementById('home-hero-learn-more'));return style.backgroundColor==='rgb(255, 255, 255)'&&style.color==='rgb(169, 84, 0)'&&style.boxShadow!=='none';})(),
                     desktopCtaWithinForm:innerWidth<1024||document.getElementById('home-hero-learn-more').getBoundingClientRect().bottom<=document.querySelector('#home-hero-inline-form [data-home-form-panel]').getBoundingClientRect().bottom+2,
                     friendshipInline:!!document.querySelector('[data-home-friendship-form] #home-friendship-application')&&!document.getElementById('zaujem-po-priatelstvach')&&!document.querySelector('#preco button')&&!!document.querySelector('#starostlivost #preco'),
                     freeVisitBadge:(()=>{const el=document.querySelector('#prva-navsteva [data-home-free-visit]');return !!el&&getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)'&&parseFloat(getComputedStyle(el).paddingTop)>=10;})(),
@@ -3037,8 +3282,8 @@ async function assertBilingualNavigation(browser,engine) {
                     singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===8 && !faq.querySelector('a[href="/caste-otazky"]') && !!faq.querySelector('[data-home-faq-contact]') && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
                     applicationAfterPricing:document.getElementById('cennik').nextElementSibling?.id==='psie-priatelstva' && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='cennik' && document.getElementById('psie-priatelstva').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
-                    flatMainDock:getComputedStyle(dock.querySelector('.mobile-dock-bar')).boxShadow==='none',
-                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/|/#o-nas|/#cennik|/#podmienky|/produkty' && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
+                    approvedMainDock:(()=>{const style=getComputedStyle(dock.querySelector('.mobile-dock-bar'));return style.boxShadow.includes('inset') && style.backgroundImage.includes('gradient') && (style.backdropFilter||style.webkitBackdropFilter||'').includes('blur');})(),
+                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].filter(el=>el.getClientRects().length).map(el=>el.getAttribute('href')).join('|')===(innerWidth<1024?'/|/#cennik|/#podmienky|/#priestory|/produkty':'/|/#o-nas|/#cennik|/#podmienky|/produkty') && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2 &&
                       (() => {
@@ -3104,7 +3349,7 @@ async function assertBilingualNavigation(browser,engine) {
                     pricingFits:[...document.querySelectorAll('[data-home-pricing-columns] *')].every(el=>el.scrollWidth<=el.clientWidth+2),
                     paws:!!document.querySelector('#top .paw-trail-background'),
                   };
-                });
+                },readPublicContent().INQUIRY_TITLE);
                 if(Object.values(layout).some(value=>!value)) throw new Error('Home brand/layout regression at '+width+'px: '+JSON.stringify(layout));
                 if(width>=1024){
                   const desktopForm=page.locator('#home-hero-inline-form [data-lead-step-form]');
@@ -3537,7 +3782,7 @@ async function assertBilingualNavigation(browser,engine) {
           const failure = { engine, restricted, route: url.pathname, status: 'FAIL', error: error.message, runtimeErrors: errors };
           results.push(failure); failures.push(failure);
           await page.screenshot({ path: path.join(out, `${label}.png`), fullPage: true }).catch(() => {});
-          console.error(`FAIL ${label}: ${error.message}`, errors);
+          console.error(`FAIL ${label}: ${error.stack || error.message}`, errors);
         } finally { await page.close(); }
       }
       if (runtimeScope === 'full' && !bellaris && !restricted) {
@@ -4243,8 +4488,11 @@ async function assertBilingualNavigation(browser,engine) {
               if (await productsLink.count() !== 1 || await productsLink.getAttribute('href') !== '/produkty') {
                 throw new Error('Main mobile dock Products link must go to /produkty');
               }
-              if (await dock.getByText('Priestory', { exact: true }).count()) {
-                throw new Error('Retired Spaces shortcut should not occupy mobile dock');
+              // PR538 restored the mobile-only Spaces shortcut before Products.
+              const spacesLink = dock.getByRole('link', { name: 'Priestory', exact: true });
+              if (await spacesLink.count() !== 1 || await spacesLink.getAttribute('href') !== '/#priestory' ||
+                  !await spacesLink.isVisible() || !await spacesLink.evaluate(el=>el.getBoundingClientRect().height>=44)) {
+                throw new Error('Approved mobile Spaces shortcut must remain visible and usable');
               }
             }
             for (const route of ['/stojan-na-misky-pre-psa', '/target-na-cvicenie-pre-psov']) {
@@ -4393,14 +4641,14 @@ async function assertBilingualNavigation(browser,engine) {
             const failure = {engine, width, route:'product-inquiries', status:'FAIL', error:error.message};
             failures.push(failure);
             results.push(failure);
-            console.error('FAIL product inquiries and redirects ' + engine + ' ' + width + ': ' + error.message);
+            console.error('FAIL product inquiries and redirects ' + engine + ' ' + width + ': ' + (error.stack || error.message));
             await productPage.screenshot({path:path.join(out, 'products-' + engine + '-' + width + '.png'), fullPage:true}).catch(()=>{});
           } finally { await productPage.close(); }
         }
       }
       await context.close();
     }
-    await browser.close();
+    } finally { await browser.close(); }
   }
   fs.writeFileSync(path.join(out, 'results.json'), JSON.stringify({ checkedAt: new Date().toISOString(), base, results }, null, 2));
   if (failures.length) process.exitCode = 1;

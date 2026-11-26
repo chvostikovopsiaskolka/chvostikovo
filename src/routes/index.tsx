@@ -11,6 +11,7 @@ import { ProductSection } from "@/components/site/ProductSection";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Footer } from "@/components/site/Contact";
 import { InquirySection } from "@/components/site/InquirySection";
+import { INQUIRY_TITLE } from "@/content/site";
 import { LeadStepForm } from "@/components/site/LeadStepForm";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { HomePuppyChecker } from "@/components/site/HomePuppyChecker";
@@ -86,16 +87,16 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <main>
         <Hero onMobileInquiryOpen={openHeroInquiry} mobileInquiryOpen={heroInquiryOpen} />
+        <Header desktopHome />
         {heroInquiryOpen && (
           <section id="home-hero-interest" ref={heroInquiryRef} data-home-hero-revealed-form
             className="relative scroll-mt-20 overflow-hidden bg-card px-4 pb-11 pt-6 lg:hidden">
             <SectionAmbientPaws />
             <div data-lead-form-shell className="form-liquid-surface relative z-10 mx-auto max-w-xl overflow-hidden rounded-[26px] px-4 py-6 min-[390px]:px-6">
               <h2 data-lead-form-intro tabIndex={-1} className="font-display text-center text-lg font-bold text-forest focus:outline-none">
-                Čo hľadáte pre svojho psíka?
+                {INQUIRY_TITLE}
               </h2>
               <p data-lead-form-intro className="mt-2 mb-4 text-center text-sm text-muted-foreground">Vyplňte krátky <strong className="font-bold text-forest">nezáväzný formulár</strong>. Ozveme sa vám.</p>
               <LeadStepForm trackingSource="home_hero_interest_mobile" questionInHeading compact />
@@ -117,7 +118,7 @@ function Index() {
         <Partners />
         <UsefulInfo />
         <PhotoStrip />
-        <div id="kontakt" className="scroll-mt-24"><InquirySection allScreens matchHero title="Chcete sa informovať o škôlke?" /></div>
+        <div id="kontakt" className="scroll-mt-24"><InquirySection allScreens matchHero title={INQUIRY_TITLE} /></div>
       </main>
       <Footer />
     </div>
