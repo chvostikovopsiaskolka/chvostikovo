@@ -2022,3 +2022,71 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .mobile-dock[data-desktop-home-dock] [data-mobile-only-shortcut],
   .mobile-dock[data-desktop-home-dock] [data-mobile-only-home-item] { display: none !important; }
 }
+
+/* Public CTA signature, owner direction 26 Nov 2026.
+ * Keep the original native button/link, handlers, tracking attributes and accessible
+ * name. This scoped visual layer excludes navigation, cookies, phone and social
+ * links; the pseudo-element is purely decorative and cannot receive clicks.
+ * Existing compact layouts retain their natural block size (44px minimum). */
+:is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"])) {
+  --signature-icon-size: clamp(24px, 4vw, 32px);
+  position: relative;
+  box-sizing: border-box;
+  min-height: 44px;
+  border: 1px solid #ffa414;
+  border-radius: 999px;
+  background-color: #fff;
+  background-image: none;
+  color: #a95400;
+  text-shadow: none;
+  box-shadow: 0 0 12px rgb(255 164 20 / 17%);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+  padding-inline-start: clamp(10px, 3vw, 20px) !important;
+  padding-inline-end: calc(var(--signature-icon-size) + 12px) !important;
+  transform: none;
+  filter: none;
+  transition: none;
+}
+:is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"]))::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: 5px;
+  top: 50%;
+  width: var(--signature-icon-size);
+  height: var(--signature-icon-size);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  background-color: #b82e7f;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14m-6-6 6 6-6 6'/%3E%3C/svg%3E");
+  background-size: 55%;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+:is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"])) > :is(svg.lucide-arrow-right, svg.lucide-chevron-right) { display: none; }
+:is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"])) > span[class*="text-white"] { color: inherit; }
+:is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"])):is(:hover, :active) {
+  background-color: #fff;
+  color: #a95400;
+  border-color: #ffa414;
+  transform: none;
+  filter: none;
+  box-shadow: 0 0 12px rgb(255 164 20 / 17%);
+}
+:is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"])):not(:disabled):active { box-shadow: 0 0 5px rgb(255 164 20 / 20%); }
+:is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"])):focus-visible { outline: 2px solid #b82e7f; outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"])):not(:disabled) { transition: box-shadow 160ms ease; }
+  :is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"])):not(:disabled)::after { transition: background-position 160ms ease; }
+  :is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"])):not(:disabled):hover { box-shadow: 0 0 20px rgb(255 164 20 / 30%); }
+  :is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"])):not(:disabled):hover::after { background-position: calc(50% + 2px) center; }
+}
+@media (forced-colors: active) {
+  :is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"])) { background: ButtonFace; color: ButtonText; border-color: ButtonText; box-shadow: none; }
+  :is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"]))::after { display: none; }
+  :is(body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary, .hero-cta-primary, main .btn-coral, [data-form-dialog] .btn-coral, [data-aria-chat] .btn-coral, [data-aria-chat-lead] .btn-coral, [data-aria-lead-hero-cta], [data-aria-chat-interest-cta], [data-aria-bubble-chat-cta]):not(:where(header *, footer *, .mobile-dock *, [data-cookie-consent] *, [data-aria-section-navigation] *, a[href^="tel:"], a[href="/#faq"], a[href*="instagram.com"], a[href*="facebook.com"])):focus-visible { outline-color: Highlight; }
+}
