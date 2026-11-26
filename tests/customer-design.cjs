@@ -168,7 +168,7 @@ async function scenario(count){
   assert.equal(w.document.getElementById('designReservationNotice').hidden,false,'Sunday reminder stays visible on Monday');
   assert.match(w.document.getElementById('designReservationNotice').textContent,/do nedele 11\. 1\. do 20:00/);
   assert.equal(w.document.getElementById('designReservationNotice').dataset.weekFrom,'2099-01-12');
-  assert.equal(w.document.getElementById('designReservationNotice').previousElementSibling.textContent,'Budúci týždeň');
+  assert.equal(w.document.getElementById('designReservationNotice').previousElementSibling.textContent,'','next-week heading is no longer duplicated');
   const nextWeekCase=(requests,reservations,hidden,message)=>{
     run(`state.data.requests=${JSON.stringify(requests)};state.data.reservations=${JSON.stringify(reservations)};state.data.booking_history=[];state.data.visits=[];renderDays();window.customerDesignPickerRender()`);
     assert.equal(w.document.getElementById('designReservationNotice').hidden,hidden,message);
@@ -258,7 +258,7 @@ async function scenario(count){
     run(`state.data.requests=${JSON.stringify(requests)};state.data.reservations=[];state.data.booking_history=[];state.data.visits=[];state.data.availability.days=Array.from({length:10},(_,i)=>{const date=new Date(${JSON.stringify(monday)}+'T12:00:00Z');date.setUTCDate(date.getUTCDate()+i+Math.floor(i/5)*2);return {date:date.toISOString().slice(0,10),available:8,capacity:8,occupied:0,bookings_open:true,dogs:[]}});renderDays();window.customerDesignPickerRender()`);
     const notice=w.document.getElementById('designReservationNotice');
     assert.equal(notice.dataset.deadline,deadline);
-    assert.equal(notice.previousElementSibling.textContent,'Budúci týždeň');
+    assert.equal(notice.previousElementSibling.textContent,'','no redundant next-week label at date rollover');
     assert.equal(notice.parentElement.dataset.weekFrom,notice.dataset.weekFrom);
     return notice;
   };
@@ -307,6 +307,10 @@ async function scenario(count){
   assert.equal(w.document.querySelectorAll('#bookingPickerDaysV37 [data-taxi-toggle]').length,0);
   const taxi=w.document.querySelector('#bookingPickerTaxiByDayV91 [data-taxi-toggle]');assert(taxi);taxi.click();
   assert.equal(w.document.querySelectorAll('#bookingPickerTaxiByDayV91 [data-taxi-mode]').length,count===2?6:3);
+  assert(w.document.querySelector('.calendar-taxi-popover-v438'),'taxi is anchored outside the row layout');
+  const outside=w.document.querySelector('.booking-day-v37:not(:disabled)[data-contact="false"]');assert(outside);outside.click();assert.equal(w.document.querySelectorAll('.calendar-taxi-popover-v438').length,0,'outside click closes popover without replacing clicked target');
+  if(!w.document.querySelector('#bookingPickerTaxiByDayV91 [data-taxi-toggle]'))w.document.querySelector('.booking-day-v37[data-date="'+outside.dataset.date+'"]').click();
+  w.document.querySelector('#bookingPickerTaxiByDayV91 [data-taxi-toggle]').click();
   w.document.querySelector('#bookingPickerTaxiByDayV91 [data-taxi-mode="pickup"]').click();assert.match(w.document.getElementById('bookingPickerTaxiByDayV91').textContent,/Vybrané/);
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').disabled,false);
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').hidden,false,'real reservation submit appears after selection');

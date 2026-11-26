@@ -195,11 +195,11 @@
       const button=document.createElement('button');button.type='button';button.disabled=!d.selectable;
       button.dataset.overviewDate=d.date;button.dataset.level=d.bookings_open===false?'closed':Number(d.available)<=0?'full':Number(d.available)<=2?'limited':'free';
       button.setAttribute('aria-pressed',String(selected.has(d.date)));
-      const title=document.createElement('strong');title.textContent=new Intl.DateTimeFormat('sk-SK',{weekday:'short',day:'numeric',month:'numeric'}).format(new Date(d.date+'T12:00:00'));
+      const title=document.createElement('strong');title.textContent=new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric'}).format(new Date(d.date+'T12:00:00'));
       const count=document.createElement('small');count.textContent=d.bookings_open===false?'Zatvorené':Number(d.available)<=0?'Plno':d.occupied+'/'+d.capacity;
       button.append(title,count);button.onclick=()=>window.openBookingPickerV37?.(null,d.date);grid.append(button);
     }
-    host.append(grid);
+    const letters=document.createElement('div');letters.className='calendar-weekletters-v438';letters.setAttribute('aria-hidden','true');for(const s of (document.documentElement.lang==='en'?['M','T','W','T','F']:['P','U','S','Š','P'])){const span=document.createElement('span');span.textContent=s;letters.append(span);}host.append(letters,grid);
     if(model.proposal){
       const reason=document.createElement('p');reason.className='compact-repeat-reason-v437';reason.textContent=model.proposal.sourceWeek==='previous'?'Predvybraté podľa minulého týždňa.':'Predvybraté podľa tohto týždňa.';host.append(reason);
       const hint=document.createElement('small');hint.textContent='Výber môžete zmeniť. Rezerváciu odošlete sami.';host.append(hint);
@@ -283,7 +283,7 @@
     const picker=byId('bookingPickerV37'),card=picker?.querySelector('.booking-picker-card-v37');if(!card)return;
     // Resume/bootstrap can advance availability while this page remains open.
     const firstDate=window.customerPickerDaysV393?.()?.[0]?.date||state.data?.availability?.days?.[0]?.date;
-    const renderedDate=byId('bookingPickerDaysV37')?.querySelector('.booking-picker-week-v127')?.dataset.weekFrom;
+    const renderedDate=byId('bookingPickerDaysV37')?.querySelector('.booking-picker-week-v127')?.dataset.firstDate;
     if(firstDate&&renderedDate&&firstDate!==renderedDate){window.customerDesignRefreshCalendarV351?.();return;}
     picker.classList.add('design-reservations-page');picker.setAttribute('role','region');picker.removeAttribute('aria-modal');
     byId('bookingPickerTitleV37').textContent='Rezervácie';
@@ -302,12 +302,12 @@
     notice.hidden=!nextHeading||!!reminder?.hidden;notice.textContent=reminder?.text||'';
     notice.dataset.weekFrom=reminder?.from||'';notice.dataset.weekTo=reminder?.to||'';notice.dataset.deadline=reminder?.deadline||'';
     // The core calendar owns the Monday-to-Sunday notice and its visibility.
-    const weekNotice=byId('designWeekDeadline');if(weekNotice){weekNotice.hidden=!!window.customerDesignHasWeekBooking?.(weekNotice.dataset.weekFrom,weekNotice.dataset.weekTo);byId('bookingPickerDaysV37').querySelector('.booking-picker-week-label-v127')?.after(weekNotice);}
+    const weekNotice=byId('designWeekDeadline');if(weekNotice){weekNotice.hidden=!!window.customerDesignHasWeekBooking?.(weekNotice.dataset.weekFrom,weekNotice.dataset.weekTo);weekNotice.closest('.booking-picker-week-v127')?.querySelector('.booking-picker-week-label-v127')?.after(weekNotice);}
 
     const selectedSection=byId('bookingPickerTaxiSectionV91');
     const taxiTitle=byId('designSelectedDaysTitle')||selectedSection?.querySelector('.booking-picker-taxi-title-v37');
     if(taxiTitle){taxiTitle.id='designSelectedDaysTitle';taxiTitle.textContent='Vybraté dni ↓';taxiTitle.hidden=selectedSection.classList.contains('hidden');}
-    picker.querySelectorAll('.booking-day-v37').forEach(button=>{const day=state.data?.availability?.days?.find(d=>d.date===button.dataset.date);if(!day)return;button.dataset.capacityLevel=day.bookings_open===false?'closed':button.classList.contains('booked')?'reserved':Number(day.available)<=0?'full':Number(day.available)<=2?'limited':'free';button.title='Obsadené '+Number(day.occupied||0)+' z '+Number(day.capacity||0)+' miest';
+    picker.querySelectorAll('.booking-day-v37').forEach(button=>{const day=state.data?.availability?.days?.find(d=>d.date===button.dataset.date);if(!day)return;button.dataset.capacityLevel=day.bookings_open===false?'closed':button.classList.contains('booked')?'reserved':Number(day.available)<=0?'full':Number(day.available)<=2?'limited':'free';button.title='Obsadené '+Number(day.occupied||0)+' z '+Number(day.capacity||0)+' miest';button.setAttribute('aria-label',new Intl.DateTimeFormat(document.documentElement.lang==='en'?'en':'sk-SK',{weekday:'long',day:'numeric',month:'numeric'}).format(new Date(day.date+'T12:00:00'))+' · '+(button.querySelector(':scope > span')?.textContent||'')+' · '+button.title);
       const span=button.querySelector(':scope > span');if(span&&!button.disabled&&button.dataset.full!=='true')span.textContent=Number(day.occupied||0)+'/'+Number(day.capacity||0);
       if(!button.disabled&&!button.classList.contains('booked')&&button.dataset.full!=='true'&&!button.querySelector('.design-capacity-dot')){const dot=document.createElement('i');dot.className='design-capacity-dot';dot.setAttribute('aria-hidden','true');span?.prepend(dot);}
     });

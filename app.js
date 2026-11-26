@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v437';
-const APP_VERSION='2.0.110';
+const APP_BUILD='v438';
+const APP_VERSION='2.0.111';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -2838,8 +2838,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   const pairTaxiV254=new Map();
   function pickerDogsV254(){return pairBookingV254?(state.data?.dogs||[]).slice(0,2):[selectedDog()].filter(Boolean)}
   function pickerTaxiV254(date,dogId){return pairBookingV254?pairTaxiV254.get(date+'|'+dogId)||'none':selectedTaxiByDateV91.get(date)||'none'}
-  function taxiChoicesV254(date,previewDog=null){return (previewDog?[previewDog]:pickerDogsV254()).map(d=>'<div class="booking-taxi-dog-v254">'+(!previewDog&&pairBookingV254?'<strong>'+esc(d.name)+'</strong>':'')+'<div class="booking-taxi-inline-choices-v201">'+[['pickup','Vyzdvihnutie','5 €'],['pickup_dropoff','Vyzdvihnutie aj dovoz','10 €'],['dropoff','Dovoz domov','5 €']].map(([id,label,price])=>'<button type="button" class="'+(!previewDog&&pickerTaxiV254(date,d.id)===id?'active':'')+'" data-taxi-mode="'+id+'" data-taxi-date="'+date+'" data-taxi-dog="'+d.id+'">'+label+' · '+price+'</button>').join('')+'</div></div>').join('')}
-  function selectedDaysMarkupV360(dates,expandedDate,previewDog=null){return dates.map(date=>`<div class="design-selected-day"><strong>${esc(skDay(date))} ${esc(skDate(date))}</strong><button type="button" class="design-taxi-disclosure" data-taxi-toggle="${date}" aria-expanded="${expandedDate===date}"><span>Potrebujete odvoz? 🚕${(!previewDog&&pickerDogsV254().some(d=>pickerTaxiV254(date,d.id)!=='none'))?' · Vybrané':''}</span><span aria-hidden="true">${expandedDate===date?'⌃':'⌄'}</span></button>${expandedDate===date?`<div class="booking-taxi-inline-v201">${taxiChoicesV254(date,previewDog)}</div>`:''}</div>`).join('')}
+  function taxiChoicesV254(date,previewDog=null){return (previewDog?[previewDog]:pickerDogsV254()).map(d=>'<div class="booking-taxi-dog-v254">'+(!previewDog&&pairBookingV254?'<strong>'+esc(d.name)+'</strong>':'')+'<div class="booking-taxi-inline-choices-v201">'+[['pickup','Vyzdvihnutie','5 €'],['pickup_dropoff','Vyzdvihnutie aj dovoz','10 €'],['dropoff','Dovoz domov','5 €']].map(([id,label,price])=>'<button type="button" class="'+(!previewDog&&pickerTaxiV254(date,d.id)===id?'active':'')+'" data-taxi-mode="'+id+'" data-taxi-date="'+date+'" data-taxi-dog="'+d.id+'">'+ (id==='pickup_dropoff'?'Tam aj späť':id==='pickup'?'Vyzdvihnutie':'Dovoz domov')+' · '+price+'</button>').join('')+'</div></div>').join('')}
+  function selectedDaysMarkupV360(dates,expandedDate,previewDog=null){return dates.map(date=>`<div class="design-selected-day"><strong>${esc(skDay(date))} ${esc(skDate(date))}</strong><button type="button" class="design-taxi-disclosure" data-taxi-toggle="${date}" aria-expanded="${expandedDate===date}"><span>Potrebujete odvoz? 🚕${(!previewDog&&pickerDogsV254().some(d=>pickerTaxiV254(date,d.id)!=='none'))?' · Vybrané':''}</span><span aria-hidden="true">${expandedDate===date?'⌃':'⌄'}</span></button>${expandedDate===date?`<div class="booking-taxi-inline-v201 calendar-taxi-popover-v438" role="group" aria-label="Taxi">${taxiChoicesV254(date,previewDog)}</div>`:''}</div>`).join('')}
   function sharedItemsV260(dates=[...selectedDatesV37].sort()){
     return dates.flatMap(date=>pickerDogsV254().map(d=>({dog_id:Number(d.id),date,taxi_mode:pickerTaxiV254(date,d.id),billing_choice:'auto'})));
   }
@@ -2989,9 +2989,29 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     return dates.length?{dates,sourceWeek:proposals[0].sourceWeek}:null;
   }
   let compactSeedV437=null;
+  function calendarMonthEndV438(today){
+    const [y,m]=today.split('-').map(Number);return new Date(Date.UTC(y,m+1,0,12)).toISOString().slice(0,10);
+  }
+  function calendarRowsV438(days,today){
+    const current=smartMondayV199(today),next=smartShiftV199(current,7),groups=new Map();
+    for(const day of days){
+      const monday=smartMondayV199(day.date),key=monday;
+      if(!groups.has(key))groups.set(key,{month:day.date.slice(0,7),monday,weekEnd:smartShiftV199(monday,6),kind:monday===current?'current':monday===next?'next':'later',days:[]});
+      const row=groups.get(key);row.days.push(day);row.month=day.date.slice(0,7); // A cross-month week belongs to its last actual working day.
+    }
+    const seen=new Set();return [...groups.values()].map(row=>{const first=!seen.has(row.kind);seen.add(row.kind);return {...row,firstForKind:first};});
+  }
+  function calendarMonthNameV438(month){
+    const language=document.documentElement.lang==='en'?'en':'sk-SK';
+    const name=new Intl.DateTimeFormat('sk-SK',{month:'long'}).format(new Date(month+'-01T12:00:00Z'));
+    return name.charAt(0).toUpperCase()+name.slice(1);
+  }
+  function calendarWeekLettersV438(){
+    return '<div class="calendar-weekletters-v438" aria-hidden="true">'+['P','U','S','Š','P'].map((s,i)=>'<span data-weekday-index="'+i+'">'+s+'</span>').join('')+'</div>';
+  }
   function compactEligibleV437(date,dogs,days){
     const day=days.find(d=>d.date===date),today=bratislavaClockV95().date;
-    return !!day&&date>today&&date<=smartShiftV199(today,21)&&day.bookings_open!==false&&Number(day.available)>=dogs.length&&dogs.length>0&&dogs.every(d=>!bookingFor(d.id,date)&&!bookingDeadlineClosedV95(date,d));
+    return !!day&&date>today&&date<=calendarMonthEndV438(today)&&day.bookings_open!==false&&Number(day.available)>=dogs.length&&dogs.length>0&&dogs.every(d=>!bookingFor(d.id,date)&&!bookingDeadlineClosedV95(date,d));
   }
   function compactSeedPickerV437(days,extraDate=null){
     const dogs=pickerDogsV254();
@@ -3281,6 +3301,14 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     });
     $('bookingPickerSmartDaysV199').addEventListener('click',e=>{const button=e.target.closest('[data-smart-action]');if(!button)return;if(button.dataset.smartAction==='manual'){smartDaysDismissedV199=true;renderPickerV37()}else if(button.dataset.smartAction==='apply')void applySmartDaysV199()});
     $('bookingPickerSubmitV37').addEventListener('click',submitPickerV37);
+    document.addEventListener('click',event=>{
+      if(!expandedTaxiDateV201||$('bookingPickerV37')?.classList.contains('hidden')||event.target.closest('.calendar-taxi-popover-v438,[data-taxi-toggle]'))return;
+      // Close without replacing the clicked day, submit or close button before its handler runs.
+      expandedTaxiDateV201=null;
+      $('bookingPickerTaxiByDayV91')?.querySelectorAll('.calendar-taxi-popover-v438').forEach(node=>node.remove());
+      $('bookingPickerTaxiByDayV91')?.querySelectorAll('[data-taxi-toggle][aria-expanded="true"]').forEach(button=>{button.setAttribute('aria-expanded','false');const arrow=button.querySelector('[aria-hidden]');if(arrow)arrow.textContent='⌄';});
+    },true);
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&expandedTaxiDateV201&&!$('bookingPickerV37')?.classList.contains('hidden')){event.preventDefault();const date=expandedTaxiDateV201;expandedTaxiDateV201=null;renderPickerV37();$('bookingPickerTaxiByDayV91')?.querySelector('[data-taxi-toggle="'+date+'"]')?.focus();}});
   }
 
   // This reminder is account-wide: a completed visit earlier this week counts too.
@@ -3315,7 +3343,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const attended=dogs.length>0&&dogs.every(d=>(state.data?.visits||[]).some(v=>Number(v.dog_id)===Number(d.id)&&v.visit_date>=monday&&v.visit_date<=today));
     // Obaja keeps the current week if either dog has not attended yet.
     const offset=attended&&days[0]?.date>=monday&&days[0]?.date<=sunday?5:0;
-    return days.slice(offset,offset+20);
+    return days.slice(offset);
   }
   window.customerPickerDaysV393=pickerDaysV393;
   function renderPickerV37(){
@@ -3335,21 +3363,22 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 
     updateBookingDeadlineNoticeV127();
     renderCompactSeedV437();
-    const groups=[];
-    for(let start=0;start<Math.min(days.length,20);start+=5){
-      const week=days.slice(start,start+5);
-      // v232: show the week-specific status ABOVE its days, not beneath them.
-      const today=bratislavaClockV95().date,weekEnd=new Date(week[0].date+'T12:00:00Z');weekEnd.setUTCDate(weekEnd.getUTCDate()+6);
-      const currentWeek=start===0&&today>=week[0].date&&today<=weekEnd.toISOString().slice(0,10);
-      const weekNoticeFull=week.some(d=>Number(d.available)<pickerDogsV254().length);
+    const groups=[],today=bratislavaClockV95().date,rows=calendarRowsV438(days,today);
+    let activeMonth='',laterOpen=false;
+    for(const row of rows){
+      const week=row.days,weekEnd=new Date(row.weekEnd+'T12:00:00Z'),currentWeek=row.kind==='current'&&row.firstForKind;
+      if(activeMonth!==row.month){
+        if(laterOpen){groups.push('</div>');laterOpen=false;}
+        activeMonth=row.month;groups.push('<h3 class="calendar-month-v438">'+esc(calendarMonthNameV438(row.month))+'</h3>'+calendarWeekLettersV438());
+      }
+      if(row.kind==='later'&&!laterOpen){groups.push('<div class="calendar-later-v438">');laterOpen=true;}
       const weekNotice=currentWeek
-        ? `<div id="designWeekDeadline" data-week-from="${week[0].date}" data-week-to="${weekEnd.toISOString().slice(0,10)}" ${hasWeekBookingV337(week[0].date,weekEnd.toISOString().slice(0,10))?'hidden':''}><strong>Nestihli ste rezervovať miesto do nedele?</strong><span>Kliknite na deň, odošlite žiadosť a počkajte na schválenie. Pri plnej kapacite nám napíšte správu.</span></div>`
-        : start<10&&weekNoticeFull
-        ? '<div class="booking-week-closed-note-v127"><strong>Niektoré dni nemajú dostatok voľných miest.</strong><span>Kliknite na požadovaný deň a napíšte nám správu. O možnosti prihlásenia vás budeme informovať.</span></div>'
+        ? `<div id="designWeekDeadline" data-week-from="${week[0].date}" data-week-to="${weekEnd.toISOString().slice(0,10)}" ${hasWeekBookingV337(week[0].date,weekEnd.toISOString().slice(0,10))?'hidden':''}><strong>Nestihli ste rezervovať miesto do nedele?</strong><span>Kliknite na deň, odošlite žiadosť a počkajte na schválenie v prípade voľného miesta.</span></div>`
         : '';
-      const futureWeek=false; // All available weeks stay visible in one compact calendar.
-      const futureOpen=!futureWeek||futureWeekExpandedV235||week.some(d=>selectedDatesV37.has(d.date));
-      groups.push(`<div class="booking-picker-week-v127 ${futureWeek?'booking-picker-future-v235':''}" data-week-from="${week[0].date}" data-week-to="${weekEnd.toISOString().slice(0,10)}"><div class="booking-picker-week-label-v127">${futureWeek?`<button type="button" class="booking-picker-future-toggle-v235" data-future-toggle="true" aria-expanded="${futureOpen?'true':'false'}">${pickerWeekLabelV393(week[0].date)} <span aria-hidden="true">${futureOpen?'⌃':'⌄'}</span></button>`:pickerWeekLabelV393(week[0].date)}</div><div class="booking-picker-future-body-v235 ${futureOpen?'':'hidden'}">${weekNotice}<div class="booking-picker-week-days-v127">${week.map(d=>{
+      // All real available dates stay visible in one compact calendar.
+      const monday=row.monday,friday=smartShiftV199(monday,4);
+      const heading=row.kind==='current'&&row.firstForKind?'Tento týždeň · '+compactDateV37(monday)+' – '+compactDateV37(friday):'';
+      groups.push(`<div class="booking-picker-week-v127 calendar-row-v438" data-calendar-kind="${row.kind}" data-week-from="${monday}" data-first-date="${week[0].date}" data-week-to="${row.weekEnd}"><div class="booking-picker-week-label-v127">${heading}</div><div class="booking-picker-future-body-v235">${weekNotice}<div class="booking-picker-week-days-v127">${Array.from({length:(new Date(week[0].date+'T12:00:00Z').getUTCDay()+6)%7},()=>'<div class="calendar-empty-v438" aria-hidden="true"></div>').join('')}${week.map(d=>{
         const existing=pickerDogsV254().some(x=>bookingFor(x.id,d.date)),deadlineClosed=pickerDogsV254().some(x=>bookingDeadlineClosedV95(d.date,x)),closed=d.bookings_open===false,full=Number(d.available)<pickerDogsV254().length;
         const past=d.date<=bratislavaClockV95().date;
         const lateContact=(deadlineClosed||full)&&!existing&&!past&&!closed;
@@ -3362,6 +3391,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         return bookingDayMarkupV360(d,{selected,existing,lateContact,full,disabled,ownStatus,closed,stateText,taxiToggle});
       }).join('')}</div>${expandedTaxiDateV201&&week.some(d=>d.date===expandedTaxiDateV201)&&selectedDatesV37.has(expandedTaxiDateV201)?`<div class="booking-taxi-inline-v201" data-taxi-date="${expandedTaxiDateV201}"><p class="booking-taxi-inline-title-v201">🚕 Taxi · ${esc(skDay(expandedTaxiDateV201))} ${esc(skDate(expandedTaxiDateV201))}</p>${taxiChoicesV254(expandedTaxiDateV201)}</div>`:' '}</div></div>`);
     }
+    if(laterOpen)groups.push('</div>');
     $('bookingPickerDaysV37').innerHTML=groups.join('');
     $('bookingPickerDaysV37').querySelectorAll('[data-future-toggle]').forEach(b=>b.addEventListener('click',()=>{futureWeekExpandedV235=b.getAttribute('aria-expanded')!=='true';renderPickerV37()}));
     $('bookingPickerDaysV37').querySelectorAll('.booking-day-v37:not(:disabled)').forEach(btn=>btn.addEventListener('click',async()=>{
@@ -3383,6 +3413,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         selectedTaxiByDateV91.delete(date);
         if(expandedTaxiDateV201===date)expandedTaxiDateV201=null;
       }else{
+        if(selectedDatesV37.size>=15){pickerErrorV95('Naraz môžete rezervovať najviac 15 dní. Ďalšie dni vyberte po odoslaní.');return;}
         selectedDatesV37.add(date);
         if(!selectedTaxiByDateV91.has(date))selectedTaxiByDateV91.set(date,'none');
       }
@@ -3398,6 +3429,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const date=button.dataset.taxiToggle;
       expandedTaxiDateV201=expandedTaxiDateV201===date?null:date;
       renderPickerV37();
+      const popup=$('bookingPickerTaxiByDayV91')?.querySelector('.calendar-taxi-popover-v438');
+      if(popup){const box=popup.getBoundingClientRect(),nav=document.querySelector('.bottom-nav')?.getBoundingClientRect();if(nav&&box.bottom>nav.top-8)popup.classList.add('calendar-taxi-above-v438');}
     }));
     $('bookingPickerTaxiByDayV91').querySelectorAll('[data-taxi-mode]').forEach(button=>button.addEventListener('click',()=>{
       const date=button.dataset.taxiDate;
@@ -3452,6 +3485,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   async function submitPickerV37(){
     const dog=selectedDog(),dates=[...selectedDatesV37].sort();
     if(!dog||!dates.length||submittingV37||checkingRenewalV157)return;
+    if(dates.length>15){pickerErrorV95('Naraz môžete rezervovať najviac 15 dní. Ďalšie dni vyberte po odoslaní.');return;}
     const deadlineDates=dates.filter(date=>bookingDeadlineClosedV95(date,dog));
     if(deadlineDates.length){
       deadlineDates.forEach(date=>{selectedDatesV37.delete(date);selectedTaxiByDateV91.delete(date)});

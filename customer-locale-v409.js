@@ -132,7 +132,7 @@
     ['Prajete si zmeniť typ taxíka?','Change your transport option?'],
     ['Požiadať o zmenu','Request a change'],
     ['Nestihli ste rezervovať miesto do nedele?','Missed the Sunday booking deadline?'],
-    ['Kliknite na deň, odošlite žiadosť a počkajte na schválenie. Pri plnej kapacite nám napíšte správu.','Select a day and submit your request for approval. If fully booked, message us.'],
+    ['Kliknite na deň, odošlite žiadosť a počkajte na schválenie. Pri plnej kapacite nám napíšte správu.','Select a day and submit your request for approval. If fully booked, message us.'],['Kliknite na deň, odošlite žiadosť a počkajte na schválenie v prípade voľného miesta.','Select a day, submit a request and wait for approval if space is available.'],['Tam aj späť','Round trip'],['Naraz môžete rezervovať najviac 15 dní. Ďalšie dni vyberte po odoslaní.','You can book up to 15 days at once. Choose more dates after submitting.'],
     ['Niektoré dni nemajú dostatok voľných miest.','Some days have limited availability.'],
     ['Kliknite na požadovaný deň a napíšte nám správu. O možnosti prihlásenia vás budeme informovať.','Select your preferred day and message us. We will let you know if a place becomes available.'],
     ['Čaká','Pending'],['Uplynulo','Past'],['Zatvorené','Closed'],['Plno','Full'],
@@ -175,6 +175,9 @@
   const dayShortEn={Po:'Mon',Ut:'Tue',St:'Wed','Št':'Thu',Pi:'Fri',So:'Sat',Ne:'Sun'};
   const monthsEn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const translate = (text,element) => {
+    if(element?.matches?.('.calendar-weekletters-v438 [data-weekday-index]'))return ['M','T','W','T','F'][Number(element.dataset.weekdayIndex)]||null;
+    if(element?.matches?.('.calendar-month-v438')){const sk=['Január','Február','Marec','Apríl','Máj','Jún','Júl','August','September','Október','November','December'],en=['January','February','March','April','May','June','July','August','September','October','November','December'];return en[sk.indexOf(text)]||null;}
+    const weekRange=text.match(/^Tento týždeň · (.+)$/);if(weekRange)return 'This week · '+weekRange[1];
     const exact=DICTIONARY.get(text);if(exact)return exact;
     // Only calendar UI may contain short weekday abbreviations. Never map
     // ordinary names, announcements, signed text or user-entered data.
@@ -189,7 +192,7 @@
     if(availability)return availability[1]+' places left';
     availability=text.match(/^Obsadené\s+(\d+)\s+z\s+(\d+)\s+miest$/);
     if(availability)return 'Occupied: '+availability[1]+' of '+availability[2]+' places';
-    availability=text.match(/^(Vyzdvihnutie aj dovoz|Vyzdvihnutie|Dovoz domov)\s*·\s*(\d+\s*€)$/);
+    availability=text.match(/^(Vyzdvihnutie aj dovoz|Vyzdvihnutie|Dovoz domov|Tam aj späť)\s*·\s*(\d+\s*€)$/);
     if(availability)return (DICTIONARY.get(availability[1])||availability[1])+' · '+availability[2];
     availability=text.match(/^Rezervovať\s+(\d+)\s+(deň|dni|dní)$/);
     if(availability)return 'Book '+availability[1]+' days';

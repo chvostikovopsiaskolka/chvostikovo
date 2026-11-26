@@ -29,7 +29,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
    await page.waitForFunction(()=>document.querySelector('.booking-picker-week-label-v127')?.textContent?.includes('This week'));
    assert.match(await page.locator('#bookingPickerTitleV37').innerText(),/Bookings|Choose a day/);
    assert.match(await page.locator('.booking-picker-week-label-v127').first().innerText(),/This week/);
-   assert.match(await page.locator('.booking-picker-week-label-v127').last().innerText(),/Next week/);
+   assert.equal(await page.locator('.booking-picker-week-label-v127').last().textContent(),'');assert.match(await page.locator('#designReservationNotice').textContent(),/Please book by Sunday/);
    // Late-contact days remain clickable but open their own contact flow after
    // the 19:00 deadline. This test exercises the ordinary booking/taxi form.
    const available=page.locator('.booking-day-v37:not(:disabled):not([data-contact="true"])').first();
@@ -43,10 +43,10 @@ const fixture=require('./liquid-v3-fixture.cjs');
    assert.match(await page.locator('#designSelectedDaysTitle').innerText(),/Selected days/);
    await selected.first().locator('.design-taxi-disclosure').click();
    await page.waitForTimeout(120);
-   assert.match(await page.locator('#bookingPickerTaxiByDayV91').innerText(),/Pickup and drop-off/);
+   assert.match(await page.locator('#bookingPickerTaxiByDayV91').innerText(),/Round trip/);
    await page.evaluate(()=>window.ChvostikovoLocale.setLanguage('sk'));
    await page.waitForFunction(()=>document.querySelector('#navBooking')?.textContent?.includes('Prehľad'));
-   assert.match(await page.locator('#bookingPickerTaxiByDayV91').innerText(),/Vyzdvihnutie aj dovoz/);
+   assert.match(await page.locator('#bookingPickerTaxiByDayV91').innerText(),/Tam aj späť/);
    await page.locator('#bookingPickerCloseV37').click();
    await page.evaluate(()=>{
      window.__noticeFixture=[{id:12345,active:true,title:'Súkromný titul oznamu',body:'Zostáva v slovenčine',
