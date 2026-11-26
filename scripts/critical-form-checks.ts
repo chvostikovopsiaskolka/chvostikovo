@@ -209,10 +209,11 @@ assert(ariaChatMobile.includes('const visibleQuestions = unanswered.slice(0, 4)'
 const approvedTitles = [
   "Aký je cenník škôlky?", "Aké sú podmienky prijatia?",
   "Kto sa postará o psíka?", "Prijímate aj šteniatka?",
-  "Kde sa škôlka nachádza?", "Aké priestory má škôlka?",
-  "Ako prebieha prvá návšteva?", "Ako si rezervujem miesto v škôlke?",
+  "Pre akých psíkov je škôlka určená?", "Ako prebieha prvá návšteva?",
+  "Je potrebné rezervovať miesto vopred?", "Kde sa škôlka nachádza?",
+  "Aké priestory má škôlka?", "Ponúkate aj psie taxi?",
 ];
-assert(approvedTitles.every(title => ariaChatMobile.includes('title: "' + title + '"')) &&
+assert(approvedTitles.every((title, index) => ariaChatMobile.includes('title: "' + title + '"') && (index === 0 || ariaChatMobile.indexOf('title: "' + approvedTitles[index - 1] + '"') < ariaChatMobile.indexOf('title: "' + title + '"'))) &&
   ariaChatMobile.includes('id: "reservation"') &&
   ariaChatMobile.includes("**do nedele 20:00**") &&
   ariaChatMobile.includes("**vieme sa dohodnúť aj individuálne**") &&
