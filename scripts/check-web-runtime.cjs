@@ -212,6 +212,21 @@ async function assertPaidAriaChat(page, {visualOnly=false}={}) {
     await chat.locator('[data-aria-chat-questions]').waitFor({state:'visible',timeout:20000});
     if(await chat.locator('[data-aria-chat-question]').count()!==4||!(await chat.innerText()).includes('20 €/deň'))throw new Error('Paid chat must reuse pricing answer and refill four FAQ');
     if(visualOnly){
+      await chat.locator('[data-aria-chat-interest-cta]').click();
+      const widget=chat.locator('[data-aria-chat-inline="interest"]');
+      await widget.waitFor({state:'visible',timeout:20000});
+      const viewport=page.viewportSize();
+      for(const width of [320,390,1280]){
+        await page.setViewportSize({width,height:844});
+        await widget.evaluate(el=>el.getBoundingClientRect());
+        const geometry=await widget.evaluate(el=>{
+          const history=el.closest('[data-aria-chat-history]'),r=el.getBoundingClientRect(),h=history.getBoundingClientRect(),s=getComputedStyle(history);
+          const left=h.left+history.clientLeft+parseFloat(s.paddingLeft),right=h.left+history.clientLeft+history.clientWidth-parseFloat(s.paddingRight);
+          return {leftGap:r.left-left,rightGap:right-r.right,overflow:history.scrollWidth-history.clientWidth,widgetOverflow:el.scrollWidth-el.clientWidth,width:r.width};
+        });
+        if(Math.abs(geometry.leftGap)>2||Math.abs(geometry.rightGap)>2||geometry.overflow>2||geometry.widgetOverflow>2)throw new Error('Paid Aria inline card must fill chat at '+width+': '+JSON.stringify(geometry));
+      }
+      await page.setViewportSize(viewport);
       await chat.getByRole('button',{name:'Close',exact:true}).click();
       await chat.waitFor({state:'hidden'});return;
     }

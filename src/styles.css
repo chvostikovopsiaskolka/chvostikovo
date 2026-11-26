@@ -1698,6 +1698,8 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   backdrop-filter: blur(24px) saturate(1.4);
 }
 [data-aria-chat-lead] [data-aria-chat-history] { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* Inline forms and widgets use the entire conversation content width. */
+[data-aria-chat-lead] [data-aria-chat-inline] { margin-inline: 0; width: 100%; max-width: 100%; box-sizing: border-box; }
 @keyframes aria-composing-pulse { 0%, 100% { opacity: .4; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
 @keyframes aria-composing-fade { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
 [data-aria-chat-lead] .aria-composing-dot { animation: aria-composing-pulse 1.2s ease-in-out infinite; }
