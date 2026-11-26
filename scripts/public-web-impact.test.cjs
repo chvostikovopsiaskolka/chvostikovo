@@ -99,3 +99,13 @@ test('content scope proves map/copy and the bounded paid section permutation',()
  assert.equal(selectScope(['scripts/public-content-impact.cjs','scripts/check-web-runtime.cjs']),'content');
  assert.equal(orderProof(src).order.at(-1),'lead-faq');
 });
+
+
+test('navigation scope preserves the entire later public CTA section byte-for-byte',()=>{
+ const marker='/* HOME navigation and paid LEAD return control — scoped overrides. */';
+ const suffix='/* Public CTA signature, owner direction 26 Nov 2026. */\nmain .btn-coral { color: red; }';
+ const old='body { margin: 0; }\n'+marker+'\n.mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links { gap: 2px; }\n'+suffix;
+ const next=old.replace('gap: 2px','gap: 4px');
+ assert.equal(selectScope(['src/styles.css'],{before:old,after:next}),'navigation');
+ for(const bad of [next.replace('color: red','color: blue'),next.replace('margin: 0','margin: 1px'),next+'\nbody { color: red; }',next.replace('.mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links','main .btn-coral')]) assert.equal(selectScope(['src/styles.css'],{before:old,after:bad}),'full');
+});

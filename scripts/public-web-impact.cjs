@@ -56,9 +56,17 @@ const navMarker="/* HOME navigation and paid LEAD return control — scoped over
 const navPaths=new Set(['src/components/site/MobileDock.tsx','src/components/site/AriaLeadAssistant.tsx','src/components/site/AriaReturnToTop.tsx','src/styles.css']);
 function navigationCssOnly(before,after) {
   if(typeof before!=='string'||typeof after!=='string')return false;
-  const section=s=>{const i=s.indexOf(navMarker);return i<0?{prefix:s,body:''}:s.indexOf(navMarker,i+1)<0?{prefix:s.slice(0,i),body:s.slice(i+navMarker.length)}:null;};
+  const navEnd="/* Public CTA signature, owner direction 26 Nov 2026.";
+  const section=s=>{
+    const i=s.indexOf(navMarker);
+    if(i<0)return {prefix:s,body:'',suffix:''};
+    if(s.indexOf(navMarker,i+1)>=0)return null;
+    const j=s.indexOf(navEnd);
+    if(j>=0&&(j<i||s.indexOf(navEnd,j+1)>=0))return null;
+    return {prefix:s.slice(0,i),body:s.slice(i+navMarker.length,j<0?undefined:j),suffix:j<0?'':s.slice(j)};
+  };
   const old=section(before),next=section(after);
-  if(!old||!next||old.prefix.trimEnd()!==next.prefix.trimEnd()||!next.body.trim())return false;
+  if(!old||!next||old.prefix.trimEnd()!==next.prefix.trimEnd()||old.suffix!==next.suffix||!next.body.trim())return false;
   return [old.body,next.body].every(body=>{
     const css=body.replace(/\/\*[\s\S]*?\*\//g,'');
     if(/@(?!media\b|supports\b)/i.test(css)||/\\/.test(css))return false;
