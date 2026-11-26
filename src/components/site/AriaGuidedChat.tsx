@@ -70,7 +70,7 @@ const chatQuestions: Question[] = [
   {
     id: "reservation",
     title: "Je potrebné rezervovať miesto vopred?",
-    answer: "Haf! 🐾 Áno, **miesto v škôlke je potrebné rezervovať vopred**, pretože máme obmedzenú kapacitu a chceme každému psíkovi zabezpečiť dostatok pozornosti.\n\nNaši škôlkari si rezervujú návštevy jednoducho cez **zákaznícku aplikáciu**, do nedele 20:00 na nasledujúci týždeň.\n\nAk máš nepravidelný pracovný rozvrh, **vieme sa dohodnúť aj individuálne** podľa voľnej kapacity.\n\nAk k nám tvoj psík ešte nechodí, najprv spolu absolvujeme bezplatnú úvodnú návštevu.",
+    answer: "Haf! 🐾 Áno, **miesto v škôlke je potrebné rezervovať vopred**, pretože máme obmedzenú kapacitu a chceme každému psíkovi zabezpečiť dostatok pozornosti.\n\nNaši škôlkari si rezervujú návštevy jednoducho cez **zákaznícku aplikáciu**, **do nedele 20:00** na nasledujúci týždeň.\n\nAk máš nepravidelný pracovný rozvrh, **vieme sa dohodnúť aj individuálne** podľa voľnej kapacity.\n\nAk k nám tvoj psík ešte nechodí, najprv spolu absolvujeme bezplatnú úvodnú návštevu.",
   },
   {
     id: "location",
