@@ -1888,7 +1888,7 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .mobile-dock[data-desktop-home-dock][data-desktop-floating="true"] .mobile-dock-bar { width: min(980px, calc(100% - 32px)); }
   .mobile-dock[data-desktop-home-dock] .mobile-dock-item.is-active,
   .mobile-dock[data-desktop-home-dock] .mobile-dock-item.is-active:hover { background: #f8ddec; }
-  .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-menu { grid-column: 1 / -1; justify-self: center; justify-content: center; gap: 8px; width: max-content; }
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-menu { grid-column: 1 / -1; grid-row: 1; justify-self: center; justify-content: center; gap: 8px; width: max-content; }
 }
 .site-brand #top [data-home-hero-photo="1"] img { object-position: 50% 0%; }
 .lead-brand-live [data-aria-back-top] { display: none; }

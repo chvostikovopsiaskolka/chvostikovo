@@ -401,6 +401,6 @@ assert(css.includes('body:has([data-desktop-home-dock])') && css.includes('data-
 
 assert(css.includes("grid-template-columns: repeat(6, minmax(0, 1fr))") && css.includes("grid-column: 1 / -1; grid-row: 1; justify-self: center") && css.includes("grid-row: 2; min-width: 0"), "Desktop home dock has separate upper shortcuts and lower main links");
 
-assert(dock.includes("Prečo si vybrať nás?") && dock.includes("data-desktop-only-shortcut") && css.includes(".mobile-dock [data-desktop-only-shortcut] { display: none !important; }"), "Why shortcut must be desktop only");
+assert(dock.includes("Prečo si vybrať nás?") && dock.includes("data-desktop-only-shortcut") && css.includes(".mobile-dock[data-home-dock] [data-desktop-only-shortcut] { display: none !important; }"), "Why shortcut must be desktop only");
 
 assert(css.includes(".mobile-dock[data-home-dock] .mobile-dock-item.is-active:hover { background: #f8ddec; }") && css.includes(".mobile-dock[data-desktop-home-dock] .mobile-dock-item.is-active:hover { background: #f8ddec; }"), "Selected home section uses the same rose color on mobile and desktop");
