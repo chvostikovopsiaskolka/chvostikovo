@@ -5,7 +5,10 @@ export const HERO_IMAGE = `${M}fdc688_6d964e3e1c8b48b6a84a4d5c3cdfd456~mv2.jpg/v
 export const PHONE = "+421951069395";
 export const PHONE_PRETTY = "+421 951 069 395";
 export const EMAIL = "chvostikovo.psiaskolka@gmail.com";
-export const MAP_LINK = "https://www.google.com/maps/search/?api=1&query=Hotel%20pre%20psov%20Chvost%C3%ADkovo&query_place_id=ChIJo6DbxrnhPkcRM-AZKTMwrwg";
+export const MAP_LINK = "https://maps.app.goo.gl/xRzZ8fC3fT8MCzeM7?g_st=ic";
+export const INQUIRY_TITLE = "Chcete sa informovať o škôlke?";
+export const INQUIRY_SUBTITLE = "Vyplňte krátky nezáväzný formulár. Ozveme sa vám.";
+export const VISIT_INQUIRY_TITLE = "Máte záujem o návštevu?";
 export const FACEBOOK = "https://www.facebook.com/profile.php?id=61564093374033";
 export const INSTAGRAM = "https://www.instagram.com/chvostikovo.psiaskolka/";
 
@@ -191,7 +194,7 @@ export const REQUIREMENTS = [
   },
   {
     title: "Zdravotný stav",
-    text: "Prijímame len klinicky zdravých psíkov bez krátkodobých či prenosných ochorení. V prípade chronických ochorení nás prosím informujte vopred, aby sme mohli posúdiť individuálne potreby a bezpečnosť. Feny počas hárania neprijímame z dôvodu bezpečnosti a pohody ostatných psíkov.",
+    text: "Prijímame psíkov bez prenosných ochorení, ktorých zdravotný stav umožňuje bezpečný pobyt v kolektíve. V prípade chronických ochorení nás, prosím, informujte vopred. Hárajúce feny do škôlky neprijímame.",
   },
 ];
 

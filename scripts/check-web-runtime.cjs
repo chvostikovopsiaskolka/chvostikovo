@@ -358,15 +358,20 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
     benefits:document.querySelectorAll('[data-lead-benefits] h3').length,
     requirements:document.querySelectorAll('#lead-requirements article').length,
     carousel:document.querySelectorAll('#lead-photo-carousel [data-gesture-track="photos"]').length,
-    checker:document.querySelector('#lead-faq')?.nextElementSibling?.id === 'aria-puppy-check',
+    checker:document.querySelector('#lead-knowledge')?.nextElementSibling?.id === 'aria-puppy-check',
+    faqLast:document.querySelector('main')?.lastElementChild?.id === 'lead-faq',
+    health:document.querySelector('#lead-requirements')?.textContent.includes("Prijímame psíkov bez prenosných ochorení, ktorých zdravotný stav umožňuje bezpečný pobyt v kolektíve. V prípade chronických ochorení nás, prosím, informujte vopred. Hárajúce feny do škôlky neprijímame."),
+    mapLinks:[...document.querySelectorAll('#aria-mosaic a[href*="maps"], footer a[href*="maps"]')].map(a=>a.getAttribute('href')),
+    inquiryHeadings:document.querySelector('#aria-hero-form h2')?.textContent.trim()==="Chcete sa informovať o škôlke?" && document.querySelector('#lead-friendship-form h3')?.textContent.trim()==="Chcete sa informovať o škôlke?",
+    inquirySubtitles:['#aria-hero-form','#lead-friendship-form'].every(id=>document.querySelector(id+' p[data-lead-form-intro], '+id+' [data-lead-form-intro] p')?.textContent.trim()==="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."),
     separated:!!document.querySelector('#lead-knowledge [data-lead-faq-cta]') && !document.querySelector('#lead-knowledge #lead-faq'),
     robots:document.querySelector('meta[name="robots"]')?.content,
     daily:document.querySelector('[data-lead-price-per-day]')?.textContent.replace(/\s+/g,' ').trim(),
     single:document.querySelector('#lead-pricing article')?.textContent,
   }));
-  if(structure.order.slice(1,11).join('|')!=='lead-photo-carousel|lead-pricing|lead-first-visit|aria-hero-form|aria-caretakers|lead-knowledge|lead-faq|aria-puppy-check|lead-benefits|aria-mosaic'||
+  if(structure.order.slice(1,10).join('|')!=='lead-photo-carousel|lead-pricing|lead-first-visit|aria-hero-form|aria-caretakers|lead-benefits|lead-knowledge|aria-puppy-check|aria-mosaic'||
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==2||structure.benefits!==3||structure.requirements!==4||
-    structure.carousel!==1||!structure.checker||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
+    structure.carousel!==1||!structure.checker||!structure.faqLast||!structure.health||!structure.inquiryHeadings||!structure.inquirySubtitles||structure.mapLinks.length<2||structure.mapLinks.some(link=>link!=="https://maps.app.goo.gl/xRzZ8fC3fT8MCzeM7?g_st=ic")||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
   for(const [width,height] of [[320,720],[360,780],[375,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
     await page.setViewportSize({width,height});
@@ -2443,7 +2448,7 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
               await aria.getByRole('button', { name: 'Podmienky prijatia' }).click();
               if (await aria.locator('[data-aria-requirements] article').count() !== 4)
                 throw new Error('Aria must list the four conditions');
-              if (!await aria.locator('[data-aria-requirements]').getByText(/Feny počas hárania/).count() ||
+              if (!await aria.locator('[data-aria-requirements]').getByText(/Hárajúce feny/).count() ||
                   !await aria.locator('[data-aria-requirements] strong').count())
                 throw new Error('Preview-only hygiene/health wording or highlight missing');
               await aria.locator('[data-aria-requirements]').getByRole('button', { name: 'Chcem sa informovať o škôlke' }).click();
@@ -2631,7 +2636,7 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
               if (await page.locator('#lead-first-visit').getByText('Úvodná návšteva zadarmo', { exact: true }).count())
                 throw new Error('Duplicated first-visit ribbon returned to three-step section');
               const hero = page.locator('#aria-hero-form');
-              if (!await hero.getByRole('heading', { name: 'Chceli by ste sa informovať o škôlke?' }).count())
+              if (!await hero.getByRole('heading', { name: 'Chcete sa informovať o škôlke?' }).count())
                 throw new Error('New compact hero form heading missing');
               const enquiry = hero.locator('[data-lead-step-form]');
               const choiceLabels = enquiry.locator('label:has(input[name="zaujem"])');
@@ -2660,9 +2665,8 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               const hasCorrectOrder = await page.evaluate(() => {
                 const ids = window.location.pathname === '/psia-skolka-kosice/'
-                  ? ['recenzie', 'aria-hero-form', 'lead-photo-carousel', 'aria-caretakers', 'aria-about',
-                     'aria-early-faq', 'lead-pricing', 'lead-requirements', 'lead-benefits',
-                     'aria-mosaic', 'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form']
+                  ? ['recenzie', 'lead-photo-carousel', 'lead-pricing', 'lead-first-visit', 'aria-hero-form', 'aria-first-visit-form', 'aria-caretakers', 'aria-about',
+                      'lead-benefits', 'lead-requirements', 'aria-puppy-check', 'aria-mosaic', 'lead-friendship-form', 'lead-faq']
                   : ['recenzie', 'aria-caretakers', 'aria-about', 'aria-early-faq', 'aria-mosaic',
                      'lead-benefits', 'lead-pricing', 'lead-requirements', 'lead-faq',
                      'aria-puppy-check', 'lead-first-visit'];

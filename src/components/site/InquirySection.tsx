@@ -8,9 +8,7 @@ import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FormDialog } from "./FormDialog";
 import { SchoolmatesFormCrown } from "./SchoolmatesFormCrown";
 
-const INFO_TITLE = "Čo hľadáte pre svojho psíka?";
-const INFO_SUBTITLE =
-  "Vyplňte krátky nezáväzný formulár. Ozveme sa vám.";
+import { INQUIRY_TITLE as INFO_TITLE, INQUIRY_SUBTITLE as INFO_SUBTITLE } from "@/content/site";
 
 export function InquiryCtaSection() {
   const [open, setOpen] = useState(false);

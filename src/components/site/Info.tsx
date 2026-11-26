@@ -7,7 +7,7 @@ import { HomeFaqContactForm, LongForm } from "./Forms";
 import { LeadStepForm } from "./LeadStepForm";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
-import { GALLERY, REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE } from "@/content/site";
+import { GALLERY, REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE, INQUIRY_TITLE, INQUIRY_SUBTITLE, VISIT_INQUIRY_TITLE } from "@/content/site";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "@/components/site/AriaPreviewText";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FirstVisitPhoto } from "./FirstVisitPhoto";
@@ -69,7 +69,7 @@ export function Requirements({ id = "podmienky", showContextFaq = false, ariaPre
 
         {/* All conditions remain visible and swipeable on mobile; two-column grid from sm upwards. */}
         <div role="region" aria-label={language === "en" ? "Admission requirements – swipe sideways" : "Podmienky prijatia – posúvajte do strany"} tabIndex={0} className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:mt-10 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0">
-          {(language === "en" ? [{title:"Vaccination and prevention",text:"A valid vaccination record covering rabies, distemper, parvovirus, parainfluenza, infectious hepatitis, leptospirosis and kennel cough is required. Dogs must be regularly dewormed and protected from external parasites."},{title:"Behaviour",text:"Dogs must be non-aggressive towards people and other dogs. We cannot accept aggressive dogs, unsuitable behaviour or dogs considered dangerous or difficult to manage in a group."},{title:"Hygiene",text:"Dogs need basic indoor toilet habits, taking puppies’ age and development into account. Owners must walk their dog before arrival. Dogs have regular toilet breaks according to their needs."},{title:"Health",text:"Dogs must be clinically healthy, without acute or infectious illnesses. Please inform us of chronic conditions in advance so we can assess individual needs and safety. Female dogs cannot attend while in heat."}] : ariaPreview ? ARIA_PREVIEW_REQUIREMENTS : REQUIREMENTS).map((r, i) => {
+          {(language === "en" ? [{title:"Vaccination and prevention",text:"A valid vaccination record covering rabies, distemper, parvovirus, parainfluenza, infectious hepatitis, leptospirosis and kennel cough is required. Dogs must be regularly dewormed and protected from external parasites."},{title:"Behaviour",text:"Dogs must be non-aggressive towards people and other dogs. We cannot accept aggressive dogs, unsuitable behaviour or dogs considered dangerous or difficult to manage in a group."},{title:"Hygiene",text:"Dogs need basic indoor toilet habits, taking puppies’ age and development into account. Owners must walk their dog before arrival. Dogs have regular toilet breaks according to their needs."},{title:"Health",text:"Dogs must be free of contagious diseases and healthy enough to participate safely in group daycare. Please inform us of chronic conditions in advance. Female dogs cannot attend while in heat."}] : ariaPreview ? ARIA_PREVIEW_REQUIREMENTS : REQUIREMENTS).map((r, i) => {
             const Icon = reqIcons[i]!;
             return (
               <article key={r.title} className="w-[86%] shrink-0 snap-start rounded-3xl border border-forest/10 bg-card p-6 shadow-card sm:w-auto sm:shrink sm:p-7">
@@ -159,14 +159,14 @@ export function FirstVisit({ inlineForm = false, leadStyle = false, language = "
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title="Čo hľadáte pre svojho psíka?"
+        title={VISIT_INQUIRY_TITLE}
         subtitle="Nechajte nám kontakt a ozveme sa vám. Termín úvodnej návštevy dohodneme po preverení zdravotných podmienok a platných očkovaní vášho psíka."
       >
         <LeadStepForm questionInHeading trackingSource="home_first_visit_interest" />
       </FormDialog>
     </section>
     {inlineForm && <div className="bg-card pt-8">
-      {language === "en" ? <InquirySection allScreens matchHero language="en" id="prva-navsteva-form" trackingSource="en_first_visit" title="Interested in a first visit?" subtitle="Fill in a short, no-obligation enquiry. We will be in touch." /> : <InquirySection allScreens matchHero id="prva-navsteva-form" trackingSource="home_first_visit_interest" title="Máte záujem o prvú návštevu?" />}
+      {language === "en" ? <InquirySection allScreens matchHero language="en" id="prva-navsteva-form" trackingSource="en_first_visit" title="Interested in a first visit?" subtitle="Fill in a short, no-obligation enquiry. We will be in touch." /> : <InquirySection allScreens matchHero id="prva-navsteva-form" trackingSource="home_first_visit_interest" title={VISIT_INQUIRY_TITLE} />}
     </div>}
     </>
   );
@@ -297,8 +297,8 @@ export function Pricing({ interestMode = false, homeLayout = false, language = "
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title={interestMode ? "Čo hľadáte pre svojho psíka?" : "Prihláška do škôlky"}
-        subtitle={interestMode ? "Nechajte nám kontakt. Ozveme sa vám a dohodneme ďalší postup." : "Povedzte nám viac o svojom psíkovi. Po odoslaní prihlášky sa vám ozveme a dohodneme ďalší postup."}
+        title={interestMode ? INQUIRY_TITLE : "Prihláška do škôlky"}
+        subtitle={interestMode ? INQUIRY_SUBTITLE : "Povedzte nám viac o svojom psíkovi. Po odoslaní prihlášky sa vám ozveme a dohodneme ďalší postup."}
       >
         {interestMode ? <LeadStepForm questionInHeading trackingSource="home_pricing_interest_20261028" /> : <LongForm />}
       </FormDialog>
