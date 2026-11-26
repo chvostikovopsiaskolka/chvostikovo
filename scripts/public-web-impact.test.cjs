@@ -61,3 +61,12 @@ test('navigation scope permits only bounded HOME/LEAD selectors and exact naviga
  assert.equal(selectScope(['src/components/site/AriaReturnToTop.tsx']),'full');
  assert.equal(selectScope(['src/styles.css','src/lib/tracking.ts'],{before:prefix,after:scoped}),'full');
 });
+
+test('facilities shortcut selects navigation only for the exact isolated desktop link',()=>{
+ const before='existing home menu\n';
+ const entry="    ...(desktopHome ? [{label:english ? \"Facilities\" : \"Priestory škôlky\", icon:House, href:homePath+(english ? \"#spaces\" : \"#priestory\"), desktopOnly:true}] : []),\n";
+ const after=before+entry;
+ const file='src/components/site/MobileDock.tsx';
+ assert.equal(selectScope([file],{dockBefore:before,dockAfter:after}),'navigation');
+ for(const bad of [after+'submitForm();',after.replace('#spaces','#contact'),after.replace('desktopOnly:true','desktopOnly:false')])assert.equal(selectScope([file],{dockBefore:before,dockAfter:bad}),'full');
+});

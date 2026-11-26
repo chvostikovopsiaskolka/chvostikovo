@@ -65,6 +65,8 @@ function navigationCssOnly(before,after) {
 }
 function homeDockOnly(before,after){
   if(typeof before!=='string'||typeof after!=='string')return false;
+  // One exact desktop-only destination addition; preserve every other handler and byte.
+  if(after.replace("    ...(desktopHome ? [{label:english ? \"Facilities\" : \"Priestory škôlky\", icon:House, href:homePath+(english ? \"#spaces\" : \"#priestory\"), desktopOnly:true}] : []),\n",'')===before)return true;
   return after.replace("    ...(desktopHome ? [{label:english ? \"Why choose us?\" : \"Prečo si vybrať nás?\", icon:Heart, href:homePath+(english ? \"#en-benefits\" : \"#preco-chvostikovo\"), desktopOnly:true}] : []),\n",'').replace("              {homeMenuEntries.map(({href,label,icon:Icon,...entry}) => <a key={href} href={href} data-desktop-only-shortcut={\"desktopOnly\" in entry ? true : undefined} onClick={event => go(event, href)}><Icon size={17} strokeWidth={1.9} aria-hidden=\"true\" /><span>{label}</span></a>)}","              {homeMenuEntries.map(({href,label,icon:Icon}) => <a key={href} href={href} onClick={event => go(event, href)}><Icon size={17} strokeWidth={1.9} aria-hidden=\"true\" /><span>{label}</span></a>)}")===before;
 }
 function ariaReturnOnly(before,after){

@@ -664,6 +664,10 @@ async function assertHomeDockSurface(page) {
       glass:bs.backgroundImage.includes('gradient')&&(bs.backdropFilter||bs.webkitBackdropFilter||'').includes('blur'),
       lowerTargets:lower.every(r=>r.height>=44)};
   });
+  if(brandPreviewCandidate){
+    const upper=await page.locator('[data-home-menu]').evaluate(el=>{const language=el.querySelector('[data-language-switch]'),selected=language.querySelector('[aria-current="page"]');return {radius:parseFloat(getComputedStyle(selected).borderTopLeftRadius),trackRadius:parseFloat(getComputedStyle(language,'::before').borderTopLeftRadius),desktop:innerWidth>=1024,labels:[...el.querySelectorAll('.mobile-dock-compact-links a span')].filter(s=>s.getClientRects().length).map(s=>({font:parseFloat(getComputedStyle(s).fontSize),nowrap:getComputedStyle(s).whiteSpace==='nowrap',fits:s.scrollWidth<=s.clientWidth+1}))};});
+    if(upper.radius<8||upper.radius>14||upper.trackRadius<8||upper.trackRadius>14||upper.desktop&&upper.labels.some(l=>l.font!==12||!l.nowrap||!l.fits))throw new Error('Upper dock labels/language shape '+JSON.stringify(upper));
+  }
   if(state.gap<1||!state.tray||state.menuHeight>46||state.languageHeight<44||state.languageWidth<44||state.languageInset<5||!state.activeInset||!state.glass||!state.lowerTargets)throw new Error('Compact liquid home dock '+JSON.stringify(state));
 }
 
@@ -683,7 +687,7 @@ async function assertCompactHomeMenu(page,en) {
   });
   const main=en?['Home','About','Prices','Rules','Apply']:['Domov','O nás','Cenník','Podmienky','Produkty','Prihláška'];
   if(JSON.stringify(state.hrefs)!==JSON.stringify(['#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['Have a puppy?','FAQ']:['Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>46||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
-  if(await menu.locator('[data-desktop-only-shortcut]').isVisible())throw new Error('Why shortcut must remain desktop-only');
+  if(await menu.locator('[data-desktop-only-shortcut]:visible').count())throw new Error('Desktop shortcuts must remain hidden on mobile');
   const crop=await page.locator('[data-home-hero-photo] img').evaluateAll(imgs=>imgs.map(img=>getComputedStyle(img).objectPosition));
   if(crop.join('|')!=='50% 0%|50% 50%')throw new Error('Only the collies photo should use the top-biased crop: '+crop.join('|'));
   if(await page.locator('[data-home-hero-phone]').count())throw new Error('Duplicate mobile Hero phone');
@@ -823,7 +827,7 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
         });
         await assertHomeDockActivePink(page,en);
         await assertHomeDockSurface(page);
-        if(!geometry.centered||!geometry.width||!geometry.shortcut||geometry.upperLinks.join('|')!==('#aria-puppy-check|'+(en?'#en-benefits':'#preco-chvostikovo')+'|#faq')||!geometry.fits||!geometry.targets||!geometry.separate||geometry.header||!geometry.logo||!geometry.rows||!geometry.slot)throw new Error('Desktop home dock '+width+' '+JSON.stringify(geometry));
+        if(!geometry.centered||!geometry.width||!geometry.shortcut||geometry.upperLinks.join('|')!==('#aria-puppy-check|'+(en?'#en-benefits':'#preco-chvostikovo')+'|'+(en?'#spaces':'#priestory')+'|#faq')||!geometry.fits||!geometry.targets||!geometry.separate||geometry.header||!geometry.logo||!geometry.rows||!geometry.slot)throw new Error('Desktop home dock '+width+' '+JSON.stringify(geometry));
         await page.evaluate(()=>window.scrollTo({top:900,behavior:'instant'}));
         await page.waitForFunction(()=>document.querySelector('[data-desktop-home-dock]')?.getAttribute('data-desktop-floating')==='true');
         if(!await dock.evaluate(el=>Math.abs(innerHeight-el.querySelector('.mobile-dock-bar').getBoundingClientRect().bottom-12)<2))throw new Error('Desktop dock not floating at bottom');
@@ -834,9 +838,12 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
       await assertHomeDockActivePink(page,en,priceId);
       await page.locator('[data-desktop-home-dock] .mobile-dock-item[href$="#'+priceId+'"]').hover();
       await assertHomeDockActivePink(page,en,priceId);
-      const why=page.locator('[data-desktop-home-dock] [data-desktop-only-shortcut]');
+      const why=page.locator('[data-desktop-home-dock] [data-desktop-only-shortcut][href$="#'+(en?'en-benefits':'preco-chvostikovo')+'"]');
       await why.click();
       await page.waitForFunction(id=>Math.abs(document.getElementById(id).getBoundingClientRect().top-8)<16,en?'en-benefits':'preco-chvostikovo');
+      const spacesId=en?'spaces':'priestory';
+      await page.locator('[data-desktop-home-dock] [data-desktop-only-shortcut][href$="#'+spacesId+'"]').click();
+      await page.waitForFunction(id=>location.hash==='#'+id&&Math.abs(document.getElementById(id).getBoundingClientRect().top-8)<16,spacesId);
     }
     console.log('PASS bilingual navigation, responsive menu and consented PageView '+engine);
   } finally {await context.close();}

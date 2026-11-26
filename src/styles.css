@@ -1992,3 +1992,13 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
     background-image: none !important;
   }
 }
+
+/* HOME upper dock only: rectangular language chip and legible desktop shortcuts. */
+.mobile-dock[data-home-dock] .mobile-dock-compact-menu > [data-language-switch],
+.mobile-dock[data-home-dock] .mobile-dock-compact-menu > [data-language-switch]::before { border-radius: 10px; }
+.mobile-dock[data-home-dock] .mobile-dock-compact-menu > [data-language-switch] a { border-radius: 11px; }
+@media (min-width: 1024px) {
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links a span { font-size: 12px; white-space: nowrap; }
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links svg { width: 15px; height: 15px; }
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-menu > [data-language-switch] a { font-size: 11px; }
+}

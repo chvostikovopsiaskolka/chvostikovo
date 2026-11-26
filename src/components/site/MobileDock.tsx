@@ -239,6 +239,7 @@ export function MobileDock({ language = "sk", variant = "main", desktopHome = fa
   const homeMenuEntries = [
     {label:english ? "Have a puppy?" : "Máte šteniatko?", icon:Dog, href:homePath+"#aria-puppy-check"},
     ...(desktopHome ? [{label:english ? "Why choose us?" : "Prečo si vybrať nás?", icon:Heart, href:homePath+(english ? "#en-benefits" : "#preco-chvostikovo"), desktopOnly:true}] : []),
+    ...(desktopHome ? [{label:english ? "Facilities" : "Priestory škôlky", icon:House, href:homePath+(english ? "#spaces" : "#priestory"), desktopOnly:true}] : []),
     {label:english ? "FAQ" : "Časté otázky", icon:MessageCircle, href:homePath+"#faq"},
   ];
   const menuEntries = [
