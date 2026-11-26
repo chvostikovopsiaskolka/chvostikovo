@@ -608,7 +608,7 @@ export function AriaLeadAssistant({
                       <>
                         <p data-aria-bubble-greeting className="rounded-[14px_14px_14px_5px] bg-white/90 px-2 py-1.5 font-display font-medium text-[#26322b] shadow-sm">
                           Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
-                          <strong className="font-extrabold">Čo ťa zaujíma o našej škôlke?</strong>
+                          <strong className="font-extrabold sm:hidden">Čo ťa zaujíma?</strong><strong className="hidden font-extrabold sm:inline">Čo ťa zaujíma v našej škôlke?</strong>
                         </p>
                         <div data-aria-bubble-choices className="mt-1.5 grid grid-cols-2 gap-1.5">
                           <button type="button" data-aria-bubble-question="pricing" onClick={() => openChat("pricing")}
