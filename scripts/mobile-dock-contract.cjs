@@ -257,14 +257,22 @@ assert(!productContact.includes('trackMarketingInteraction') &&
        "Product delivery contact information must not be copied to advertising audiences");
 
 // Paid LEAD content flow: one existing liquid/crown form follows visit steps.
-// The primary orange CTA scrolls there; the widget and dock stay unchanged.
+// The FAQ CTA scrolls there; the primary Hero CTA opens the existing chat.
 const paidLeadCurrent = read("src/routes/test-aria.tsx");
 const ariaGuideCurrent = read("src/components/site/AriaLeadAssistant.tsx");
 const storyCurrent = read("src/components/site/Story.tsx");
 assert(paidLeadCurrent.includes('data-aria-lead-hero-cta') &&
        paidLeadCurrent.includes('<FaqList items={LEAD_FAQ}') &&
        paidLeadCurrent.includes('const conditionsSection') &&
-       paidLeadCurrent.includes('lead_landing_hero_orange_cta') &&
+       paidLeadCurrent.includes('lead_landing_hero_aria_cta') &&
+       paidLeadCurrent.includes('Spoznajte našu škôlku') &&
+       paidLeadCurrent.includes('onClick={openHeroAriaChat}') &&
+       paidLeadCurrent.includes('aria-haspopup="dialog"') &&
+       paidLeadCurrent.includes('trackMarketingInteraction("hero_learn_more", source)') &&
+       paidLeadCurrent.includes('trackCookielessInteraction("explore_daycare", source)') &&
+       paidLeadCurrent.includes('ariaChatRef.current?.open()') &&
+       paidLeadCurrent.includes('revealLeadHeroForm("lead_landing_faq_interest")') &&
+       ariaGuideCurrent.includes('useImperativeHandle(openChatRef, () => ({ open: () => openChat() }))') &&
        paidLeadCurrent.includes('data-lead-inline-card') &&
        paidLeadCurrent.includes('data-aria-hero-form-dogs') &&
        paidLeadCurrent.includes('max-w-[294px]') &&
