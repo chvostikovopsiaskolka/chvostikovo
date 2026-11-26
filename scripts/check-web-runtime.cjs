@@ -414,6 +414,9 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
         pillRows:new Set(visiblePills.map(el=>Math.round(el.getBoundingClientRect().top))).size,
         actionBg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).backgroundColor,
         actionFg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).color,
+        actionBorder:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).borderTopColor,
+        actionArrow:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]'),'::after').backgroundColor,
+        actionArrowDecorative:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]'),'::after').pointerEvents==='none',
         pillBold:visiblePills.every(el=>Number(getComputedStyle(el).fontWeight)>=700),
         pillGap:parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pills]')).columnGap),
         photoCrop:[...document.querySelectorAll('[data-lead-hero-photo] img')].length===2&&[...document.querySelectorAll('[data-lead-hero-photo] img')].every(el=>getComputedStyle(el).objectPosition==='50% 50%'),
@@ -428,7 +431,7 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
           (innerWidth<1024||speech.width>=455&&speech.width<=482)&&!!tail&&Number(tail.dataset.tipX)<-8&&
           document.querySelectorAll('[data-aria-section-navigation]').length===0&&document.querySelectorAll('[data-aria-chat-trigger]').length===1&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
     });
-    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.actionFg!=='rgb(255, 255, 255)'||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.greetingFit||!fold.compactLauncher||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
+    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 255, 255)'||fold.actionFg!=='rgb(169, 84, 0)'||fold.actionBorder!=='rgb(255, 164, 20)'||fold.actionArrow!=='rgb(184, 46, 127)'||!fold.actionArrowDecorative||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.greetingFit||!fold.compactLauncher||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
   await assertPaidReturnArrow(page);
@@ -1054,8 +1057,8 @@ async function assertPublicContent(browser,engine){
             if (url.pathname === '/test-aria/' || url.pathname === '/psia-skolka-kosice/') {
               if (palette.variant !== 'orange-rose' ||
                   palette.rose !== '#b82e7f' || palette.sage !== '#f3f8ef' ||
-                  palette.actionBg !== 'rgb(184, 46, 127)' ||
-                  palette.firstVisitAction !== 'rgb(184, 46, 127)' ||
+                  palette.actionBg !== 'rgb(255, 255, 255)' ||
+                  palette.firstVisitAction !== 'rgb(255, 255, 255)' ||
                   palette.badgeBg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgba(255, 181, 85, 0.38)' : 'rgb(255, 164, 20)') ||
                   palette.badgeFg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(38, 50, 43)' : 'rgb(255, 255, 255)') ||
                   palette.headline !== 'rgb(255, 164, 20)' ||
@@ -1288,7 +1291,7 @@ async function assertPublicContent(browser,engine){
                       heroDogs.querySelector('img')?.getAttribute('src') === firstVisitDogs.querySelector('img')?.getAttribute('src') &&
                       !!heroDogs.querySelector('[data-crown-ground]'),
                     liquidBadge: liquidGlass(badgeNode) && getComputedStyle(badgeNode).color === 'rgb(38, 50, 43)',
-                    liquidCta: liquidGlass(ctaNode) && getComputedStyle(ctaNode).color === 'rgb(38, 50, 43)' &&
+                    liquidCta: getComputedStyle(ctaNode).backgroundColor === 'rgb(255, 255, 255)' && getComputedStyle(ctaNode).color === 'rgb(169, 84, 0)' && getComputedStyle(ctaNode,'::after').backgroundColor === 'rgb(184, 46, 127)' &&
                       cta.width >= 225 && cta.width <= 300 &&
                       ctaNode.getAttribute('aria-controls') === 'aria-hero-form',
                     liquidDock: liquidGlass(dockNode) &&
@@ -3253,7 +3256,7 @@ async function assertPublicContent(browser,engine){
                       const third=document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] article')[2];
                       return !!third && getComputedStyle(third).borderTopWidth==='0px';
                     })(),
-                    warmExplore:innerWidth<1024||(()=>{const style=getComputedStyle(document.getElementById('home-hero-learn-more'));return style.backgroundColor==='rgb(255, 227, 174)'&&style.boxShadow!=='none';})(),
+                    warmExplore:innerWidth<1024||(()=>{const style=getComputedStyle(document.getElementById('home-hero-learn-more'));return style.backgroundColor==='rgb(255, 255, 255)'&&style.color==='rgb(169, 84, 0)'&&style.boxShadow!=='none';})(),
                     desktopCtaWithinForm:innerWidth<1024||document.getElementById('home-hero-learn-more').getBoundingClientRect().bottom<=document.querySelector('#home-hero-inline-form [data-home-form-panel]').getBoundingClientRect().bottom+2,
                     friendshipInline:!!document.querySelector('[data-home-friendship-form] #home-friendship-application')&&!document.getElementById('zaujem-po-priatelstvach')&&!document.querySelector('#preco button')&&!!document.querySelector('#starostlivost #preco'),
                     freeVisitBadge:(()=>{const el=document.querySelector('#prva-navsteva [data-home-free-visit]');return !!el&&getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)'&&parseFloat(getComputedStyle(el).paddingTop)>=10;})(),
