@@ -11,6 +11,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { InquirySection } from "@/components/site/InquirySection";
+import { LeadFormIntro } from "@/components/site/LeadFormIntro";
 import { LeadStepForm, LEAD_STEP_INTERESTS } from "@/components/site/LeadStepForm";
 import { AriaLeadAssistant } from "@/components/site/AriaLeadAssistant";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
@@ -30,7 +31,7 @@ import { Footer } from "@/components/site/Contact";
 import { ABOUT_MORE, SafetyCertificates } from "@/components/site/Story";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
-import { DAYCARE_GALLERY_EXTRAS, GALLERY, FAQ, PRICING } from "@/content/site";
+import { DAYCARE_GALLERY_EXTRAS, GALLERY, FAQ, PRICING, INQUIRY_TITLE, INQUIRY_SUBTITLE, VISIT_INQUIRY_TITLE } from "@/content/site";
 import { LEAD_FAQ } from "@/content/lead-faq";
 import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
 import teamPhoto from "@/assets/team-dogs.jpg";
@@ -118,16 +119,16 @@ export function AriaPreviewPage() {
   const isLiveLead = useRouterState({ select: (state) => state.location.pathname.replace(/\/$/, "") === "/psia-skolka-kosice" });
   const heroFormIntro = (
     <div data-lead-form-intro className={isLiveLead ? "mb-5" : undefined}>
-      <h2 className="section-title mt-2 text-center text-xl sm:text-2xl">Chceli by ste sa informovať o škôlke?</h2>
+      <h2 className="section-title mt-2 text-center text-xl sm:text-2xl">{INQUIRY_TITLE}</h2>
       <p className="mt-2 text-center text-sm leading-relaxed text-forest/70 sm:text-base">
-        Radi vám odpovieme na otázky o škôlke.
+        <LeadFormIntro text={INQUIRY_SUBTITLE} />
       </p>
     </div>
   );
   const visitFormIntro = (
     <div data-lead-form-intro className={isLiveLead ? "mb-5" : undefined}>
-      <h2 className="section-title text-center text-2xl sm:text-3xl">Máte záujem o návštevu?</h2>
-      <p className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
+      <h2 className="section-title text-center text-2xl sm:text-3xl">{VISIT_INQUIRY_TITLE}</h2>
+      <p className="mt-2 text-center text-sm text-forest/70"><LeadFormIntro text={INQUIRY_SUBTITLE} /></p>
     </div>
   );
   const [leadModalOpen, setLeadModalOpen] = useState(false);
@@ -470,7 +471,7 @@ export function AriaPreviewPage() {
   const puppyChecker = <AriaPuppyChecker onInterest={(details) => openPuppyContact(details)} onInfo={(details) => openPuppyContact(details, true)} />;
   const friendshipSection = <>
     <FriendshipFeature />
-    <InquirySection allScreens matchHero id="lead-friendship-form" trackingSource="lead_landing_friendship_20261028" title="Chcete sa informovať o škôlke?" />
+    <InquirySection allScreens matchHero id="lead-friendship-form" trackingSource="lead_landing_friendship_20261028" title={INQUIRY_TITLE} />
   </>;
   const conditionsSection = (
     <section id="lead-knowledge" className="relative scroll-mt-24 bg-white pb-10 sm:pb-14">
@@ -588,12 +589,12 @@ export function AriaPreviewPage() {
           {firstVisitSection}
           {heroFormSection}
           {caretakersSection}
-          {conditionsSection}
-          {campaignFaqSection}
-          {puppyChecker}
           {benefitsSection}
+          {conditionsSection}
+          {puppyChecker}
           <AriaMosaicGallery paidLead />
           {friendshipSection}
+          {campaignFaqSection}
         </> : <>
           {heroFormSection}
           {caretakersSection}
@@ -636,8 +637,8 @@ export function AriaPreviewPage() {
         previewBrand
         open={leadModalOpen}
         onOpenChange={setLeadModalOpen}
-        title="Čo hľadáte pre svojho psíka?"
-        subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."
+        title={INQUIRY_TITLE}
+        subtitle={INQUIRY_SUBTITLE}
       >
         <LeadStepForm key={leadModalSource} questionInHeading ariaPreview trackingSource={leadModalSource} presetInterest={ariaPreset} puppyCheck={puppyCheck} />
       </FormDialog>

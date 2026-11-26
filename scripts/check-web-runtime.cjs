@@ -358,15 +358,20 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
     benefits:document.querySelectorAll('[data-lead-benefits] h3').length,
     requirements:document.querySelectorAll('#lead-requirements article').length,
     carousel:document.querySelectorAll('#lead-photo-carousel [data-gesture-track="photos"]').length,
-    checker:document.querySelector('#lead-faq')?.nextElementSibling?.id === 'aria-puppy-check',
+    checker:document.querySelector('#lead-knowledge')?.nextElementSibling?.id === 'aria-puppy-check',
+    faqLast:document.querySelector('main')?.lastElementChild?.id === 'lead-faq',
+    health:document.querySelector('#lead-requirements')?.textContent.includes("Prijímame psíkov bez prenosných ochorení, ktorých zdravotný stav umožňuje bezpečný pobyt v kolektíve. V prípade chronických ochorení nás, prosím, informujte vopred. Hárajúce feny do škôlky neprijímame."),
+    mapLinks:[...document.querySelectorAll('#aria-mosaic a[href*="maps"], footer a[href*="maps"]')].map(a=>a.getAttribute('href')),
+    inquiryHeadings:document.querySelector('#aria-hero-form h2')?.textContent.trim()==="Chcete sa informovať o škôlke?" && document.querySelector('#lead-friendship-form h3')?.textContent.trim()==="Chcete sa informovať o škôlke?",
+    inquirySubtitles:['#aria-hero-form','#lead-friendship-form'].every(id=>document.querySelector(id+' p[data-lead-form-intro], '+id+' [data-lead-form-intro] p')?.textContent.trim()==="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."),
     separated:!!document.querySelector('#lead-knowledge [data-lead-faq-cta]') && !document.querySelector('#lead-knowledge #lead-faq'),
     robots:document.querySelector('meta[name="robots"]')?.content,
     daily:document.querySelector('[data-lead-price-per-day]')?.textContent.replace(/\s+/g,' ').trim(),
     single:document.querySelector('#lead-pricing article')?.textContent,
   }));
-  if(structure.order.slice(1,11).join('|')!=='lead-photo-carousel|lead-pricing|lead-first-visit|aria-hero-form|aria-caretakers|lead-knowledge|lead-faq|aria-puppy-check|lead-benefits|aria-mosaic'||
+  if(structure.order.slice(1,10).join('|')!=='lead-photo-carousel|lead-pricing|lead-first-visit|aria-hero-form|aria-caretakers|lead-benefits|lead-knowledge|aria-puppy-check|aria-mosaic'||
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==2||structure.benefits!==3||structure.requirements!==4||
-    structure.carousel!==1||!structure.checker||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
+    structure.carousel!==1||!structure.checker||!structure.faqLast||!structure.health||!structure.inquiryHeadings||!structure.inquirySubtitles||structure.mapLinks.length<2||structure.mapLinks.some(link=>link!=="https://maps.app.goo.gl/xRzZ8fC3fT8MCzeM7?g_st=ic")||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
   for(const [width,height] of [[320,720],[360,780],[375,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
     await page.setViewportSize({width,height});
@@ -482,7 +487,8 @@ async function assertApplicationDogLayout(surface, engine, label) {
   const two=form.getByRole('radio',{name:'Chcem prihlásiť dvoch psíkov'});
   const one=form.getByRole('radio',{name:'Chcem prihlásiť jedného psíka'});
   try {
-    await two.check();
+    await activateFixtureControl(form.locator('label:has(input[name="pocet_psikov"][value="2"])'));
+    if(!await two.isChecked())throw new Error('Two-dog choice did not select');
     await form.locator('input[name="pes2"]').waitFor({state:'visible'});
     for(const width of [320,375,390,430,1440]) {
       await page.setViewportSize({width,height:width>=1024?900:844});
@@ -523,32 +529,39 @@ async function assertApplicationDogLayout(surface, engine, label) {
     const next=form.getByRole('button',{name:'Pokračovať',exact:true});
     const owner=form.locator('input[name="meno"]');
     if(await owner.isVisible())throw new Error('Owner step visible before dog details');
-    await next.click();
+    await activateFixtureControl(next);
     if(await form.getAttribute('data-application-step')!=='1')throw new Error('Incomplete dogs passed step validation');
     for(const suffix of ['', '2']){
       for(const [name,value] of [['pes','Fixture dog '+suffix],['plemeno','Labrador'],['vek','2 roky'],['vaha','25 kg'],['povaha','Fixture only']])await form.locator('[name="'+name+suffix+'"]').fill(value);
       for(const name of ['pohlavie','kastrovana'])await form.locator('label:has(input[name="'+name+suffix+'"])').first().click();
     }
     await form.locator('label:has(input[name="duvod"])').first().click();
-    await next.click();
+    await activateFixtureControl(next);
     await owner.waitFor({state:'visible'});
     if(await form.locator('input[name="pes"]').isVisible())throw new Error('Both application steps visible');
     await owner.fill('Fixture owner');
     await form.locator('input[name="telefon"]').fill('912345678');
     const payload=await form.evaluate(el=>Object.fromEntries(new FormData(el)));
     if(payload.pes!=='Fixture dog '||payload.pes2!=='Fixture dog 2'||payload.meno!=='Fixture owner'||payload.duvod!=='Pravidelne – 1× alebo viackrát týždenne')throw new Error('Hidden step fields missing from application payload');
-    await form.getByRole('button',{name:'Späť',exact:true}).click();
+    await activateFixtureControl(form.getByRole('button',{name:'Späť',exact:true}));
     await form.locator('input[name="pes"]').waitFor({state:'visible'});
     if(await form.locator('input[name="pes2"]').inputValue()!=='Fixture dog 2'||await owner.inputValue()!=='Fixture owner')throw new Error('Step navigation lost application values');
-    await next.click();
+    await activateFixtureControl(next);
     await owner.waitFor({state:'visible'});
     if(await owner.inputValue()!=='Fixture owner')throw new Error('Owner values lost on return');
-    await form.getByRole('button',{name:'Späť',exact:true}).click();
+    await activateFixtureControl(form.getByRole('button',{name:'Späť',exact:true}));
     await form.locator('input[name="pes"]').waitFor({state:'visible'});
+    await activateFixtureControl(form.locator('label:has(input[name="pocet_psikov"][value="1"])'));
+    if(!await one.isChecked())throw new Error('One-dog choice did not select');
+    await form.locator('input[name="pes2"]').waitFor({state:'hidden',timeout:5000});
     console.log('PASS application step navigation and full FormData '+engine+' '+label);
+  } catch(error) {
+    // Do not mask the original failure by attempting to click a hidden dog
+    // selector during cleanup (e.g. when step two remains active in WebKit).
+    const state=await form.evaluate(el=>({step:el.dataset.applicationStep,selected:el.querySelector('input[name="pocet_psikov"]:checked')?.value,modal:!!el.closest('[role="dialog"]')})).catch(()=>null);
+    throw new Error('Application interaction '+engine+' '+label+' '+JSON.stringify(state),{cause:error});
   } finally {
     await page.setViewportSize(original);
-    await one.check();
   }
 }
 
@@ -2443,7 +2456,7 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
               await aria.getByRole('button', { name: 'Podmienky prijatia' }).click();
               if (await aria.locator('[data-aria-requirements] article').count() !== 4)
                 throw new Error('Aria must list the four conditions');
-              if (!await aria.locator('[data-aria-requirements]').getByText(/Feny počas hárania/).count() ||
+              if (!await aria.locator('[data-aria-requirements]').getByText(/Hárajúce feny/).count() ||
                   !await aria.locator('[data-aria-requirements] strong').count())
                 throw new Error('Preview-only hygiene/health wording or highlight missing');
               await aria.locator('[data-aria-requirements]').getByRole('button', { name: 'Chcem sa informovať o škôlke' }).click();
@@ -2631,7 +2644,7 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
               if (await page.locator('#lead-first-visit').getByText('Úvodná návšteva zadarmo', { exact: true }).count())
                 throw new Error('Duplicated first-visit ribbon returned to three-step section');
               const hero = page.locator('#aria-hero-form');
-              if (!await hero.getByRole('heading', { name: 'Chceli by ste sa informovať o škôlke?' }).count())
+              if (!await hero.getByRole('heading', { name: 'Chcete sa informovať o škôlke?' }).count())
                 throw new Error('New compact hero form heading missing');
               const enquiry = hero.locator('[data-lead-step-form]');
               const choiceLabels = enquiry.locator('label:has(input[name="zaujem"])');
@@ -2660,9 +2673,8 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               const hasCorrectOrder = await page.evaluate(() => {
                 const ids = window.location.pathname === '/psia-skolka-kosice/'
-                  ? ['recenzie', 'aria-hero-form', 'lead-photo-carousel', 'aria-caretakers', 'aria-about',
-                     'aria-early-faq', 'lead-pricing', 'lead-requirements', 'lead-benefits',
-                     'aria-mosaic', 'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form']
+                  ? ['recenzie', 'lead-photo-carousel', 'lead-pricing', 'lead-first-visit', 'aria-hero-form', 'aria-first-visit-form', 'aria-caretakers', 'aria-about',
+                      'lead-benefits', 'lead-requirements', 'aria-puppy-check', 'aria-mosaic', 'lead-friendship-form', 'lead-faq']
                   : ['recenzie', 'aria-caretakers', 'aria-about', 'aria-early-faq', 'aria-mosaic',
                      'lead-benefits', 'lead-pricing', 'lead-requirements', 'lead-faq',
                      'aria-puppy-check', 'lead-first-visit'];
@@ -3190,7 +3202,7 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
                     singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===8 && !faq.querySelector('a[href="/caste-otazky"]') && !!faq.querySelector('[data-home-faq-contact]') && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
                     applicationAfterPricing:document.getElementById('cennik').nextElementSibling?.id==='psie-priatelstva' && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='cennik' && document.getElementById('psie-priatelstva').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
-                    approvedMainDock:(()=>{const style=getComputedStyle(dock.querySelector('.mobile-dock-bar'));return innerWidth<1024?style.boxShadow==='none':style.boxShadow.includes('inset');})(),
+                    approvedMainDock:(()=>{const style=getComputedStyle(dock.querySelector('.mobile-dock-bar'));return style.boxShadow.includes('inset') && style.backgroundImage.includes('gradient') && (style.backdropFilter||style.webkitBackdropFilter||'').includes('blur');})(),
                     mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].filter(el=>el.getClientRects().length).map(el=>el.getAttribute('href')).join('|')===(innerWidth<1024?'/|/#cennik|/#podmienky|/#priestory|/produkty':'/|/#o-nas|/#cennik|/#podmienky|/produkty') && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2 &&
@@ -4396,8 +4408,11 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
               if (await productsLink.count() !== 1 || await productsLink.getAttribute('href') !== '/produkty') {
                 throw new Error('Main mobile dock Products link must go to /produkty');
               }
-              if (await dock.getByText('Priestory', { exact: true }).count()) {
-                throw new Error('Retired Spaces shortcut should not occupy mobile dock');
+              // PR538 restored the mobile-only Spaces shortcut before Products.
+              const spacesLink = dock.getByRole('link', { name: 'Priestory', exact: true });
+              if (await spacesLink.count() !== 1 || await spacesLink.getAttribute('href') !== '/#priestory' ||
+                  !await spacesLink.isVisible() || !await spacesLink.evaluate(el=>el.getBoundingClientRect().height>=44)) {
+                throw new Error('Approved mobile Spaces shortcut must remain visible and usable');
               }
             }
             for (const route of ['/stojan-na-misky-pre-psa', '/target-na-cvicenie-pre-psov']) {

@@ -1,5 +1,5 @@
 import { Phone } from "lucide-react";
-import { PHONE, PHONE_PRETTY } from "@/content/site";
+import { PHONE, PHONE_PRETTY, INQUIRY_TITLE } from "@/content/site";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
 import { useState } from "react";
 import { LeadStepForm } from "./LeadStepForm";
@@ -88,7 +88,7 @@ export function Hero({ onMobileInquiryOpen, mobileInquiryOpen, language = "sk" }
             <SchoolmatesFormCrown compact />
             <div data-lead-form-shell data-home-form-panel className="form-liquid-surface rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
               <h2 data-lead-form-intro className={"text-center text-xl text-forest " + (language === "sk" ? "sm:whitespace-nowrap" : "")}>
-                {t("Čo hľadáte pre svojho psíka?", "What are you looking for for your dog?")}
+                {t(INQUIRY_TITLE, "What are you looking for for your dog?")}
               </h2>
               <p data-lead-form-intro className="mt-2 mb-4 text-center text-sm text-muted-foreground">
                 {language === "en" ? <>Fill in a short <strong className="font-bold text-forest">no-obligation enquiry</strong>. We will be in touch.</> : <>Vyplňte krátky <strong className="font-bold text-forest">nezáväzný formulár</strong>. Ozveme sa vám.</>}
