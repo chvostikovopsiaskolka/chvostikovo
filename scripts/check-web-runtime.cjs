@@ -393,7 +393,7 @@ async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=n
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==2||structure.benefits!==3||structure.requirements!==4||
     structure.carousel!==1||!structure.checker||!structure.faqLast||!structure.health||!structure.inquiryHeadings||!structure.inquirySubtitles||structure.mapLinks.length<2||structure.mapLinks.some(link=>link!==expected.MAP_LINK)||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
-  for(const [width,height] of [[320,720],[360,780],[375,667],[390,740],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
+  for(const [width,height] of [[320,720],[360,780],[375,667],[390,740],[430,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
     await page.setViewportSize({width,height});
     await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
     await page.waitForTimeout(160);
@@ -438,7 +438,7 @@ async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=n
         actionArrowDecorative:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]'),'::after').pointerEvents==='none',
         pillBold:visiblePills.every(el=>Number(getComputedStyle(el).fontWeight)>=700),
         pillGap:parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pills]')).columnGap),
-        photoCrop:[...document.querySelectorAll('[data-lead-hero-photo] img')].length===2&&[...document.querySelectorAll('[data-lead-hero-photo] img')].every(el=>getComputedStyle(el).objectPosition==='50% 50%'),
+        photoCrop:(()=>{const imgs=[...document.querySelectorAll('[data-lead-hero-photo] img')],short=innerWidth<640&&innerHeight<=740;return imgs.length===2&&imgs.every(el=>getComputedStyle(el).objectFit==='cover'&&getComputedStyle(el).objectPosition===(short?'50% 20%':'50% 50%'))&&(!short||innerWidth<390||(imgs.every(el=>el.getBoundingClientRect().height>=108)&&cta.top-photos.bottom>=14));})(),
         reviewGap:parseFloat(getComputedStyle(document.querySelector('[data-aria-lead-review-spacing]')).marginTop),
         galleryBelow:box('#lead-photo-carousel').top>=innerHeight-2,
         greetingFit:(()=>{const p=document.querySelector('[data-aria-bubble-greeting]'),range=document.createRange();range.selectNodeContents(p);const rects=[...range.getClientRects()].filter(r=>r.width>0&&r.height>0);const expected=innerWidth<640?'Ahoj, volám sa Aria. Čo ťa zaujíma?':'Ahoj, volám sa Aria. Čo ťa zaujíma v našej škôlke?';return p.innerText.replace(/\s+/g,' ').trim()===expected&&new Set(rects.map(r=>Math.round(r.top))).size===1&&p.scrollWidth<=p.clientWidth+1&&Math.abs(p.getBoundingClientRect().right-Math.max(...rects.map(r=>r.right))-parseFloat(getComputedStyle(p).paddingRight))<=2&&(innerWidth>=640||face.left>=6&&face.left<=10);})(),
