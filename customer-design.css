@@ -1151,7 +1151,7 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 .compact-overview-v437 .compact-repeat-reason-v437{border-top:1px dashed #d5c5b7;margin:10px 0 4px;padding-top:8px;white-space:nowrap;font-size:clamp(10px,3.1vw,13px);font-weight:750;color:#315d43}
 .compact-overview-v437>small{font-size:10px;color:#66716b}
 
-/* v438 month calendar: one weekday legend per month, real dates and contiguous later rows. */
+/* v438 month calendar, real dates and five working-day columns. */
 #compactDogChoicesV437>button[aria-pressed=true]{background:#ffe5ce;color:#a94c12}
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-v438{font-size:17px;font-weight:850;margin:10px 6px 3px;color:#273242}
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-v438:first-child{margin-top:0}
@@ -1204,3 +1204,9 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 .compact-overview-grid-v437 button{box-sizing:border-box;height:49px;min-height:49px;max-height:49px}
 .compact-overview-grid-v437 button[data-level=free]:not([aria-pressed=true]){background:#21834e;color:#fff;border-color:#1b7544}
 .compact-overview-grid-v437 button[data-level=limited]:not([aria-pressed=true]){background:#ffdf75;color:#694908;border-color:#dfb43c}
+
+/* v440: each week has its own liquid boundary and aligned weekday legend. */
+.customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438{margin:0 0 8px!important;padding:10px 6px!important;background:#ffffff24!important;box-shadow:inset 0 1px 0 #ffffffb0,inset 0 0 0 1px #b58b713b,0 4px 10px #73543a12!important;border-radius:15px!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438:last-of-type{margin-bottom:0!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .calendar-weekletters-v438{margin:0 0 5px!important;gap:5px!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-picker-week-days-v127{margin:0!important}

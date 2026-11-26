@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v439';
-const APP_VERSION='2.0.112';
+const APP_BUILD='v440';
+const APP_VERSION='2.0.113';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -3364,21 +3364,19 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     updateBookingDeadlineNoticeV127();
     renderCompactSeedV437();
     const groups=[],today=bratislavaClockV95().date,rows=calendarRowsV438(days,today);
-    let activeMonth='',laterOpen=false;
+    let activeMonth='';
     for(const row of rows){
       const week=row.days,weekEnd=new Date(row.weekEnd+'T12:00:00Z'),currentWeek=row.kind==='current'&&row.firstForKind;
       if(activeMonth!==row.month){
-        if(laterOpen){groups.push('</div>');laterOpen=false;}
-        activeMonth=row.month;groups.push('<h3 class="calendar-month-v438">'+esc(calendarMonthNameV438(row.month))+'</h3>'+calendarWeekLettersV438());
+        activeMonth=row.month;groups.push('<h3 class="calendar-month-v438">'+esc(calendarMonthNameV438(row.month))+'</h3>');
       }
-      if(row.kind==='later'&&!laterOpen){groups.push('<div class="calendar-later-v438">');laterOpen=true;}
       const weekNotice=currentWeek
         ? `<div id="designWeekDeadline" data-week-from="${week[0].date}" data-week-to="${weekEnd.toISOString().slice(0,10)}" ${hasWeekBookingV337(week[0].date,weekEnd.toISOString().slice(0,10))?'hidden':''}><strong>Nestihli ste rezervovať miesto do nedele?</strong><span>Kliknite na deň, odošlite žiadosť a počkajte na schválenie v prípade voľného miesta.</span></div>`
         : '';
       // All real available dates stay visible in one compact calendar.
       const monday=row.monday,friday=smartShiftV199(monday,4);
       const heading=row.kind==='current'&&row.firstForKind?'Tento týždeň · '+compactDateV37(monday)+' – '+compactDateV37(friday):'';
-      groups.push(`<div class="booking-picker-week-v127 calendar-row-v438" data-calendar-kind="${row.kind}" data-week-from="${monday}" data-first-date="${week[0].date}" data-week-to="${row.weekEnd}"><div class="booking-picker-week-label-v127">${heading}</div><div class="booking-picker-future-body-v235">${weekNotice}<div class="booking-picker-week-days-v127">${Array.from({length:(new Date(week[0].date+'T12:00:00Z').getUTCDay()+6)%7},()=>'<div class="calendar-empty-v438" aria-hidden="true"></div>').join('')}${week.map(d=>{
+      groups.push(`<div class="booking-picker-week-v127 calendar-row-v438" data-calendar-kind="${row.kind}" data-week-from="${monday}" data-first-date="${week[0].date}" data-week-to="${row.weekEnd}"><div class="booking-picker-week-label-v127">${heading}</div><div class="booking-picker-future-body-v235">${weekNotice}${calendarWeekLettersV438()}<div class="booking-picker-week-days-v127">${Array.from({length:(new Date(week[0].date+'T12:00:00Z').getUTCDay()+6)%7},()=>'<div class="calendar-empty-v438" aria-hidden="true"></div>').join('')}${week.map(d=>{
         const existing=pickerDogsV254().some(x=>bookingFor(x.id,d.date)),deadlineClosed=pickerDogsV254().some(x=>bookingDeadlineClosedV95(d.date,x)),closed=d.bookings_open===false,full=Number(d.available)<pickerDogsV254().length;
         const past=d.date<=bratislavaClockV95().date;
         const lateContact=(deadlineClosed||full)&&!existing&&!past&&!closed;
@@ -3389,9 +3387,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         const stateText=existing?(ownStatus==='pending'?'Čaká':'Schválené'):past?'Uplynulo':closed?'Zatvorené':full?'Plno':deadlineClosed?'Napíšte nám':`${Math.max(0,Number(d.available)||0)} voľné`;
         const taxiToggle=selected?`<button type="button" class="booking-day-taxi-toggle-v201" data-taxi-toggle="${d.date}" aria-expanded="${expandedTaxiDateV201===d.date?'true':'false'}" data-taxi-selected="${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'true':'false'}" aria-pressed="${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'true':'false'}" aria-label="Taxi na ${esc(skDay(d.date))} ${esc(skDate(d.date))}">🚕${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'<span class="taxi-indicator-v201"></span>':''}</button>`:'';
         return bookingDayMarkupV360(d,{selected,existing,lateContact,full,disabled,ownStatus,closed,stateText,taxiToggle});
-      }).join('')}</div>${expandedTaxiDateV201&&week.some(d=>d.date===expandedTaxiDateV201)&&selectedDatesV37.has(expandedTaxiDateV201)?`<div class="booking-taxi-inline-v201" data-taxi-date="${expandedTaxiDateV201}"><p class="booking-taxi-inline-title-v201">🚕 Taxi · ${esc(skDay(expandedTaxiDateV201))} ${esc(skDate(expandedTaxiDateV201))}</p>${taxiChoicesV254(expandedTaxiDateV201)}</div>`:' '}</div></div>`);
+      }).join('')}${Array.from({length:Math.max(0,5-(new Date(week[week.length-1].date+'T12:00:00Z').getUTCDay()))},()=>'<div class="calendar-empty-v438" aria-hidden="true"></div>').join('')}</div>${expandedTaxiDateV201&&week.some(d=>d.date===expandedTaxiDateV201)&&selectedDatesV37.has(expandedTaxiDateV201)?`<div class="booking-taxi-inline-v201" data-taxi-date="${expandedTaxiDateV201}"><p class="booking-taxi-inline-title-v201">🚕 Taxi · ${esc(skDay(expandedTaxiDateV201))} ${esc(skDate(expandedTaxiDateV201))}</p>${taxiChoicesV254(expandedTaxiDateV201)}</div>`:' '}</div></div>`);
     }
-    if(laterOpen)groups.push('</div>');
     $('bookingPickerDaysV37').innerHTML=groups.join('');
     $('bookingPickerDaysV37').querySelectorAll('[data-future-toggle]').forEach(b=>b.addEventListener('click',()=>{futureWeekExpandedV235=b.getAttribute('aria-expanded')!=='true';renderPickerV37()}));
     $('bookingPickerDaysV37').querySelectorAll('.booking-day-v37:not(:disabled)').forEach(btn=>btn.addEventListener('click',async()=>{
