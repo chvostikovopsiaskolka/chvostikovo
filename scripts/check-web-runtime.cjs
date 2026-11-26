@@ -652,6 +652,23 @@ async function assertFooterMapGeometry(browser, engine) {
 
 
 
+async function assertHomeDockFinish(page) {
+  const state=await page.locator('[data-home-menu]').evaluate(el=>{
+    const bar=el.closest('.mobile-dock-bar'),upper=el.getBoundingClientRect();
+    const lower=[...bar.querySelectorAll('.mobile-dock-item')].filter(a=>a.getClientRects().length).map(a=>a.getBoundingClientRect());
+    const language=el.querySelector('[data-language-switch]'),pill=language.querySelector('[aria-current="page"]');
+    const rect=pill.getBoundingClientRect(),style=getComputedStyle(pill),surface=getComputedStyle(el,'::before'),barStyle=getComputedStyle(bar);
+    const active=bar.querySelector('.mobile-dock-item.is-active')?.getBoundingClientRect();
+    return {gap:Math.min(...lower.map(r=>r.top))-upper.bottom,
+      upperHeight:upper.height,lowerHeight:Math.min(...lower.map(r=>r.height)),
+      upperInset:parseFloat(surface.top),upperBorder:getComputedStyle(el).borderBottomWidth,
+      languageTarget:rect.height,languageInset:parseFloat(style.paddingTop),
+      languageClip:style.backgroundClip,activeInset:active?active.left-bar.getBoundingClientRect().left:null,
+      glass:barStyle.backgroundImage.includes('linear-gradient')&&(barStyle.backdropFilter||barStyle.webkitBackdropFilter||'').includes('blur')};
+  });
+  if(state.gap<1||state.gap>8||state.upperHeight>46||state.upperHeight>=state.lowerHeight||state.upperInset<2||state.upperBorder!=='0px'||state.languageTarget<44||state.languageInset<5||state.languageClip!=='content-box'||!state.glass)throw new Error('Home dock finish '+JSON.stringify(state));
+}
+
 async function assertCompactHomeMenu(page,en) {
   const menu=page.locator('[data-home-menu]');
   await menu.waitFor({state:'visible'});
@@ -668,6 +685,7 @@ async function assertCompactHomeMenu(page,en) {
   });
   const main=en?['Home','About','Prices','Rules','Apply']:['Domov','O nás','Cenník','Podmienky','Produkty','Prihláška'];
   if(JSON.stringify(state.hrefs)!==JSON.stringify(['#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['Have a puppy?','FAQ']:['Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>46||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
+  if(brandPreviewCandidate)await assertHomeDockFinish(page);
   if(await menu.locator('[data-desktop-only-shortcut]').isVisible())throw new Error('Why shortcut must remain desktop-only');
   const crop=await page.locator('[data-home-hero-photo] img').evaluateAll(imgs=>imgs.map(img=>getComputedStyle(img).objectPosition));
   if(crop.join('|')!=='50% 0%|50% 50%')throw new Error('Only the collies photo should use the top-biased crop: '+crop.join('|'));
@@ -805,6 +823,7 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
           return {centered:Math.abs((upper.left+upper.right-r.left-r.right)/2)<2,width:r.width<=980.5,shortcut:el.querySelector('[data-desktop-only-shortcut]')?.getBoundingClientRect().width>0,upperLinks:[...el.querySelectorAll('[data-home-menu] .mobile-dock-compact-links a')].map(a=>new URL(a.href).hash),fits:r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&bar.scrollWidth<=bar.clientWidth+1&&r.bottom<=slot.bottom+1,targets:boxes.every(b=>b.height>=44),separate:boxes.every((b,i)=>boxes.every((a,j)=>i===j||a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1)),header:!!document.querySelector('header.fixed'),logo:logoBox.width>0&&logoBox.right<=upper.left+1&&logoBox.bottom<=lower[0].top+1,rows:lower.length>=5&&lower.every(b=>b.top>=upper.bottom-1&&Math.abs(b.top-lower[0].top)<2),slot:el.previousElementSibling?.id==='top'&&slot.height>=108&&r.top>=hero.bottom-1};
         });
         await assertHomeDockActivePink(page,en);
+        await assertHomeDockFinish(page);
         if(!geometry.centered||!geometry.width||!geometry.shortcut||geometry.upperLinks.join('|')!==('#aria-puppy-check|'+(en?'#en-benefits':'#preco-chvostikovo')+'|#faq')||!geometry.fits||!geometry.targets||!geometry.separate||geometry.header||!geometry.logo||!geometry.rows||!geometry.slot)throw new Error('Desktop home dock '+width+' '+JSON.stringify(geometry));
         await page.evaluate(()=>window.scrollTo({top:900,behavior:'instant'}));
         await page.waitForFunction(()=>document.querySelector('[data-desktop-home-dock]')?.getAttribute('data-desktop-floating')==='true');
