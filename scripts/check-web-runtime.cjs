@@ -422,7 +422,7 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
         photoCrop:[...document.querySelectorAll('[data-lead-hero-photo] img')].length===2&&[...document.querySelectorAll('[data-lead-hero-photo] img')].every(el=>getComputedStyle(el).objectPosition==='50% 50%'),
         reviewGap:parseFloat(getComputedStyle(document.querySelector('[data-aria-lead-review-spacing]')).marginTop),
         galleryBelow:box('#lead-photo-carousel').top>=innerHeight-2,
-        greetingFit:(()=>{const p=document.querySelector('[data-aria-bubble-greeting]'),range=document.createRange();range.selectNodeContents(p);const rects=[...range.getClientRects()].filter(r=>r.width>0&&r.height>0);const expected=innerWidth<640?'Ahoj, volám sa Aria. Čo ťa zaujíma?':'Ahoj, volám sa Aria. Čo ťa zaujíma v našej škôlke?';return p.innerText.replace(/\s+/g,' ').trim()===expected&&new Set(rects.map(r=>Math.round(r.top))).size===1&&p.scrollWidth<=p.clientWidth+1&&(innerWidth>=640||face.left>=6&&face.left<=10);})(),
+        greetingFit:(()=>{const p=document.querySelector('[data-aria-bubble-greeting]'),range=document.createRange();range.selectNodeContents(p);const rects=[...range.getClientRects()].filter(r=>r.width>0&&r.height>0);const expected=innerWidth<640?'Ahoj, volám sa Aria. Čo ťa zaujíma?':'Ahoj, volám sa Aria. Čo ťa zaujíma v našej škôlke?';return p.innerText.replace(/\s+/g,' ').trim()===expected&&new Set(rects.map(r=>Math.round(r.top))).size===1&&p.scrollWidth<=p.clientWidth+1&&Math.abs(p.getBoundingClientRect().right-Math.max(...rects.map(r=>r.right))-parseFloat(getComputedStyle(p).paddingRight))<=2&&(innerWidth>=640||face.left>=6&&face.left<=10);})(),
         compactLauncher:(()=>{const buttons=[...document.querySelectorAll('[data-aria-bubble-question]')],s=box('[data-aria-speech]'),rs=buttons.map(e=>e.getBoundingClientRect());return rs.length===2&&Math.abs(rs[0].top-rs[1].top)<2&&rs[0].right<rs[1].left&&rs.every(r=>r.height>=44&&r.left>=s.left&&r.right<=s.right)&&buttons.every(e=>e.scrollWidth<=e.clientWidth+1);})(),
         dockInside:dock.top>=0&&dock.bottom<=innerHeight+1,
         ctaHeight:cta.height,proofBottom:proof.bottom,ariaTop:aria.top,faceWidth:face?.width,
@@ -466,6 +466,8 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
   if(await page.getByRole('dialog').count())throw new Error('Campaign CTA must scroll to its in-page form');
   const form=page.locator('#aria-hero-form [data-lead-step-form]');
+  const formCircle=await form.getByRole('button',{name:'Pokračovať',exact:true}).evaluate(el=>{const icon=getComputedStyle(el,'::after');return {width:parseFloat(icon.width),height:parseFloat(icon.height),end:parseFloat(icon.right),button:el.getBoundingClientRect().height,decorative:icon.pointerEvents==='none'};});
+  if(formCircle.width!==36||formCircle.height!==36||formCircle.end!==5||formCircle.button<formCircle.height+2||!formCircle.decorative)throw new Error('Form CTA circle geometry '+JSON.stringify(formCircle));
   await advanceLeadContact(form);
   await assertLeadContactIntro(form);
   await form.getByRole('button',{name:'Späť',exact:true}).click();
