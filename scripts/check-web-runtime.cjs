@@ -169,6 +169,8 @@ async function assertHeroAriaEntry(page) {
   await chat.waitFor({state:'visible',timeout:5000});
   await chat.getByRole('button',{name:'Close',exact:true}).click();
   await chat.waitFor({state:'hidden'});
+  // Radix may keep the exit overlay and body pointer lock briefly after close.
+  await page.waitForFunction(()=>getComputedStyle(document.body).pointerEvents!=='none'&&!document.querySelector('[data-state="closed"][role="dialog"]'));
 }
 async function assertPaidAriaChat(page, {visualOnly=false}={}) {
   const posted=[];
@@ -203,7 +205,8 @@ async function assertPaidAriaChat(page, {visualOnly=false}={}) {
     }
     const trigger=page.locator('[data-aria-lead-chat] [data-aria-chat-trigger]');
     const launcher=page.locator('[data-aria-lead-chat] [data-aria-bubble-question="pricing"]');
-    await launcher.click();
+    // Use the same settled native touch/mouse fixture as the Hero entry.
+    await activateFixtureControl(launcher);
     const chat=page.locator('[data-aria-chat]');
     await chat.waitFor({state:'visible',timeout:1500});
     const surface=await chat.evaluate(el=>({background:getComputedStyle(el).backgroundColor,blur:getComputedStyle(el).getPropertyValue('backdrop-filter')||getComputedStyle(el).getPropertyValue('-webkit-backdrop-filter')}));
