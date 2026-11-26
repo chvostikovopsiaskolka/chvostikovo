@@ -2838,7 +2838,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   const pairTaxiV254=new Map();
   function pickerDogsV254(){return pairBookingV254?(state.data?.dogs||[]).slice(0,2):[selectedDog()].filter(Boolean)}
   function pickerTaxiV254(date,dogId){return pairBookingV254?pairTaxiV254.get(date+'|'+dogId)||'none':selectedTaxiByDateV91.get(date)||'none'}
-  function taxiChoicesV254(date,previewDog=null){return (previewDog?[previewDog]:pickerDogsV254()).map(d=>'<div class="booking-taxi-dog-v254">'+(!previewDog&&pairBookingV254?'<strong>'+esc(d.name)+'</strong>':'')+'<div class="booking-taxi-inline-choices-v201">'+[['pickup','Vyzdvihnutie','5 €'],['pickup_dropoff','Vyzdvihnutie aj dovoz','10 €'],['dropoff','Dovoz domov','5 €']].map(([id,label,price])=>'<button type="button" class="'+(!previewDog&&pickerTaxiV254(date,d.id)===id?'active':'')+'" data-taxi-mode="'+id+'" data-taxi-date="'+date+'" data-taxi-dog="'+d.id+'">'+ (id==='pickup_dropoff'?'Tam aj späť':label)+' · '+price+'</button>').join('')+'</div></div>').join('')}
+  function taxiChoicesV254(date,previewDog=null){return (previewDog?[previewDog]:pickerDogsV254()).map(d=>'<div class="booking-taxi-dog-v254">'+(!previewDog&&pairBookingV254?'<strong>'+esc(d.name)+'</strong>':'')+'<div class="booking-taxi-inline-choices-v201">'+[['pickup','Vyzdvihnutie','5 €'],['pickup_dropoff','Vyzdvihnutie aj dovoz','10 €'],['dropoff','Dovoz domov','5 €']].map(([id,label,price])=>'<button type="button" class="'+(!previewDog&&pickerTaxiV254(date,d.id)===id?'active':'')+'" data-taxi-mode="'+id+'" data-taxi-date="'+date+'" data-taxi-dog="'+d.id+'">'+ (id==='pickup_dropoff'?'Tam aj späť':id==='pickup'?'Vyzdvihnutie':'Dovoz domov')+' · '+price+'</button>').join('')+'</div></div>').join('')}
   function selectedDaysMarkupV360(dates,expandedDate,previewDog=null){return dates.map(date=>`<div class="design-selected-day"><strong>${esc(skDay(date))} ${esc(skDate(date))}</strong><button type="button" class="design-taxi-disclosure" data-taxi-toggle="${date}" aria-expanded="${expandedDate===date}"><span>Potrebujete odvoz? 🚕${(!previewDog&&pickerDogsV254().some(d=>pickerTaxiV254(date,d.id)!=='none'))?' · Vybrané':''}</span><span aria-hidden="true">${expandedDate===date?'⌃':'⌄'}</span></button>${expandedDate===date?`<div class="booking-taxi-inline-v201 calendar-taxi-popover-v438" role="group" aria-label="Taxi">${taxiChoicesV254(date,previewDog)}</div>`:''}</div>`).join('')}
   function sharedItemsV260(dates=[...selectedDatesV37].sort()){
     return dates.flatMap(date=>pickerDogsV254().map(d=>({dog_id:Number(d.id),date,taxi_mode:pickerTaxiV254(date,d.id),billing_choice:'auto'})));
@@ -3301,7 +3301,13 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     });
     $('bookingPickerSmartDaysV199').addEventListener('click',e=>{const button=e.target.closest('[data-smart-action]');if(!button)return;if(button.dataset.smartAction==='manual'){smartDaysDismissedV199=true;renderPickerV37()}else if(button.dataset.smartAction==='apply')void applySmartDaysV199()});
     $('bookingPickerSubmitV37').addEventListener('click',submitPickerV37);
-    document.addEventListener('click',event=>{if(expandedTaxiDateV201&&!$('bookingPickerV37')?.classList.contains('hidden')&&!event.target.closest('.design-selected-day')){expandedTaxiDateV201=null;renderPickerV37();}},true);
+    document.addEventListener('click',event=>{
+      if(!expandedTaxiDateV201||$('bookingPickerV37')?.classList.contains('hidden')||event.target.closest('.calendar-taxi-popover-v438,[data-taxi-toggle]'))return;
+      // Close without replacing the clicked day, submit or close button before its handler runs.
+      expandedTaxiDateV201=null;
+      $('bookingPickerTaxiByDayV91')?.querySelectorAll('.calendar-taxi-popover-v438').forEach(node=>node.remove());
+      $('bookingPickerTaxiByDayV91')?.querySelectorAll('[data-taxi-toggle][aria-expanded="true"]').forEach(button=>{button.setAttribute('aria-expanded','false');const arrow=button.querySelector('[aria-hidden]');if(arrow)arrow.textContent='⌄';});
+    },true);
     document.addEventListener('keydown',event=>{if(event.key==='Escape'&&expandedTaxiDateV201&&!$('bookingPickerV37')?.classList.contains('hidden')){event.preventDefault();const date=expandedTaxiDateV201;expandedTaxiDateV201=null;renderPickerV37();$('bookingPickerTaxiByDayV91')?.querySelector('[data-taxi-toggle="'+date+'"]')?.focus();}});
   }
 

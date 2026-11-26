@@ -307,6 +307,10 @@ async function scenario(count){
   assert.equal(w.document.querySelectorAll('#bookingPickerDaysV37 [data-taxi-toggle]').length,0);
   const taxi=w.document.querySelector('#bookingPickerTaxiByDayV91 [data-taxi-toggle]');assert(taxi);taxi.click();
   assert.equal(w.document.querySelectorAll('#bookingPickerTaxiByDayV91 [data-taxi-mode]').length,count===2?6:3);
+  assert(w.document.querySelector('.calendar-taxi-popover-v438'),'taxi is anchored outside the row layout');
+  const outside=w.document.querySelector('.booking-day-v37:not(:disabled)[data-contact="false"]');assert(outside);outside.click();assert.equal(w.document.querySelectorAll('.calendar-taxi-popover-v438').length,0,'outside click closes popover without replacing clicked target');
+  if(!w.document.querySelector('#bookingPickerTaxiByDayV91 [data-taxi-toggle]'))outside.click();
+  w.document.querySelector('#bookingPickerTaxiByDayV91 [data-taxi-toggle]').click();
   w.document.querySelector('#bookingPickerTaxiByDayV91 [data-taxi-mode="pickup"]').click();assert.match(w.document.getElementById('bookingPickerTaxiByDayV91').textContent,/Vybrané/);
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').disabled,false);
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').hidden,false,'real reservation submit appears after selection');

@@ -1173,3 +1173,5 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 .customer-design #bookingPickerV37 .calendar-taxi-popover-v438 .booking-taxi-inline-choices-v201 button{min-height:44px!important;font-size:clamp(8px,2.4vw,11px)!important;padding:4px 1px!important;background:#fff8e6;border-color:#e4c772;white-space:nowrap!important}
 .customer-design #bookingPickerV37 .calendar-taxi-popover-v438 .booking-taxi-inline-choices-v201 button.active{background:#ffdf8c!important}
 .compact-overview-v437>.calendar-weekletters-v438{margin:0 0 4px}
+
+.customer-design #bookingPickerV37 .calendar-taxi-popover-v438 .booking-taxi-inline-choices-v201 button{white-space:normal!important;overflow-wrap:normal;line-height:1.2!important}
