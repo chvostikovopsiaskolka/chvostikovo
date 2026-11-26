@@ -1,4 +1,4 @@
-import { Component, lazy, Suspense, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { Component, lazy, Suspense, useEffect, useId, useImperativeHandle, useRef, useState, type ReactNode, type Ref } from "react";
 import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, UsersRound, X, ArrowRight } from "lucide-react";
 import { AriaReturnToTop } from "./AriaReturnToTop";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
@@ -70,6 +70,7 @@ export function AriaLeadAssistant({
   onOpenInterest,
   onOpenPuppyChecker,
   onRevealInlineForm,
+  openChatRef,
   hidden = false,
   trackingPrefix = "aria_preview_v3",
   requirementsSectionId = "lead-requirements",
@@ -85,6 +86,8 @@ export function AriaLeadAssistant({
   onOpenInterest: () => void;
   onOpenPuppyChecker: () => void;
   onRevealInlineForm?: (() => void) | undefined;
+  /** Optional entry point for the paid Hero CTA; reuse the same tracked chat. */
+  openChatRef?: Ref<{ open: () => void }>;
   hidden?: boolean;
   trackingPrefix?: string;
   requirementsSectionId?: string;
@@ -358,6 +361,8 @@ export function AriaLeadAssistant({
     void trackCookielessInteraction("explore_daycare", trackingPrefix + "_chat_open", "sk");
     if (questionId) void trackCookielessInteraction("explore_daycare", trackingPrefix + "_chat_bubble_" + questionId, "sk");
   }
+
+  useImperativeHandle(openChatRef, () => ({ open: () => openChat() }));
 
   const outlineReady = speechGeometry !== null;
   const { width: sw, height: sh, tipX, tipY } =
