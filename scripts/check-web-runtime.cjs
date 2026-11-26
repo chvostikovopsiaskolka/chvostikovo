@@ -905,7 +905,7 @@ async function assertPublicContent(browser,engine){
         const checkMap=async selector=>{const links=page.locator(selector+' a[href*="maps"]');if(await links.count()<1||!(await links.evaluateAll(es=>es.map(e=>e.getAttribute('href')))).every(h=>h===expected.MAP_LINK))throw new Error('Map differs '+route+' '+selector);};
         const checkCopy=async(selector,heading)=>{
           const box=page.locator(selector);await box.waitFor({state:'attached'});
-          const actual=await box.locator('[data-lead-form-intro]').evaluateAll(es=>es.map(e=>e.textContent.trim()).join(' '));
+          const actual=await box.locator('[data-lead-form-intro]').evaluateAll(es=>es.flatMap(e=>e.matches('h2,h3,p')?[e.textContent.trim()]:[...e.querySelectorAll('h2,h3,p')].map(n=>n.textContent.trim())));
           if(!actual.includes(heading)||!actual.includes(expected.INQUIRY_SUBTITLE))throw new Error('Enquiry copy '+route+' '+selector+' '+actual);
         };
         const checkHealth=async(selector,value)=>{if(!(await page.locator(selector).textContent()).includes(value))throw new Error('Admission content '+route);};
@@ -928,6 +928,16 @@ async function assertPublicContent(browser,engine){
           await page.setViewportSize({width:390,height:844});
           await activateFixtureControl(page.locator('[data-aria-lead-hero-cta]'));await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
           const form=page.locator('#aria-hero-form [data-lead-step-form]');await advanceLeadContact(form);await assertLeadContactIntro(form);
+          await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+          await page.waitForFunction(()=>scrollY<5);
+          const launcher=page.locator('[data-aria-lead-chat] [data-aria-bubble-chat-cta]');
+          const hit=await launcher.evaluate(el=>{const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.bottom+2};});
+          if(await page.evaluate(()=>navigator.maxTouchPoints>0))await page.touchscreen.tap(hit.x,hit.y);else await page.mouse.click(hit.x,hit.y);
+          const chat=page.locator('[data-aria-chat]');await chat.waitFor({state:'visible'});
+          await chat.locator('[data-aria-chat-question="requirements"]').click();
+          await chat.locator('[data-aria-chat-requirements]').waitFor({state:'visible',timeout:20000});
+          if(!(await chat.locator('[data-aria-chat-requirements]').textContent()).includes(expected.health))throw Error('Aria admission copy differs');
+          await chat.getByRole('button',{name:'Close',exact:true}).click();
         }else if(route==='/test-aria/'){
           await checkMap('#aria-mosaic');await checkHealth('#lead-requirements',expected.health);await checkCopy('#aria-hero-form',expected.INQUIRY_TITLE);await checkCopy('#aria-first-visit-form',expected.VISIT_INQUIRY_TITLE);
         }else if(route==='/en/dog-daycare-kosice/'){
@@ -3170,7 +3180,7 @@ async function assertPublicContent(browser,engine){
                 }
                 if (width >= 1024 && !await hero.locator('[data-lead-step-form]:visible').first().isVisible())
                   throw new Error('Desktop home guided form missing');
-                const layout = await page.evaluate(() => {
+                const layout = await page.evaluate(expectedTitle => {
                   const ids=['top','preco-chvostikovo','o-nas','aria-puppy-check','cennik','psie-priatelstva','podmienky','starostlivost','preco','priestory','prva-navsteva','prva-navsteva-form','faq','informujte-sa'];
                   const nodes=ids.map(id=>document.getElementById(id));
                   const photo=document.querySelector('#o-nas img'), benefits=document.querySelector('#o-nas [data-hero-benefits]');
@@ -3193,7 +3203,7 @@ async function assertPublicContent(browser,engine){
                     reviewsInHero:document.getElementById('top').contains(document.getElementById('recenzie')),
                     tickerAbsent:!document.querySelector('main .info-ticker-track'),
                     benefitsMoved:!!photo && !!benefits && benefits.getBoundingClientRect().top>=photo.getBoundingClientRect().bottom && !document.querySelector('#top [data-hero-benefits]'),
-                    bottomInquiry:document.querySelector('#kontakt #informujte-sa [data-lead-step-form]') && !document.querySelector('#kontakt [data-long-form]') && !!document.querySelector('#informujte-sa h3')?.textContent,
+                    bottomInquiry:document.querySelector('#kontakt #informujte-sa [data-lead-step-form]') && !document.querySelector('#kontakt [data-long-form]') && document.querySelector('#informujte-sa h3')?.textContent===expectedTitle,
                     aboutWidth:(()=>{const copy=document.querySelector('#o-nas [data-about-expanded]').getBoundingClientRect();const pictures=document.querySelector('#o-nas [data-about-expanded]').parentElement.nextElementSibling.getBoundingClientRect();return Math.abs(copy.width-pictures.width)<2;})(),
                     forms:['informujte-sa','prva-navsteva-form'].every(id=>document.getElementById(id)?.querySelector('[data-lead-step-form]')),
                     uniqueFields:inputs.length===new Set(inputs).size,
@@ -3329,7 +3339,7 @@ async function assertPublicContent(browser,engine){
                     pricingFits:[...document.querySelectorAll('[data-home-pricing-columns] *')].every(el=>el.scrollWidth<=el.clientWidth+2),
                     paws:!!document.querySelector('#top .paw-trail-background'),
                   };
-                });
+                },readPublicContent().INQUIRY_TITLE);
                 if(Object.values(layout).some(value=>!value)) throw new Error('Home brand/layout regression at '+width+'px: '+JSON.stringify(layout));
                 if(width>=1024){
                   const desktopForm=page.locator('#home-hero-inline-form [data-lead-step-form]');

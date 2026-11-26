@@ -14,6 +14,8 @@ const tooling = new Set([
   '.github/workflows/public-web-runtime.yml', '.github/workflows/check-form-funnel.yml',
 ]);
 const plumbing = new Set([...tooling, 'scripts/critical-form-checks.ts', 'scripts/mobile-dock-contract.cjs', 'AGENTS.md']);
+const contentFixtures=new Set(['scripts/check-web-runtime.cjs','scripts/public-web-impact.test.cjs','scripts/mobile-dock-contract.cjs']);
+const contentHarness=new Set([...contentFixtures,'scripts/public-web-impact.cjs','scripts/public-content-impact.cjs','.github/workflows/public-web-runtime.yml']);
 const cssStart = '/* Paid campaign content only:';
 const cssEnd = '/* Keep decoration below the admission heading';
 function splitSelectors(header) {
@@ -86,9 +88,9 @@ function navigationOnly(files,css={}){
 }
 
 function selectScope(files, css={}) {
-  if(publicContentOnly(files,css,plumbing))return 'content';
+  if(publicContentOnly(files,css,contentFixtures))return 'content';
   // Exercise the new content fixture on harness-only PRs that modify it.
-  if(files.includes('scripts/public-content-impact.cjs')&&files.every(file=>plumbing.has(file)))return 'content';
+  if(files.includes('scripts/public-content-impact.cjs')&&files.every(file=>contentHarness.has(file)))return 'content';
   if(navigationOnly(files,css))return 'navigation';
   if(!files.length)return 'full';
   const scopedCss=files.includes('src/styles.css')&&scopedLeadCss(css.before,css.after);
@@ -99,7 +101,7 @@ function selectScope(files, css={}) {
 // These changes cannot alter form/consent/attribution implementations. Chat JS
 // retains its browser integration suite; form/lib/route/unknown changes fail closed.
 function formChecksRequired(files, css={}) {
-  if(publicContentOnly(files,css,plumbing)||(files.includes('scripts/public-content-impact.cjs')&&files.every(file=>plumbing.has(file))))return false;
+  if(publicContentOnly(files,css,contentFixtures)||(files.includes('scripts/public-content-impact.cjs')&&files.every(file=>contentHarness.has(file))))return false;
   const presentation=new Set([...tooling,'src/styles.css','src/assets/aria-assistant-head-lead.webp']);
   return !files.length||files.some(file=>!presentation.has(file)&&!(file==='src/components/site/AriaGuidedChat.tsx'&&introCopyOnly(css.copyBefore,css.copyAfter)));
 }
