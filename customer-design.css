@@ -1182,3 +1182,6 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 .customer-design #bookingPickerV37 #bookingPickerDaysV37{box-shadow:inset 0 1px 0 #ffffffc9,0 5px 0 #d9c6b72b,0 12px 25px #73543a20!important}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-later-v438{background:#ffffff24;box-shadow:inset 0 1px 0 #ffffffb0,inset 0 0 0 1px #b58b713b,0 4px 10px #73543a12}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(:disabled)[data-capacity-level=free]{background:#e3f5e866!important;border-color:#badbc766!important}
+
+/* Preserve the tested outer inset, without adding spacing between later rows. */
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-later-v438{padding:10px 6px 7px!important}
