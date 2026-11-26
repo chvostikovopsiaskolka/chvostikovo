@@ -5,13 +5,14 @@ const path = require('node:path');
 // Run in CI, without submitting forms or emitting analytics traffic.
 const bellaris = process.env.WEB_SITE === 'bellaris';
 const { ARIA_ROUTES } = require('./public-web-impact.cjs');
+const {readPublicContent}=require('./public-content-impact.cjs');
 const runtimeScope = process.env.WEB_RUNTIME_SCOPE || 'full';
-if(!['full','aria','aria-visual','navigation'].includes(runtimeScope)||bellaris&&runtimeScope!=='full')throw new Error('Invalid public web runtime scope');
+if(!['full','aria','aria-visual','navigation','content'].includes(runtimeScope)||bellaris&&runtimeScope!=='full')throw new Error('Invalid public web runtime scope');
 const base = process.env.WEB_BASE_URL || (bellaris ? 'https://bellaris.sk' : 'https://chvostikovo.sk');
 const fullRoutes = bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/', '/test-aria/'];
 const urls = (runtimeScope === 'aria-visual' ? ['/psia-skolka-kosice/'] : runtimeScope === 'aria' ? ARIA_ROUTES : fullRoutes).map(route => new URL(route, base));
 const brandPreviewCandidate = new URL(base).hostname === '127.0.0.1';
-if(['aria-visual','navigation'].includes(runtimeScope)&&!brandPreviewCandidate)throw new Error('Visual assertions require a freshly built local candidate');
+if(['aria-visual','navigation','content'].includes(runtimeScope)&&!brandPreviewCandidate)throw new Error('Visual assertions require a freshly built local candidate');
 const out = process.env.RUNTIME_REPORT_DIR || 'runtime-report';
 fs.mkdirSync(out, { recursive: true });
 const results = [];
@@ -351,7 +352,8 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
     await image.decode();
     if(image.naturalWidth<400||image.naturalHeight<400)throw new Error("Paid Aria must use the approved high-resolution head");
   });
-  const structure=await page.evaluate(()=>({
+  const expected=readPublicContent();
+  const structure=await page.evaluate(expected=>({
     order:[...document.querySelector('main').children].map(el=>el.id),
     faq:[...document.querySelectorAll('[data-lead-faq]')].map(el=>el.dataset.leadFaq),
     forms:document.querySelectorAll('main [data-lead-step-form]').length,
@@ -360,18 +362,18 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
     carousel:document.querySelectorAll('#lead-photo-carousel [data-gesture-track="photos"]').length,
     checker:document.querySelector('#lead-knowledge')?.nextElementSibling?.id === 'aria-puppy-check',
     faqLast:document.querySelector('main')?.lastElementChild?.id === 'lead-faq',
-    health:document.querySelector('#lead-requirements')?.textContent.includes("Prijímame psíkov bez prenosných ochorení, ktorých zdravotný stav umožňuje bezpečný pobyt v kolektíve. V prípade chronických ochorení nás, prosím, informujte vopred. Hárajúce feny do škôlky neprijímame."),
+    health:document.querySelector('#lead-requirements')?.textContent.includes(expected.health),
     mapLinks:[...document.querySelectorAll('#aria-mosaic a[href*="maps"], footer a[href*="maps"]')].map(a=>a.getAttribute('href')),
-    inquiryHeadings:document.querySelector('#aria-hero-form h2')?.textContent.trim()==="Chcete sa informovať o škôlke?" && document.querySelector('#lead-friendship-form h3')?.textContent.trim()==="Chcete sa informovať o škôlke?",
-    inquirySubtitles:['#aria-hero-form','#lead-friendship-form'].every(id=>document.querySelector(id+' p[data-lead-form-intro], '+id+' [data-lead-form-intro] p')?.textContent.trim()==="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."),
+    inquiryHeadings:document.querySelector('#aria-hero-form h2')?.textContent.trim()===expected.INQUIRY_TITLE && document.querySelector('#lead-friendship-form h3')?.textContent.trim()===expected.INQUIRY_TITLE,
+    inquirySubtitles:['#aria-hero-form','#lead-friendship-form'].every(id=>document.querySelector(id+' p[data-lead-form-intro], '+id+' [data-lead-form-intro] p')?.textContent.trim()===expected.INQUIRY_SUBTITLE),
     separated:!!document.querySelector('#lead-knowledge [data-lead-faq-cta]') && !document.querySelector('#lead-knowledge #lead-faq'),
     robots:document.querySelector('meta[name="robots"]')?.content,
     daily:document.querySelector('[data-lead-price-per-day]')?.textContent.replace(/\s+/g,' ').trim(),
     single:document.querySelector('#lead-pricing article')?.textContent,
-  }));
-  if(structure.order.slice(1,10).join('|')!=='lead-photo-carousel|lead-pricing|lead-first-visit|aria-hero-form|aria-caretakers|lead-benefits|lead-knowledge|aria-puppy-check|aria-mosaic'||
+  }),expected);
+  if(structure.order.filter(id=>expected.order.includes(id)).join('|')!==expected.order.join('|')||
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==2||structure.benefits!==3||structure.requirements!==4||
-    structure.carousel!==1||!structure.checker||!structure.faqLast||!structure.health||!structure.inquiryHeadings||!structure.inquirySubtitles||structure.mapLinks.length<2||structure.mapLinks.some(link=>link!=="https://maps.app.goo.gl/xRzZ8fC3fT8MCzeM7?g_st=ic")||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
+    structure.carousel!==1||!structure.checker||!structure.faqLast||!structure.health||!structure.inquiryHeadings||!structure.inquirySubtitles||structure.mapLinks.length<2||structure.mapLinks.some(link=>link!==expected.MAP_LINK)||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
   for(const [width,height] of [[320,720],[360,780],[375,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
     await page.setViewportSize({width,height});
@@ -887,10 +889,68 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
   } finally {await context.close();}
 }
 
+
+// The shared public-content scope verifies actual affected DOM and enquiry
+// interaction in both engines, with external network and submissions blocked.
+async function assertPublicContent(browser,engine){
+  const expected=readPublicContent();
+  const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+  try{
+    await context.addInitScript(()=>localStorage.setItem('chvostikovo-cookies',JSON.stringify({version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,functional:false,analytics:false,marketing:false})));
+    await context.route('**/*',route=>{const req=route.request(),u=new URL(req.url());return u.origin===new URL(base).origin&&['GET','HEAD'].includes(req.method())?route.continue():route.abort();});
+    for(const route of [...fullRoutes,'/produkty/','/stojan-na-misky-pre-psa/','/target-na-cvicenie-pre-psov/','/blog/','/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/']){
+      const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+      try{
+        const res=await page.goto(new URL(route,base).href,{waitUntil:'domcontentloaded'});if(res?.status()!==200)throw new Error('Content route HTTP '+route);
+        const checkMap=async selector=>{const links=page.locator(selector+' a[href*="maps"]');if(await links.count()<1||!(await links.evaluateAll(es=>es.map(e=>e.getAttribute('href')))).every(h=>h===expected.MAP_LINK))throw new Error('Map differs '+route+' '+selector);};
+        const checkCopy=async(selector,heading)=>{
+          const box=page.locator(selector);await box.waitFor({state:'attached'});
+          const actual=await box.locator('[data-lead-form-intro]').evaluateAll(es=>es.map(e=>e.textContent.trim()).join(' '));
+          if(!actual.includes(heading)||!actual.includes(expected.INQUIRY_SUBTITLE))throw new Error('Enquiry copy '+route+' '+selector+' '+actual);
+        };
+        const checkHealth=async(selector,value)=>{if(!(await page.locator(selector).textContent()).includes(value))throw new Error('Admission content '+route);};
+        const rejectCookie=async()=>{const button=page.getByRole('button',{name:/Len nevyhnutné|Odmietnuť|Necessary only|Reject/}).first();if(await button.isVisible())await activateFixtureControl(button);};
+        const fit=async(selector)=>{const box=page.locator(selector);await box.waitFor({state:'visible'});const ok=await box.evaluate(el=>{const r=el.getBoundingClientRect();return r.left>=-1&&r.right<=innerWidth+1&&el.scrollWidth<=el.clientWidth+2;});if(!ok)throw Error('Content overflow '+route+' '+selector);};
+        await checkMap('footer');
+        if(route==='/'){
+          await page.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});await rejectCookie();
+          await checkMap('#priestory');await checkHealth('#podmienky',expected.health);await checkCopy('#informujte-sa',expected.INQUIRY_TITLE);await checkCopy('#prva-navsteva-form',expected.VISIT_INQUIRY_TITLE);
+          await page.setViewportSize({width:320,height:844});
+          await activateFixtureControl(page.locator('[data-home-hero-interest-cta]'));await checkCopy('#home-hero-interest',expected.INQUIRY_TITLE);await fit('#home-hero-interest [data-lead-form-shell]');
+          const form=page.locator('#home-hero-interest [data-lead-step-form]');await advanceLeadContact(form);await assertLeadContactIntro(form);
+          await page.setViewportSize({width:1440,height:900});await checkCopy('#home-hero-inline-form',expected.INQUIRY_TITLE);await fit('#home-hero-inline-form [data-lead-form-shell]');
+        }else if(route==='/psia-skolka-kosice/'){
+          await page.locator('[data-aria-speech] [data-aria-tail]').waitFor({state:'attached'});await rejectCookie();
+          await checkMap('#aria-mosaic');await checkHealth('#lead-requirements',expected.health);await checkCopy('#aria-hero-form',expected.INQUIRY_TITLE);await checkCopy('#lead-friendship-form',expected.INQUIRY_TITLE);
+          const order=await page.evaluate(ids=>[...document.querySelector('main').children].map(e=>e.id).filter(id=>ids.includes(id)).join('|')===ids.join('|'),expected.order);if(!order)throw Error('Paid section order');
+          if(await page.locator('main [data-lead-step-form]').count()!==2)throw Error('Paid enquiry missing or duplicated');
+          for(const width of [320,390,1440]){await page.setViewportSize({width,height:844});await fit('#aria-hero-form [data-lead-form-shell]');await fit('#lead-friendship-form [data-lead-form-shell]');}
+          await page.setViewportSize({width:390,height:844});
+          await activateFixtureControl(page.locator('[data-aria-lead-hero-cta]'));await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
+          const form=page.locator('#aria-hero-form [data-lead-step-form]');await advanceLeadContact(form);await assertLeadContactIntro(form);
+        }else if(route==='/test-aria/'){
+          await checkMap('#aria-mosaic');await checkHealth('#lead-requirements',expected.health);await checkCopy('#aria-hero-form',expected.INQUIRY_TITLE);await checkCopy('#aria-first-visit-form',expected.VISIT_INQUIRY_TITLE);
+        }else if(route==='/en/dog-daycare-kosice/'){
+          await checkMap('#spaces');await checkHealth('#requirements',expected.englishHealth);
+        }else{
+          const health=page.locator('#podmienky,#lead-requirements');if(await health.count()===1)await checkHealth('#podmienky,#lead-requirements',expected.health);
+        }
+        if(errors.length)throw Error('Content runtime error '+route+' '+errors.join('; '));
+        console.log('PASS public content '+engine+' '+route);
+      }finally{await page.close();}
+    }
+  }finally{await context.close();}
+}
+
 (async () => {
   for (const [engine, browserType] of selectedEngines) {
     const browser = await browserType.launch();
     try {
+    if(runtimeScope==='content'){
+      await assertPublicContent(browser,engine);
+      results.push({engine,scope:'content',status:'PASS'});
+      continue;
+    }
     if(runtimeScope==='navigation'){
       await assertBilingualNavigation(browser,engine,{navigationOnly:true});
       await assertPaidReturnNavigation(browser,engine);
@@ -2644,7 +2704,7 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
               if (await page.locator('#lead-first-visit').getByText('Úvodná návšteva zadarmo', { exact: true }).count())
                 throw new Error('Duplicated first-visit ribbon returned to three-step section');
               const hero = page.locator('#aria-hero-form');
-              if (!await hero.getByRole('heading', { name: 'Chcete sa informovať o škôlke?' }).count())
+              if (!await hero.getByRole('heading', { name: readPublicContent().INQUIRY_TITLE }).count())
                 throw new Error('New compact hero form heading missing');
               const enquiry = hero.locator('[data-lead-step-form]');
               const choiceLabels = enquiry.locator('label:has(input[name="zaujem"])');
@@ -3133,7 +3193,7 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
                     reviewsInHero:document.getElementById('top').contains(document.getElementById('recenzie')),
                     tickerAbsent:!document.querySelector('main .info-ticker-track'),
                     benefitsMoved:!!photo && !!benefits && benefits.getBoundingClientRect().top>=photo.getBoundingClientRect().bottom && !document.querySelector('#top [data-hero-benefits]'),
-                    bottomInquiry:document.querySelector('#kontakt #informujte-sa [data-lead-step-form]') && !document.querySelector('#kontakt [data-long-form]') && document.querySelector('#informujte-sa h3')?.textContent==='Chcete sa informovať o škôlke?',
+                    bottomInquiry:document.querySelector('#kontakt #informujte-sa [data-lead-step-form]') && !document.querySelector('#kontakt [data-long-form]') && !!document.querySelector('#informujte-sa h3')?.textContent,
                     aboutWidth:(()=>{const copy=document.querySelector('#o-nas [data-about-expanded]').getBoundingClientRect();const pictures=document.querySelector('#o-nas [data-about-expanded]').parentElement.nextElementSibling.getBoundingClientRect();return Math.abs(copy.width-pictures.width)<2;})(),
                     forms:['informujte-sa','prva-navsteva-form'].every(id=>document.getElementById(id)?.querySelector('[data-lead-step-form]')),
                     uniqueFields:inputs.length===new Set(inputs).size,

@@ -1,4 +1,5 @@
 const { execFileSync } = require('node:child_process');
+const {CONTENT_PATHS,publicContentOnly}=require('./public-content-impact.cjs');
 // Unknown/shared changes retain full regression. The bounded LEAD CSS region is
 // recognized only when its surrounding stylesheet is byte-identical AND every
 // rule stays inside its known route/chat consumers.
@@ -9,7 +10,7 @@ const ariaSources = new Set([
   'src/assets/aria-assistant-head-lead.webp',
 ]);
 const tooling = new Set([
-  'scripts/check-web-runtime.cjs', 'scripts/public-web-impact.cjs', 'scripts/public-web-impact.test.cjs',
+  'scripts/check-web-runtime.cjs', 'scripts/public-web-impact.cjs', 'scripts/public-web-impact.test.cjs', 'scripts/public-content-impact.cjs',
   '.github/workflows/public-web-runtime.yml', '.github/workflows/check-form-funnel.yml',
 ]);
 const plumbing = new Set([...tooling, 'scripts/critical-form-checks.ts', 'scripts/mobile-dock-contract.cjs', 'AGENTS.md']);
@@ -85,6 +86,9 @@ function navigationOnly(files,css={}){
 }
 
 function selectScope(files, css={}) {
+  if(publicContentOnly(files,css,plumbing))return 'content';
+  // Exercise the new content fixture on harness-only PRs that modify it.
+  if(files.includes('scripts/public-content-impact.cjs')&&files.every(file=>plumbing.has(file)))return 'content';
   if(navigationOnly(files,css))return 'navigation';
   if(!files.length)return 'full';
   const scopedCss=files.includes('src/styles.css')&&scopedLeadCss(css.before,css.after);
@@ -95,6 +99,7 @@ function selectScope(files, css={}) {
 // These changes cannot alter form/consent/attribution implementations. Chat JS
 // retains its browser integration suite; form/lib/route/unknown changes fail closed.
 function formChecksRequired(files, css={}) {
+  if(publicContentOnly(files,css,plumbing)||(files.includes('scripts/public-content-impact.cjs')&&files.every(file=>plumbing.has(file))))return false;
   const presentation=new Set([...tooling,'src/styles.css','src/assets/aria-assistant-head-lead.webp']);
   return !files.length||files.some(file=>!presentation.has(file)&&!(file==='src/components/site/AriaGuidedChat.tsx'&&introCopyOnly(css.copyBefore,css.copyAfter)));
 }
@@ -103,7 +108,7 @@ if(require.main===module){
 (async()=>{
   const [base,head]=process.argv.slice(2);
   if(![base,head].every(sha=>/^[a-f0-9]{40}$/.test(sha||'')))throw new Error('Expected exact base/head commit SHAs');
-  let files, css={};
+  let files, css={content:{}};
   if(process.env.GITHUB_TOKEN&&process.env.GITHUB_REPOSITORY){
     const repo=process.env.GITHUB_REPOSITORY;
     if(!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo))throw new Error('Invalid repository');
@@ -117,11 +122,16 @@ if(require.main===module){
     for(const [path,beforeKey,afterKey] of [['src/styles.css','before','after'],['src/components/site/AriaGuidedChat.tsx','copyBefore','copyAfter'],['src/components/site/MobileDock.tsx','dockBefore','dockAfter'],['src/components/site/AriaLeadAssistant.tsx','ariaBefore','ariaAfter']]){
       if(files.includes(path))[css[beforeKey],css[afterKey]]=await Promise.all([read(path,base),read(path,head)]);
     }
+    for(const path of files.filter(path=>CONTENT_PATHS.has(path))){
+      const [before,after]=await Promise.all([read(path,base),read(path,head)]);
+      css.content[path]={before,after};
+    }
   }else{
     files=execFileSync('git',['diff','--name-only','--no-renames',base,head,'--'],{encoding:'utf8'}).trim().split(/\r?\n/).filter(Boolean);
     for(const [path,beforeKey,afterKey] of [['src/styles.css','before','after'],['src/components/site/AriaGuidedChat.tsx','copyBefore','copyAfter'],['src/components/site/MobileDock.tsx','dockBefore','dockAfter'],['src/components/site/AriaLeadAssistant.tsx','ariaBefore','ariaAfter']]){
       if(files.includes(path))for(const [key,ref] of [[beforeKey,base],[afterKey,head]])css[key]=execFileSync('git',['show',ref+':'+path],{encoding:'utf8'});
     }
+    for(const path of files.filter(path=>CONTENT_PATHS.has(path)))css.content[path]={before:execFileSync('git',['show',base+':'+path],{encoding:'utf8'}),after:execFileSync('git',['show',head+':'+path],{encoding:'utf8'})};
   }
   const scope=selectScope(files,css);
   console.error('Candidate runtime scope: '+scope+' ('+files.length+' changed paths)');

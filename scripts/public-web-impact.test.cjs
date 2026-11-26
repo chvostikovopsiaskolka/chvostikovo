@@ -79,3 +79,23 @@ test('responsive About and Facilities swap cannot hide unrelated source changes'
  assert.equal(selectScope([file],{dockBefore:before,dockAfter:after}),'navigation');
  assert.equal(selectScope([file],{dockBefore:before,dockAfter:after+'submitForm();'}),'full');
 });
+
+test('content scope proves map/copy and the bounded paid section permutation',()=>{
+ const {contentFileOnly,orderProof}=require('./public-content-impact.cjs');
+ const site='export const MAP_LINK = "https://maps.app.goo.gl/abc";\nexport const INQUIRY_TITLE = "Old";\nexport const INQUIRY_SUBTITLE = "Description";\nexport const VISIT_INQUIRY_TITLE = "Visit";\n    title: "Zdravotný stav",\n    text: "Health",\nexport const PRICE = 25;';
+ const updated=site.replace('"Old"','"New"').replace('/abc"','/xyz"');
+ const src='prefix {isLiveLead ? <>\n'+['leadPhotoGallery','pricingSection','firstVisitSection','heroFormSection','caretakersSection','benefitsSection','conditionsSection','puppyChecker','mosaic','friendshipSection','campaignFaqSection'].map(x=>'          '+(x==='mosaic'?'<AriaMosaicGallery paidLead />':'{'+x+'}')).join('\n')+'\n        </> : <> suffix';
+ const reordered=src.replace('          {caretakersSection}\n          {benefitsSection}','          {benefitsSection}\n          {caretakersSection}');
+ const en='prefix title:"Health",text:"Healthy" suffix';
+ const files=['src/content/site.ts','src/routes/test-aria.tsx','src/components/site/Info.tsx'];
+ const impact={content:{[files[0]]:{before:site,after:updated},[files[1]]:{before:src,after:reordered},[files[2]]:{before:en,after:en.replace('Healthy','Safe')}}};
+ assert.equal(selectScope(files,impact),'content');assert.equal(formChecksRequired(files,impact),false);
+ for(const file of files)assert.equal(contentFileOnly(file,impact.content[file].before,impact.content[file].after),true);
+ for(const extra of ['src/components/site/Forms.tsx','src/components/site/LeadStepForm.tsx','src/lib/analytics.ts','src/styles.css','package.json','supabase/functions/submit/index.ts']){assert.equal(selectScope([...files,extra],impact),'full');assert.equal(formChecksRequired([...files,extra],impact),true);}
+ for(const bad of [updated.replace('PRICE = 25','PRICE = 30'),updated.replace('https://maps.app.goo.gl/xyz','https://example.com'),updated.replace('"New"','submitForm()'),updated.replace('"Health"','"<script>"'),updated+'\nsubmitForm();'])assert.equal(contentFileOnly(files[0],site,bad),false);
+ for(const bad of [reordered.replace('{benefitsSection}','{unknownSection}'),reordered.replace('{friendshipSection}','{mosaic}'),reordered+'\nsubmitForm();',reordered.replace('{puppyChecker}','{conditionsSection}')])assert.equal(contentFileOnly(files[1],src,bad),false);
+ assert.equal(contentFileOnly(files[2],en,en.replace('Healthy','Safe')+'submitForm()'),false);
+ assert.equal(selectScope(files),'full');assert.equal(formChecksRequired(files),true);
+ assert.equal(selectScope(['scripts/public-content-impact.cjs','scripts/check-web-runtime.cjs']),'content');
+ assert.equal(orderProof(src).order.at(-1),'lead-faq');
+});
