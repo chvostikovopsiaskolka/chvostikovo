@@ -183,7 +183,7 @@
   window.customerDesignRefreshLocaleV420=()=>{if(state.data)ticket();};
   function compactOverviewV437(root){
     const model=window.customerCompactOverviewV437?.();
-    const card=root.querySelector('.design-visit-empty');if(!card||!model?.days?.length)return;
+    const card=root.querySelector('.design-visit-empty');if(!card)return;if(!model?.days?.length){card.querySelector('.compact-overview-v437')?.remove();return;}
     let host=card.querySelector('.compact-overview-v437');
     if(!host){host=document.createElement('div');host.className='compact-overview-v437';card.append(host);}
     const selected=new Set(model.proposal?.dates||[]);

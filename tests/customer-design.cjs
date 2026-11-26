@@ -188,13 +188,30 @@ async function scenario(count){
   assert.equal(w.document.getElementById('designWeekDeadline'),null,'late-week notice does not appear on preceding Sunday');
   w.__fixtureNowIso='2099-01-05T09:00:00Z';run('window.openBookingPickerV37()');
   run("state.data.availability.days[1].available=2;state.data.availability.days[1].occupied=6;renderDays();window.customerDesignPickerRender()");
+  // On both account types the next-week pattern is a draft; rerender never re-adds manually removed days.
+  const priorSeedFixture=run('JSON.stringify(state.data)');
+  run("state.data.requests=[];state.data.reservations=[];state.data.booking_history=state.data.dogs.map(d=>({dog_id:d.id,reservation_date:'2098-12-31',status:'attended'}));renderDays();window.openBookingPickerV37()");
+  const suggested=w.document.querySelector('.booking-day-v37[data-date="2099-01-14"]');
+  assert(suggested?.classList.contains('selected'),'shared weekday is preselected for one/two dogs');
+  assert.match(w.document.getElementById('bookingPickerSmartDaysV199').textContent,/Predvybraté podľa minulého týždňa/);
+  suggested.click();run('window.customerDesignRefreshCalendarV351()');
+  assert(!w.document.querySelector('.booking-day-v37[data-date="2099-01-14"]').classList.contains('selected'),'manual deselection survives rerender');
+  if(count===2){
+    assert.equal(w.document.querySelector('[data-compact-dog="both"]').getAttribute('aria-pressed'),'true');
+    w.document.querySelector('[data-compact-dog="1"]').click();
+    assert.equal(w.document.querySelector('[data-compact-dog="1"]').getAttribute('aria-pressed'),'true');
+    w.document.querySelector('[data-compact-dog="both"]').click();
+  }
+  run('state.data=JSON.parse('+JSON.stringify(priorSeedFixture)+');renderDays();window.openBookingPickerV37()');
   const lateDay=w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]');
   assert.equal(lateDay.dataset.contact,'false','Sunday planning reminder no longer blocks a normal request');
   assert.equal(lateDay.dataset.capacityLevel,'limited');
   assert.equal(lateDay.querySelector('span').textContent,'6/8','late day shows actual occupancy');
   assert(lateDay.querySelector('.design-capacity-dot'),'late day retains capacity dot');
   run('globalThis.beforeDeadlineFixture=JSON.stringify(state.data)');w.__savedDeadlineApi=run('api');
-  lateDay.click();
+  // An explicit manual single-date booking first clears the optional preselection.
+  for(const date of [...w.document.querySelectorAll('.booking-day-v37.selected')].map(b=>b.dataset.date))w.document.querySelector('.booking-day-v37[data-date="'+date+'"]').click();
+  w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]').click();
   assert(w.document.getElementById('supportChatModalV52').classList.contains('hidden'),'before D−1 19:00 selects the day without opening chat');
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').hidden,false);
   run("api=async(payload)=>{globalThis.deadlinePayload=payload;const rows=(payload.dog_ids||[payload.dog_id]).map((dog_id,i)=>({id:800+i,dog_id,reservation_date:'2099-01-06',status:'pending',taxi_mode:'none',can_manage:true}));return payload.action==='request_dogs_bookings'?{data:{bookings:rows}}:{data:rows[0]}};");
