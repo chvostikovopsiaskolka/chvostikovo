@@ -955,8 +955,8 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
       const activeUpper=page.locator('[data-desktop-home-dock] [data-home-menu] a[href$="#'+spacesId+'"]');
       await activeUpper.waitFor({state:'visible'});
       await page.waitForFunction(id=>document.querySelector('[data-desktop-home-dock] [data-home-menu] a[href$="#'+id+'"]')?.getAttribute('aria-current')==='location',spacesId);
-      const upperPaint=await activeUpper.evaluate(el=>{const s=getComputedStyle(el),b=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();return s.backgroundColor==='rgb(248, 221, 236)'&&s.backgroundClip==='padding-box'&&parseFloat(s.borderTopWidth)>=3&&b.top+3>=p.top+2&&b.bottom-3<=p.bottom-2&&b.left+3>=p.left+2&&b.right-3<=p.right-2;});
-      if(!upperPaint)throw new Error('Active upper navigation chip exceeds tray');
+      const upperPaint=await activeUpper.evaluate(el=>{const s=getComputedStyle(el),b=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();const state={color:s.backgroundColor,clip:s.backgroundClip,border:parseFloat(s.borderTopWidth),top:b.top+3-p.top,bottom:p.bottom-b.bottom+3,left:b.left+3-p.left,right:p.right-b.right+3};return {...state,ok:state.color==='rgb(248, 221, 236)'&&state.clip==='padding-box'&&state.border>=3&&Math.min(state.top,state.bottom,state.left,state.right)>=2};});
+      if(!upperPaint.ok)throw new Error('Active upper navigation chip exceeds tray '+JSON.stringify(upperPaint));
     }
     console.log('PASS bilingual navigation, responsive menu and consented PageView '+engine);
   } finally {await context.close();}

@@ -2073,7 +2073,14 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-menu > [data-language-switch] { grid-column: 3; grid-row: 1; width: 88px; pointer-events: auto; }
   .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-menu > [data-language-switch]::before { inset: 4px 2px; border-radius: 10px; }
   .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-menu > [data-language-switch] a { border-width: 8px 5px; border-radius: 11px; }
-  .mobile-dock[data-desktop-home-dock] .mobile-dock-item.is-active { border-width: 3px; background-clip: padding-box; }
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links a:hover,
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-phone:hover { background-clip: padding-box; }
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links a[aria-current="location"],
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links a[aria-current="location"]:hover {
+    background-color: #f8ddec; background-clip: padding-box;
+  }
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-item.is-active,
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-item.is-active:hover { border-width: 3px; background-color: #f8ddec; background-clip: padding-box; }
   @media (prefers-reduced-transparency: reduce) {
     .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-menu::after,
     .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links { background: #fffaf0; }
