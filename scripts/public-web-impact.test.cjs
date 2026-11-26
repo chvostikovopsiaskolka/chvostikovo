@@ -70,3 +70,12 @@ test('facilities shortcut selects navigation only for the exact isolated desktop
  assert.equal(selectScope([file],{dockBefore:before,dockAfter:after}),'navigation');
  for(const bad of [after+'submitForm();',after.replace('#spaces','#contact'),after.replace('desktopOnly:true','desktopOnly:false')])assert.equal(selectScope([file],{dockBefore:before,dockAfter:bad}),'full');
 });
+
+test('responsive About and Facilities swap cannot hide unrelated source changes',()=>{
+ const edits=[["       { id: \"requirements\", label: \"Rules\", icon: Heart }]\n","       { id: \"requirements\", label: \"Rules\", icon: Heart },\n       { id: \"spaces\", label: \"Facilities\", icon: House }]\n"],["       { id: \"podmienky\", label: \"Podmienky\", icon: Heart },\n       { id: \"produkty\",","       { id: \"podmienky\", label: \"Podmienky\", icon: Heart },\n       { id: \"priestory\", label: \"Priestory\", icon: House },\n       { id: \"produkty\","],["  const homeMenuEntries = [\n","  const homeMenuEntries = [\n    {label:english ? \"About\" : \"O nás\", icon:Users, href:homePath+(english ? \"#about\" : \"#o-nas\"), mobileOnly:true},\n"],["data-desktop-only-shortcut={\"desktopOnly\" in entry ? true : undefined} onClick={event => go(event, href)}","data-desktop-only-shortcut={\"desktopOnly\" in entry ? true : undefined} data-mobile-only-shortcut={\"mobileOnly\" in entry ? true : undefined} aria-current={(\"mobileOnly\" in entry || \"desktopOnly\" in entry) && href.endsWith(\"#\" + activeSection) ? \"location\" : undefined} onClick={event => go(event, href)}"],["              key={id}\n              aria-current={activeSection === id ? \"location\" : undefined}","              key={id}\n              data-desktop-only-home-item={homeDock && (id === \"about\" || id === \"o-nas\") || undefined}\n              data-mobile-only-home-item={homeDock && (id === \"spaces\" || id === \"priestory\") || undefined}\n              aria-current={activeSection === id ? \"location\" : undefined}"]];
+ const before=edits.map(e=>e[0]).join('\n');
+ const after=edits.reduce((s,[a,b])=>s.replace(a,b),before);
+ const file='src/components/site/MobileDock.tsx';
+ assert.equal(selectScope([file],{dockBefore:before,dockAfter:after}),'navigation');
+ assert.equal(selectScope([file],{dockBefore:before,dockAfter:after+'submitForm();'}),'full');
+});

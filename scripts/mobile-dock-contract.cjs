@@ -17,7 +17,7 @@ for (const value of ["Produkty", "Podmienky", "Cenník", "O nás", "Prihláška"
 // The main SK order and route-local landing sequences are intentionally distinct.
 const mainDock = dock.slice(dock.indexOf('    : [{ id: "top", label: "Domov"'), dock.indexOf("// Return arrow: hide while moving down; show on upward scroll or after stopping."));
 assert(mainDock.includes('{ id: "top", label: "Domov"') && mainDock.includes('id: "o-nas"'), "Main dock retains Home and About");
-assert(mainDock.indexOf('id: "top"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "podmienky"') && mainDock.indexOf('id: "podmienky"') < mainDock.indexOf('id: "produkty"'), "Main dock order");
+assert(mainDock.indexOf('id: "top"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "podmienky"') && mainDock.indexOf('id: "podmienky"') < mainDock.indexOf('id: "priestory"') && mainDock.indexOf('id: "priestory"') < mainDock.indexOf('id: "produkty"'), "Main dock order");
 assert(dock.includes('{!homeDock && <button') && dock.includes('const eligible = !homeDock'), "Return arrow stays on other landing pages only");
 assert(dock.includes('{!marketing && (') && dock.includes('mobile-dock-item mobile-dock-apply') && read("src/routes/index.tsx").includes("<Header desktopHome />"), "Homepage retains the dedicated application shortcut");
 assert(dock.includes('id === "produkty" && !marketing ? "/produkty"'), "Products dock item must navigate to the actual catalogue, not a stale anchor");
