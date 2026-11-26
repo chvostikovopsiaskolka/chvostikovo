@@ -235,7 +235,7 @@ export function CookieBanner() {
         {!showDetails && (
           <img src={ariaHead} alt="Aria, psia pomocníčka" width={512} height={474}
             data-aria-cookie-head
-            className="pointer-events-none absolute left-3 top-2 z-20 size-[90px] object-contain drop-shadow-[0_5px_7px_rgba(0,0,0,.2)] sm:left-4 sm:size-[106px]" />
+            className="pointer-events-none absolute left-3 top-2 z-20 size-[80px] object-contain drop-shadow-[0_5px_7px_rgba(0,0,0,.2)] sm:left-4 sm:size-[94px]" />
         )}
         <div data-cookie-panel data-aria-cookie-bubble={!showDetails ? "true" : undefined}
           className={"relative max-h-[calc(100dvh-1rem)] w-full overflow-y-auto rounded-3xl border p-4 text-forest sm:p-6 " +
@@ -245,7 +245,7 @@ export function CookieBanner() {
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
             <p id="cookie-consent-title" className={!showDetails
-                ? "flex min-h-[48px] items-center whitespace-nowrap pl-[88px] font-display text-[clamp(10px,3.1vw,17px)] font-bold leading-tight sm:pl-[106px] sm:text-xl"
+                ? "flex min-h-[48px] items-center whitespace-nowrap pl-[76px] font-display text-[clamp(10px,3.1vw,17px)] font-bold leading-tight sm:pl-[94px] sm:text-xl"
                 : "font-display text-lg font-bold sm:text-xl"}>
               {showDetails
                 ? isEnglish ? "Cookie settings" : "Nastavenia cookies"
@@ -255,8 +255,8 @@ export function CookieBanner() {
             {!showDetails && (
               <p className={"mt-0 max-w-3xl text-sm leading-relaxed sm:text-base " + "font-medium text-forest/90"}>
                 {isEnglish
-                  ? <>I'm Aria and welcome to Chvostíkovo! Necessary cookies help the website work.<br />You decide whether to allow functional, analytics and marketing cookies.{" "}</>
-                  : <>Som Aria a vítam ťa v Chvostíkove! Nevyhnutné cookies pomáhajú webu fungovať.<br />O funkčných, analytických a marketingových cookies rozhoduješ ty.{" "}</>}
+                  ? <>My name is Aria and welcome to our website!<br />Necessary cookies help the website work.<br />You decide whether to allow functional, analytics and marketing cookies.{" "}</>
+                  : <>Volám sa Aria a vítam ťa na našom webe!<br />Nevyhnutné cookies pomáhajú webu fungovať.<br />O funkčných, analytických a marketingových cookies rozhoduješ ty.{" "}</>}
                 <a
                   href={isEnglish ? "/en/cookies" : "/cookies"}
                   target="_blank"
