@@ -16,6 +16,10 @@ import { createAriaChatAnalytics, ariaEventSource, ariaFormKind, ARIA_IDLE_MS } 
   const id = () => "11111111-1111-4111-8111-" + String(++serial).padStart(12,"0");
   const a = createAriaChatAnalytics(() => now, id);
   const opened = a.record("open")!;
+  assert(a.record("question_offer","eligibility")?.detail === "eligibility", "New FAQ offer recorded");
+  assert(!a.record("question_offer","eligibility"), "Offer once per conversation");
+  assert(a.record("question_offer","taxi")?.detail === "taxi", "Taxi offer accepted");
+  assert(!a.record("question_offer","unknown"), "Unknown offer rejected");
   const q1 = a.record("question","pricing")!;
   const q2 = a.record("question","pricing")!;
   const q3 = a.record("question","requirements")!;
@@ -40,6 +44,7 @@ import { createAriaChatAnalytics, ariaEventSource, ariaFormKind, ARIA_IDLE_MS } 
   const later = a.record("open")!;
   assert(later.chat_id !== opened.chat_id && later.visit_id === opened.visit_id && later.sequence === 1, "Expired chat gets fresh ID, visit is in-memory");
   assert(!a.record("form_submit","interest",retry), "Expired attempt must not attach to a new conversation");
+  assert(a.record("question_offer","eligibility")?.chat_id === later.chat_id, "New conversation gets new offer");
   const automatic = a.record("auto_question","pricing")!;
   assert(automatic.action === "auto_question", "Automatic answer distinct from manual click");
   const laterAttempt = id();
@@ -670,4 +675,10 @@ assert(ariaLandingTracking.includes("leadChat={isLiveLead}") && ariaDockTracking
   assert((await send({...payload,aria:{...payload.aria,phone:"synthetic"}})).status===400,"Unknown payload property rejected");
   assert((await send({path:"/psia-skolka-kosice/",event_name:"form_submit",event_source:"lead_landing_aria_chat_interest",attempt_id:chat_id})).status===201,"Existing ordinary form event still accepted");
   assert(records[2]?.event_name==="form_submit" && records[2]?.attempt_id===chat_id,"Ordinary form event preserves attempt ID and type");
+  for(const [index,detail] of ["eligibility","taxi"].entries()) {
+    for(const action of ["question_offer","question"]) {
+      assert((await send({...payload,event_source:"lead_landing_aria_chat_"+action+"_"+detail,aria:{...payload.aria,sequence:4+index*2+(action==="question"?1:0),action,detail}})).status===201,"New FAQ "+action+" accepted");
+    }
+  }
+  assert((await send({...payload,event_source:"lead_landing_aria_chat_question_offer_unknown",aria:{...payload.aria,action:"question_offer",detail:"unknown"}})).status===400,"Unknown offers rejected");
 }
