@@ -1,0 +1,34 @@
+name: Aria collector live QA (PR 552)
+on:
+  push:
+    branches: ['qa/aria-552-live-20261126']
+    paths: ['.github/workflows/aria-live-qa-552.yml']
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send only isolated QA observations (no leads)
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          const chat_id='98c293a6-bc13-41c5-9d6d-93b256815526';
+          const visit_id='98c293a6-bc13-41c5-9d6d-93b256815527';
+          const endpoint='https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/website-landing-event';
+          async function send(sequence,action,detail,status=201) {
+            const response=await fetch(endpoint,{method:'POST',headers:{Origin:'https://chvostikovo.sk','Content-Type':'application/json','User-Agent':'Mozilla/5.0 Aria-QA'},body:JSON.stringify({path:'/psia-skolka-kosice/',event_name:'aria_chat_event',event_source:'lead_landing_aria_chat_'+action+(detail?'_'+detail:''),aria_environment:'qa',aria:{chat_id,visit_id,sequence,action,detail,form_attempt_id:null},utm_source:'qa'})});
+            assert.equal(response.status,status,action+':'+detail+' HTTP '+response.status);
+            console.log(action,detail,response.status);
+          }
+          await send(1,'open',null);
+          await send(2,'question_offer','eligibility');
+          await send(3,'question','eligibility');
+          await send(4,'question_offer','taxi');
+          await send(5,'question','taxi');
+          await send(6,'interest_open',null);
+          await send(7,'leave',null);
+          await send(8,'question_offer','unknown',400);
+          console.log('QA only: all seven valid events accepted; invalid ID rejected.');
+          JS
