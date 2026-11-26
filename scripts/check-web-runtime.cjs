@@ -656,7 +656,7 @@ async function assertFooterMapGeometry(browser, engine) {
 async function assertHomeDockSurface(page) {
   const state=await page.locator('.mobile-dock[data-home-dock] .mobile-dock-bar').evaluate(bar=>{
     const menu=bar.querySelector('[data-home-menu]'),language=menu.querySelector('[data-language-switch]'),selected=language.querySelector('[aria-current="page"]'),active=bar.querySelector('.mobile-dock-item.is-active');
-    const m=menu.getBoundingClientRect(),lower=[...bar.querySelectorAll('.mobile-dock-item')].map(e=>e.getBoundingClientRect()),lang=selected.getBoundingClientRect();
+    const m=menu.getBoundingClientRect(),lower=[...bar.querySelectorAll('.mobile-dock-item')].filter(e=>e.getClientRects().length).map(e=>e.getBoundingClientRect()),lang=selected.getBoundingClientRect();
     const ms=getComputedStyle(menu),ls=getComputedStyle(selected),as=active&&getComputedStyle(active),bs=getComputedStyle(bar);
     return {gap:Math.min(...lower.map(r=>r.top))-m.bottom,tray:parseFloat(ms.borderRadius)>=12&&ms.backgroundImage.includes('gradient'),
       menuHeight:m.height,languageHeight:lang.height,languageWidth:lang.width,languageInset:parseFloat(ls.borderTopWidth),
@@ -664,6 +664,10 @@ async function assertHomeDockSurface(page) {
       glass:bs.backgroundImage.includes('gradient')&&(bs.backdropFilter||bs.webkitBackdropFilter||'').includes('blur'),
       lowerTargets:lower.every(r=>r.height>=44)};
   });
+  if(brandPreviewCandidate){
+    const upper=await page.locator('[data-home-menu]').evaluate(el=>{const language=el.querySelector('[data-language-switch]'),selected=language.querySelector('[aria-current="page"]');return {radius:parseFloat(getComputedStyle(selected).borderTopLeftRadius),trackRadius:parseFloat(getComputedStyle(language,'::before').borderTopLeftRadius),desktop:innerWidth>=1024,labels:[...el.querySelectorAll('.mobile-dock-compact-links a span')].filter(s=>s.getClientRects().length).map(s=>({font:parseFloat(getComputedStyle(s).fontSize),nowrap:getComputedStyle(s).whiteSpace==='nowrap',fits:s.scrollWidth<=s.clientWidth+1}))};});
+    if(upper.radius<8||upper.radius>14||upper.trackRadius<8||upper.trackRadius>14||upper.desktop&&upper.labels.some(l=>l.font!==12||!l.nowrap||!l.fits))throw new Error('Upper dock labels/language shape '+JSON.stringify(upper));
+  }
   if(state.gap<1||!state.tray||state.menuHeight>46||state.languageHeight<44||state.languageWidth<44||state.languageInset<5||!state.activeInset||!state.glass||!state.lowerTargets)throw new Error('Compact liquid home dock '+JSON.stringify(state));
 }
 
@@ -678,12 +682,12 @@ async function assertCompactHomeMenu(page,en) {
       targets:[...links,phone,...el.querySelectorAll('[data-language-switch] a')].every(a=>a&&a.getBoundingClientRect().height>=44&&a.scrollWidth<=a.clientWidth+1),
       height:p.height,total:d.height,inside:d.left>=0&&d.right<=innerWidth+1&&d.top>=0&&d.bottom<=innerHeight+1,
       noOverflow:el.scrollWidth<=el.clientWidth+1,arrow:!!nav.querySelector('.mobile-dock-back-top'),phone:phone?.getAttribute('href'),
-      main:[...bar.children].filter(a=>a.matches('a,button')).map(a=>a.textContent.trim()),
+      main:[...bar.children].filter(a=>a.matches('a,button')&&a.getClientRects().length).map(a=>a.textContent.trim()),
       dialog:!!nav.querySelector('button[aria-haspopup="dialog"]'),reserve:parseFloat(getComputedStyle(document.body).paddingBottom)};
   });
-  const main=en?['Home','About','Prices','Rules','Apply']:['Domov','O nás','Cenník','Podmienky','Produkty','Prihláška'];
-  if(JSON.stringify(state.hrefs)!==JSON.stringify(['#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['Have a puppy?','FAQ']:['Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>46||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
-  if(await menu.locator('[data-desktop-only-shortcut]').isVisible())throw new Error('Why shortcut must remain desktop-only');
+  const main=en?['Home','Prices','Rules','Facilities','Apply']:['Domov','Cenník','Podmienky','Priestory','Produkty','Prihláška'];
+  if(JSON.stringify(state.hrefs)!==JSON.stringify([en?'#about':'#o-nas','#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['About','Have a puppy?','FAQ']:['O nás','Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>46||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
+  if(await menu.locator('[data-desktop-only-shortcut]:visible').count())throw new Error('Desktop shortcuts must remain hidden on mobile');
   const crop=await page.locator('[data-home-hero-photo] img').evaluateAll(imgs=>imgs.map(img=>getComputedStyle(img).objectPosition));
   if(crop.join('|')!=='50% 0%|50% 50%')throw new Error('Only the collies photo should use the top-biased crop: '+crop.join('|'));
   if(await page.locator('[data-home-hero-phone]').count())throw new Error('Duplicate mobile Hero phone');
@@ -750,6 +754,12 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
       await assertHomeDockSurface(page);
       await page.screenshot({path:path.join(out,'compact-sk-menu-'+engine+'-'+width+'.png')});
     }
+    await page.locator('[data-home-menu] [href$="#o-nas"]').click();
+    await page.waitForFunction(()=>location.hash==='#o-nas'&&Math.abs(document.getElementById('o-nas').getBoundingClientRect().top-8)<16);
+    await page.locator('.mobile-dock-item[data-mobile-only-home-item]').click();
+    await assertHomeDockActivePink(page,false,'priestory');
+    await page.locator('.mobile-dock').getByRole('link',{name:'Domov',exact:true}).click();
+    await page.waitForFunction(()=>scrollY<5);
     if(!navigationOnly)await assertApplicationPreview(page,false);
     await page.locator('[data-home-menu] a[href="/#aria-puppy-check"]').click();
     await page.waitForFunction(()=>location.hash==='#aria-puppy-check');
@@ -801,6 +811,10 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
     await page.waitForFunction(()=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='Contact'&&a[2]?.source==='en_mobile_dock_phone').length===1);
     if(await page.evaluate(()=>window.__bilingualGa.filter(a=>a[0]==='event'&&a[1]==='phone_click'&&a[2]?.cta_source==='en_mobile_dock_phone').length)!==1)throw new Error('EN phone GA4 must emit once');
     if(!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='home_mobile_dock_phone')||!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='en_mobile_dock_phone'))throw new Error('Cookieless phone sources missing');
+    await page.locator('[data-home-menu] [href$="#about"]').click();
+    await page.waitForFunction(()=>location.hash==='#about'&&Math.abs(document.getElementById('about').getBoundingClientRect().top-8)<16);
+    await page.locator('.mobile-dock-item[data-mobile-only-home-item]').click();
+    await assertHomeDockActivePink(page,true,'spaces');
     await page.setViewportSize({width:1440,height:900});
     const pv=await page.evaluate(()=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='PageView').length);
     await page.locator('[data-desktop-home-dock] [data-language-switch] a[lang="sk"]').click();
@@ -818,12 +832,12 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
         await page.waitForFunction(()=>document.querySelector('[data-desktop-home-dock]')?.getAttribute('data-desktop-floating')==='false');
         const geometry=await dock.evaluate(el=>{
           const bar=el.querySelector('.mobile-dock-bar'),r=bar.getBoundingClientRect(),slot=el.getBoundingClientRect(),logo=el.querySelector('[data-desktop-dock-logo]'),links=[...el.querySelectorAll('a,button')].filter(x=>x.getClientRects().length);
-          const boxes=links.map(x=>x.getBoundingClientRect()), upper=el.querySelector('[data-home-menu]').getBoundingClientRect(), logoBox=logo.getBoundingClientRect(), lower=[...bar.querySelectorAll('.mobile-dock-item')].map(x=>x.getBoundingClientRect()), hero=el.previousElementSibling?.getBoundingClientRect();
-          return {centered:Math.abs((upper.left+upper.right-r.left-r.right)/2)<2,width:r.width<=980.5,shortcut:el.querySelector('[data-desktop-only-shortcut]')?.getBoundingClientRect().width>0,upperLinks:[...el.querySelectorAll('[data-home-menu] .mobile-dock-compact-links a')].map(a=>new URL(a.href).hash),fits:r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&bar.scrollWidth<=bar.clientWidth+1&&r.bottom<=slot.bottom+1,targets:boxes.every(b=>b.height>=44),separate:boxes.every((b,i)=>boxes.every((a,j)=>i===j||a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1)),header:!!document.querySelector('header.fixed'),logo:logoBox.width>0&&logoBox.right<=upper.left+1&&logoBox.bottom<=lower[0].top+1,rows:lower.length>=5&&lower.every(b=>b.top>=upper.bottom-1&&Math.abs(b.top-lower[0].top)<2),slot:el.previousElementSibling?.id==='top'&&slot.height>=108&&r.top>=hero.bottom-1};
+          const boxes=links.map(x=>x.getBoundingClientRect()), upper=el.querySelector('[data-home-menu]').getBoundingClientRect(), logoBox=logo.getBoundingClientRect(), lower=[...bar.querySelectorAll('.mobile-dock-item')].filter(x=>x.getClientRects().length).map(x=>x.getBoundingClientRect()), hero=el.previousElementSibling?.getBoundingClientRect();
+          return {centered:Math.abs((upper.left+upper.right-r.left-r.right)/2)<2,width:r.width<=980.5,shortcut:el.querySelector('[data-desktop-only-shortcut]')?.getBoundingClientRect().width>0,upperLinks:[...el.querySelectorAll('[data-home-menu] .mobile-dock-compact-links a')].filter(a=>a.getClientRects().length).map(a=>new URL(a.href).hash),fits:r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&bar.scrollWidth<=bar.clientWidth+1&&r.bottom<=slot.bottom+1,targets:boxes.every(b=>b.height>=44),separate:boxes.every((b,i)=>boxes.every((a,j)=>i===j||a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1)),header:!!document.querySelector('header.fixed'),logo:logoBox.width>0&&logoBox.right<=upper.left+1&&logoBox.bottom<=lower[0].top+1,rows:lower.length>=5&&lower.every(b=>b.top>=upper.bottom-1&&Math.abs(b.top-lower[0].top)<2),slot:el.previousElementSibling?.id==='top'&&slot.height>=108&&r.top>=hero.bottom-1};
         });
         await assertHomeDockActivePink(page,en);
         await assertHomeDockSurface(page);
-        if(!geometry.centered||!geometry.width||!geometry.shortcut||geometry.upperLinks.join('|')!==('#aria-puppy-check|'+(en?'#en-benefits':'#preco-chvostikovo')+'|#faq')||!geometry.fits||!geometry.targets||!geometry.separate||geometry.header||!geometry.logo||!geometry.rows||!geometry.slot)throw new Error('Desktop home dock '+width+' '+JSON.stringify(geometry));
+        if(!geometry.centered||!geometry.width||!geometry.shortcut||geometry.upperLinks.join('|')!==('#aria-puppy-check|'+(en?'#en-benefits':'#preco-chvostikovo')+'|'+(en?'#spaces':'#priestory')+'|#faq')||!geometry.fits||!geometry.targets||!geometry.separate||geometry.header||!geometry.logo||!geometry.rows||!geometry.slot)throw new Error('Desktop home dock '+width+' '+JSON.stringify(geometry));
         await page.evaluate(()=>window.scrollTo({top:900,behavior:'instant'}));
         await page.waitForFunction(()=>document.querySelector('[data-desktop-home-dock]')?.getAttribute('data-desktop-floating')==='true');
         if(!await dock.evaluate(el=>Math.abs(innerHeight-el.querySelector('.mobile-dock-bar').getBoundingClientRect().bottom-12)<2))throw new Error('Desktop dock not floating at bottom');
@@ -834,9 +848,12 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
       await assertHomeDockActivePink(page,en,priceId);
       await page.locator('[data-desktop-home-dock] .mobile-dock-item[href$="#'+priceId+'"]').hover();
       await assertHomeDockActivePink(page,en,priceId);
-      const why=page.locator('[data-desktop-home-dock] [data-desktop-only-shortcut]');
+      const why=page.locator('[data-desktop-home-dock] [data-desktop-only-shortcut][href$="#'+(en?'en-benefits':'preco-chvostikovo')+'"]');
       await why.click();
       await page.waitForFunction(id=>Math.abs(document.getElementById(id).getBoundingClientRect().top-8)<16,en?'en-benefits':'preco-chvostikovo');
+      const spacesId=en?'spaces':'priestory';
+      await page.locator('[data-desktop-home-dock] [data-desktop-only-shortcut][href$="#'+spacesId+'"]').click();
+      await page.waitForFunction(id=>location.hash==='#'+id&&Math.abs(document.getElementById(id).getBoundingClientRect().top-8)<16,spacesId);
     }
     console.log('PASS bilingual navigation, responsive menu and consented PageView '+engine);
   } finally {await context.close();}
@@ -3159,7 +3176,7 @@ async function assertBilingualNavigation(browser,engine,{navigationOnly=false}={
                     applicationAfterPricing:document.getElementById('cennik').nextElementSibling?.id==='psie-priatelstva' && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='cennik' && document.getElementById('psie-priatelstva').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
                     approvedMainDock:(()=>{const style=getComputedStyle(dock.querySelector('.mobile-dock-bar'));return innerWidth<1024?style.boxShadow==='none':style.boxShadow.includes('inset');})(),
-                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/|/#o-nas|/#cennik|/#podmienky|/produkty' && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
+                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].filter(el=>el.getClientRects().length).map(el=>el.getAttribute('href')).join('|')===(innerWidth<1024?'/|/#cennik|/#podmienky|/#priestory|/produkty':'/|/#o-nas|/#cennik|/#podmienky|/produkty') && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2 &&
                       (() => {

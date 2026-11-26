@@ -1992,3 +1992,29 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
     background-image: none !important;
   }
 }
+
+/* HOME upper dock only: rectangular language chip and legible desktop shortcuts. */
+.mobile-dock[data-home-dock] .mobile-dock-compact-menu > [data-language-switch],
+.mobile-dock[data-home-dock] .mobile-dock-compact-menu > [data-language-switch]::before { border-radius: 10px; }
+.mobile-dock[data-home-dock] .mobile-dock-compact-menu > [data-language-switch] a { border-radius: 11px; }
+@media (min-width: 1024px) {
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links a span { font-size: 12px; white-space: nowrap; }
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links svg { width: 15px; height: 15px; }
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-menu > [data-language-switch] a { font-size: 11px; }
+}
+
+/* HOME mobile: About moves up, gallery replaces About in the lower row. */
+.mobile-dock[data-home-dock] .mobile-dock-compact-links a[aria-current="location"] { background: #f8ddec; }
+@media (max-width: 1023px) {
+  .mobile-dock[data-home-dock] [data-desktop-only-home-item] { display: none !important; }
+  .mobile-dock[data-home-dock] .mobile-dock-compact-links { grid-template-columns: minmax(44px, .8fr) minmax(44px, 1.25fr) minmax(44px, 1fr); gap: 1px; }
+  .mobile-dock[data-home-dock] .mobile-dock-compact-links a { min-width: 44px; flex-direction: column; gap: 1px; padding-inline: 1px; text-align: center; }
+  .mobile-dock[data-home-dock] .mobile-dock-compact-links a span { font-size: 9px; line-height: 1.05; }
+  .mobile-dock[data-home-dock] .mobile-dock-compact-links svg { width: 12px; height: 12px; }
+  .mobile-dock[data-home-dock] .mobile-dock-compact-menu > [data-language-switch]::before { inset-inline: 5px; }
+  .mobile-dock[data-home-dock] .mobile-dock-compact-menu > [data-language-switch] a { border-inline-width: 6px; padding-inline: 0; }
+}
+@media (min-width: 1024px) {
+  .mobile-dock[data-desktop-home-dock] [data-mobile-only-shortcut],
+  .mobile-dock[data-desktop-home-dock] [data-mobile-only-home-item] { display: none !important; }
+}

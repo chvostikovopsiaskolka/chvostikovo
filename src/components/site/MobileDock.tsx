@@ -78,11 +78,13 @@ export function MobileDock({ language = "sk", variant = "main", desktopHome = fa
     ? [{ id: "top", label: "Home", icon: House },
        { id: "about", label: "About", icon: Users },
        { id: "pricing", label: "Prices", icon: Tag },
-       { id: "requirements", label: "Rules", icon: Heart }]
+       { id: "requirements", label: "Rules", icon: Heart },
+       { id: "spaces", label: "Facilities", icon: House }]
     : [{ id: "top", label: "Domov", icon: House },
        { id: "o-nas", label: "O nás", icon: Users },
        { id: "cennik", label: "Cenník", icon: Tag },
        { id: "podmienky", label: "Podmienky", icon: Heart },
+       { id: "priestory", label: "Priestory", icon: House },
        { id: "produkty", label: "Produkty", icon: Package }];
 
   // Return arrow: hide while moving down; show on upward scroll or after stopping.
@@ -237,8 +239,10 @@ export function MobileDock({ language = "sk", variant = "main", desktopHome = fa
 
   // Keep the main menu short; no duplicated dock links or footer actions.
   const homeMenuEntries = [
+    {label:english ? "About" : "O nás", icon:Users, href:homePath+(english ? "#about" : "#o-nas"), mobileOnly:true},
     {label:english ? "Have a puppy?" : "Máte šteniatko?", icon:Dog, href:homePath+"#aria-puppy-check"},
     ...(desktopHome ? [{label:english ? "Why choose us?" : "Prečo si vybrať nás?", icon:Heart, href:homePath+(english ? "#en-benefits" : "#preco-chvostikovo"), desktopOnly:true}] : []),
+    ...(desktopHome ? [{label:english ? "Facilities" : "Priestory škôlky", icon:House, href:homePath+(english ? "#spaces" : "#priestory"), desktopOnly:true}] : []),
     {label:english ? "FAQ" : "Časté otázky", icon:MessageCircle, href:homePath+"#faq"},
   ];
   const menuEntries = [
@@ -270,7 +274,7 @@ export function MobileDock({ language = "sk", variant = "main", desktopHome = fa
           {desktopHome && homeDock && <img data-desktop-dock-logo src={logo} alt="Chvostíkovo" className="hidden lg:block" />}
           {homeDock && <div className="mobile-dock-compact-menu" data-home-menu>
             <div className="mobile-dock-compact-links">
-              {homeMenuEntries.map(({href,label,icon:Icon,...entry}) => <a key={href} href={href} data-desktop-only-shortcut={"desktopOnly" in entry ? true : undefined} onClick={event => go(event, href)}><Icon size={17} strokeWidth={1.9} aria-hidden="true" /><span>{label}</span></a>)}
+              {homeMenuEntries.map(({href,label,icon:Icon,...entry}) => <a key={href} href={href} data-desktop-only-shortcut={"desktopOnly" in entry ? true : undefined} data-mobile-only-shortcut={"mobileOnly" in entry ? true : undefined} aria-current={("mobileOnly" in entry || "desktopOnly" in entry) && href.endsWith("#" + activeSection) ? "location" : undefined} onClick={event => go(event, href)}><Icon size={17} strokeWidth={1.9} aria-hidden="true" /><span>{label}</span></a>)}
             </div>
             <a data-home-dock-phone className="mobile-dock-compact-phone" href={"tel:" + PHONE} aria-label={english ? "Call Chvostíkovo" : "Zavolať do Chvostíkova"} data-tracking-source={english ? "en_mobile_dock_phone" : "home_mobile_dock_phone"} onClick={() => void trackCookielessInteraction("phone_click", english ? "en_mobile_dock_phone" : "home_mobile_dock_phone", language)}><Phone size={19} strokeWidth={1.9} aria-hidden="true" /></a>
             <LanguageSwitch language={language} source={"mobile_dock_" + variant + "_language"} />
@@ -284,6 +288,8 @@ export function MobileDock({ language = "sk", variant = "main", desktopHome = fa
             <a
               href={id === "produkty" && !marketing ? "/produkty" : homePath + (id === "top" ? "" : "#" + id)}
               key={id}
+              data-desktop-only-home-item={homeDock && (id === "about" || id === "o-nas") || undefined}
+              data-mobile-only-home-item={homeDock && (id === "spaces" || id === "priestory") || undefined}
               aria-current={activeSection === id ? "location" : undefined}
               aria-label={id === "starostlivost" ? label : undefined}
               className={"mobile-dock-item" + (activeSection === id ? " is-active" : "")}
