@@ -168,7 +168,7 @@ async function scenario(count){
   assert.equal(w.document.getElementById('designReservationNotice').hidden,false,'Sunday reminder stays visible on Monday');
   assert.match(w.document.getElementById('designReservationNotice').textContent,/do nedele 11\. 1\. do 20:00/);
   assert.equal(w.document.getElementById('designReservationNotice').dataset.weekFrom,'2099-01-12');
-  assert.equal(w.document.getElementById('designReservationNotice').previousElementSibling.textContent,'Budúci týždeň');
+  assert.equal(w.document.getElementById('designReservationNotice').previousElementSibling.textContent,'','next-week heading is no longer duplicated');
   const nextWeekCase=(requests,reservations,hidden,message)=>{
     run(`state.data.requests=${JSON.stringify(requests)};state.data.reservations=${JSON.stringify(reservations)};state.data.booking_history=[];state.data.visits=[];renderDays();window.customerDesignPickerRender()`);
     assert.equal(w.document.getElementById('designReservationNotice').hidden,hidden,message);

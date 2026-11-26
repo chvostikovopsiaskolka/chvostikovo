@@ -10,9 +10,12 @@ const dates=()=>JSON.parse(JSON.stringify(c.compactBookingProposalV437(dogs,days
 assert.deepEqual(dates(),['2026-12-02']);
 days[2].available=1;assert.deepEqual(dates(),[]);days[2].available=2;
 days[2].bookings_open=false;assert.deepEqual(dates(),[]);days[2].bookings_open=true;
-assert.equal(c.compactEligibleV437('2026-12-18',dogs,[{date:'2026-12-18',available:2,bookings_open:true}]),false);
+assert.equal(c.compactEligibleV437('2026-12-31',dogs,[{date:'2026-12-31',available:2,bookings_open:true}]),true);
+assert.equal(c.compactEligibleV437('2027-01-01',dogs,[{date:'2027-01-01',available:2,bookings_open:true}]),false);
+assert.equal(c.calendarMonthEndV438('2027-12-25'),'2028-01-31');assert.equal(c.calendarMonthEndV438('2028-01-01'),'2028-02-29');
+const rows=JSON.parse(JSON.stringify(c.calendarRowsV438(days,'2026-11-26')));assert.equal(rows.length,2);assert.equal(rows[0].month,'2026-11');assert.equal(rows[1].month,'2026-12');assert.equal(rows[0].kind,'next');assert.equal(rows[1].kind,'next');assert.equal(rows[1].firstForKind,false);
 assert.equal(c.compactEligibleV437('2026-12-17',dogs,[{date:'2026-12-17',available:2,bookings_open:true}]),true);
 assert.match(src,/compactSeedPickerV437\(pickerDaysV393\(\),extraDate\);/);
 assert.match(src,/if\(pairBookingV254\)return submitPairV254\(dates\)/);
-assert.match(fs.readFileSync('supabase/functions/customer-portal-api/index.ts','utf8'),/nextWeekdays\(firstMonday, 20\)\.filter\(date => date <= addDays\(today,21\)\)/);
+assert.match(fs.readFileSync('supabase/functions/customer-portal-api/index.ts','utf8'),/nextWeekdays\(firstMonday, 50\)\.filter\(date => date <= endDate\)/);
 console.log('PASS compact booking common history, capacity, closed, and existing horizon');

@@ -132,7 +132,7 @@
     ['Prajete si zmeniť typ taxíka?','Change your transport option?'],
     ['Požiadať o zmenu','Request a change'],
     ['Nestihli ste rezervovať miesto do nedele?','Missed the Sunday booking deadline?'],
-    ['Kliknite na deň, odošlite žiadosť a počkajte na schválenie. Pri plnej kapacite nám napíšte správu.','Select a day and submit your request for approval. If fully booked, message us.'],
+    ['Kliknite na deň, odošlite žiadosť a počkajte na schválenie. Pri plnej kapacite nám napíšte správu.','Select a day and submit your request for approval. If fully booked, message us.'],['Kliknite na deň, odošlite žiadosť a počkajte na schválenie v prípade voľného miesta.','Select a day, submit a request and wait for approval if space is available.'],['Tam aj späť','Round trip'],['Naraz môžete rezervovať najviac 15 dní. Ďalšie dni vyberte po odoslaní.','You can book up to 15 days at once. Choose more dates after submitting.'],
     ['Niektoré dni nemajú dostatok voľných miest.','Some days have limited availability.'],
     ['Kliknite na požadovaný deň a napíšte nám správu. O možnosti prihlásenia vás budeme informovať.','Select your preferred day and message us. We will let you know if a place becomes available.'],
     ['Čaká','Pending'],['Uplynulo','Past'],['Zatvorené','Closed'],['Plno','Full'],
