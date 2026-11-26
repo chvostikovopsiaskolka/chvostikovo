@@ -487,7 +487,8 @@ async function assertApplicationDogLayout(surface, engine, label) {
   const two=form.getByRole('radio',{name:'Chcem prihlásiť dvoch psíkov'});
   const one=form.getByRole('radio',{name:'Chcem prihlásiť jedného psíka'});
   try {
-    await two.check();
+    await activateFixtureControl(form.locator('label:has(input[name="pocet_psikov"][value="2"])'));
+    if(!await two.isChecked())throw new Error('Two-dog choice did not select');
     await form.locator('input[name="pes2"]').waitFor({state:'visible'});
     for(const width of [320,375,390,430,1440]) {
       await page.setViewportSize({width,height:width>=1024?900:844});
@@ -528,32 +529,39 @@ async function assertApplicationDogLayout(surface, engine, label) {
     const next=form.getByRole('button',{name:'Pokračovať',exact:true});
     const owner=form.locator('input[name="meno"]');
     if(await owner.isVisible())throw new Error('Owner step visible before dog details');
-    await next.click();
+    await activateFixtureControl(next);
     if(await form.getAttribute('data-application-step')!=='1')throw new Error('Incomplete dogs passed step validation');
     for(const suffix of ['', '2']){
       for(const [name,value] of [['pes','Fixture dog '+suffix],['plemeno','Labrador'],['vek','2 roky'],['vaha','25 kg'],['povaha','Fixture only']])await form.locator('[name="'+name+suffix+'"]').fill(value);
       for(const name of ['pohlavie','kastrovana'])await form.locator('label:has(input[name="'+name+suffix+'"])').first().click();
     }
     await form.locator('label:has(input[name="duvod"])').first().click();
-    await next.click();
+    await activateFixtureControl(next);
     await owner.waitFor({state:'visible'});
     if(await form.locator('input[name="pes"]').isVisible())throw new Error('Both application steps visible');
     await owner.fill('Fixture owner');
     await form.locator('input[name="telefon"]').fill('912345678');
     const payload=await form.evaluate(el=>Object.fromEntries(new FormData(el)));
     if(payload.pes!=='Fixture dog '||payload.pes2!=='Fixture dog 2'||payload.meno!=='Fixture owner'||payload.duvod!=='Pravidelne – 1× alebo viackrát týždenne')throw new Error('Hidden step fields missing from application payload');
-    await form.getByRole('button',{name:'Späť',exact:true}).click();
+    await activateFixtureControl(form.getByRole('button',{name:'Späť',exact:true}));
     await form.locator('input[name="pes"]').waitFor({state:'visible'});
     if(await form.locator('input[name="pes2"]').inputValue()!=='Fixture dog 2'||await owner.inputValue()!=='Fixture owner')throw new Error('Step navigation lost application values');
-    await next.click();
+    await activateFixtureControl(next);
     await owner.waitFor({state:'visible'});
     if(await owner.inputValue()!=='Fixture owner')throw new Error('Owner values lost on return');
-    await form.getByRole('button',{name:'Späť',exact:true}).click();
+    await activateFixtureControl(form.getByRole('button',{name:'Späť',exact:true}));
     await form.locator('input[name="pes"]').waitFor({state:'visible'});
+    await activateFixtureControl(form.locator('label:has(input[name="pocet_psikov"][value="1"])'));
+    if(!await one.isChecked())throw new Error('One-dog choice did not select');
+    await form.locator('input[name="pes2"]').waitFor({state:'hidden',timeout:5000});
     console.log('PASS application step navigation and full FormData '+engine+' '+label);
+  } catch(error) {
+    // Do not mask the original failure by attempting to click a hidden dog
+    // selector during cleanup (e.g. when step two remains active in WebKit).
+    const state=await form.evaluate(el=>({step:el.dataset.applicationStep,selected:el.querySelector('input[name="pocet_psikov"]:checked')?.value,modal:!!el.closest('[role="dialog"]')})).catch(()=>null);
+    throw new Error('Application interaction '+engine+' '+label+' '+JSON.stringify(state),{cause:error});
   } finally {
     await page.setViewportSize(original);
-    await one.check();
   }
 }
 
