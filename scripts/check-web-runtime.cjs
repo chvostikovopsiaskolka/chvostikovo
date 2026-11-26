@@ -443,7 +443,11 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
   }
   const inquiry=page.locator('[data-lead-faq-cta]');
   await centerFixtureControl(inquiry);await inquiry.hover();
-  if(await inquiry.evaluate(el=>getComputedStyle(el).color)!=='rgb(255, 255, 255)')throw new Error('Rose inquiry hover needs white text');
+  const inquiryHover=await inquiry.evaluate(el=>{
+    const style=getComputedStyle(el), arrow=getComputedStyle(el,'::after');
+    return {fill:style.backgroundColor,text:style.color,border:style.borderTopColor,arrow:arrow.backgroundColor,decorative:arrow.pointerEvents==='none'};
+  });
+  if(inquiryHover.fill!=='rgb(255, 255, 255)'||inquiryHover.text!=='rgb(169, 84, 0)'||inquiryHover.border!=='rgb(255, 164, 20)'||inquiryHover.arrow!=='rgb(184, 46, 127)'||!inquiryHover.decorative)throw new Error('Public inquiry CTA hover palette '+JSON.stringify(inquiryHover));
   await page.mouse.move(0,0);
   await page.setViewportSize({width:390,height:844});
   await centerFixtureControl(page.locator('[data-lead-faq="first-visit"] > button'));
@@ -563,7 +567,7 @@ async function assertApplicationDogLayout(surface, engine, label) {
     // Do not mask the original failure by attempting to click a hidden dog
     // selector during cleanup (e.g. when step two remains active in WebKit).
     const state=await form.evaluate(el=>({step:el.dataset.applicationStep,selected:el.querySelector('input[name="pocet_psikov"]:checked')?.value,modal:!!el.closest('[role="dialog"]')})).catch(()=>null);
-    throw new Error('Application interaction '+engine+' '+label+' '+JSON.stringify(state),{cause:error});
+    throw new Error('Application interaction '+engine+' '+label+' '+JSON.stringify(state)+'; cause: '+(error?.stack||String(error)),{cause:error});
   } finally {
     await page.setViewportSize(original);
   }
