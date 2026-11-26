@@ -1881,3 +1881,27 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 
 /* Keep the top of the collies image inside its existing frame. */
 .site-brand #top [data-home-hero-photo="1"] img { object-position: 50% 0%; }
+
+.lead-brand-live [data-aria-back-top] { display: none; }
+@media (max-width: 1023px) {
+  .lead-brand-live [data-aria-back-top] {
+    display: grid; position: absolute; left: 0; bottom: calc(12px + 104px + 6px);
+    width: 44px; height: 44px; padding: 0; place-items: center;
+    border: 0; border-radius: 999px; background: rgb(255 252 241 / 82%); color: #26322b;
+    box-shadow: 0 4px 13px rgb(30 65 49 / 14%);
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+    pointer-events: auto; touch-action: manipulation;
+    transition: opacity 150ms ease, transform 150ms ease, visibility 150ms;
+  }
+  .lead-brand-live [data-aria-back-top][data-visible="false"],
+  .lead-brand-live:has([data-form-dialog], [role="dialog"][data-state="open"]) [data-aria-back-top] {
+    visibility: hidden; opacity: 0; pointer-events: none; transform: translateY(5px);
+  }
+  .lead-brand-live [data-aria-back-top]:focus-visible { outline: 2px solid #26322b; outline-offset: 2px; }
+  @media (max-width: 639px) {
+    .lead-brand-live [data-aria-back-top] { bottom: calc(12px + clamp(60px, calc(20vw - 4px), 84px) + 6px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .lead-brand-live [data-aria-back-top] { transition: none; } }
+  @media (prefers-reduced-transparency: reduce) { .lead-brand-live [data-aria-back-top] { background: #fffcf1; -webkit-backdrop-filter: none; backdrop-filter: none; } }
+}
+

@@ -359,6 +359,33 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
     if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.actionFg!=='rgb(255, 255, 255)'||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.greetingFit||!fold.compactLauncher||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
+  // Paid-only scroll shortcut: same-document scroll, no chat open or CTA conversion.
+  await page.setViewportSize({width:390,height:844});
+  const back=page.locator('[data-aria-back-top]');
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+  await back.waitFor({state:'hidden'});
+  await page.waitForFunction(()=>window.scrollY<5);
+  await page.evaluate(()=>window.scrollTo({top:650,behavior:'instant'}));
+  await page.waitForFunction(()=>window.scrollY>160);
+  await back.waitFor({state:'visible',timeout:4000}).catch(async error=>{throw new Error('Paid arrow idle visibility: '+JSON.stringify(await back.evaluate(el=>({scrollY,innerWidth,visible:el.dataset.visible,disabled:el.disabled,visibility:getComputedStyle(el).visibility,dialog:!!document.querySelector('[data-form-dialog], [role="dialog"][data-state="open"]')}))),{cause:error});});
+  const arrowGeometry=await back.evaluate(el=>{const a=el.getBoundingClientRect(),p=document.querySelector('[data-aria-chat-trigger]').getBoundingClientRect();return a.height>=44&&a.width>=44&&a.bottom<=p.top-4&&Math.abs(a.left-p.left)<=2&&a.top>=0;});
+  if(!arrowGeometry)throw new Error('Return arrow must sit above Aria without covering her');
+  await page.evaluate(()=>window.scrollTo({top:450,behavior:'instant'}));
+  await page.waitForFunction(()=>Math.abs(scrollY-450)<8);
+  await back.waitFor({state:'visible'});
+  // Fixed shortcut must be hit directly without centering/scrolling the document.
+  await back.evaluate(el=>{const r=el.getBoundingClientRect();if(!el.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)))throw new Error('Aria return arrow is occluded');});
+  if(await page.evaluate(()=>navigator.maxTouchPoints>0))await back.tap({timeout:5000});else await back.click({timeout:5000});
+  await page.waitForFunction(()=>window.scrollY<5);
+  await back.waitFor({state:'hidden'});
+  await page.setViewportSize({width:1280,height:900});
+  await page.evaluate(()=>window.scrollTo({top:650,behavior:'instant'}));
+  await page.waitForFunction(()=>scrollY>160);
+  if(await back.isVisible())throw new Error('Paid arrow must stay hidden on desktop');
+  await page.setViewportSize({width:390,height:844});
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+  await page.waitForFunction(()=>scrollY<5);
+  if(await page.locator('[data-aria-chat-trigger]').getAttribute('aria-expanded')!=='false')throw new Error('Return arrow must not open chat');
   if(await page.locator('#lead-requirements h2').innerText()!=='Podmienky prijatia psíka')throw new Error('Campaign conditions heading differs');
   if(visualOnly){
     await page.setViewportSize({width:390,height:844});
@@ -380,11 +407,9 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
   await centerFixtureControl(puppyLink);
   await puppyLink.click();
   await page.waitForFunction(()=>Math.abs(document.getElementById('aria-puppy-check').getBoundingClientRect().top)<140);
-  await centerFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
-  await page.locator('[data-aria-lead-hero-cta]').click();
+  await activateFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
-  await centerFixtureControl(page.locator('[data-lead-faq-cta]'));
-  await page.locator('[data-lead-faq-cta]').click();
+  await activateFixtureControl(page.locator('[data-lead-faq-cta]'));
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
   if(await page.getByRole('dialog').count())throw new Error('Campaign CTA must scroll to its in-page form');
   const form=page.locator('#aria-hero-form [data-lead-step-form]');
@@ -3584,7 +3609,7 @@ async function assertBilingualNavigation(browser,engine) {
           const failure = { engine, restricted, route: url.pathname, status: 'FAIL', error: error.message, runtimeErrors: errors };
           results.push(failure); failures.push(failure);
           await page.screenshot({ path: path.join(out, `${label}.png`), fullPage: true }).catch(() => {});
-          console.error(`FAIL ${label}: ${error.message}`, errors);
+          console.error(`FAIL ${label}: ${error.stack || error.message}`, errors);
         } finally { await page.close(); }
       }
       if (runtimeScope === 'full' && !bellaris && !restricted) {
@@ -4440,7 +4465,7 @@ async function assertBilingualNavigation(browser,engine) {
             const failure = {engine, width, route:'product-inquiries', status:'FAIL', error:error.message};
             failures.push(failure);
             results.push(failure);
-            console.error('FAIL product inquiries and redirects ' + engine + ' ' + width + ': ' + error.message);
+            console.error('FAIL product inquiries and redirects ' + engine + ' ' + width + ': ' + (error.stack || error.message));
             await productPage.screenshot({path:path.join(out, 'products-' + engine + '-' + width + '.png'), fullPage:true}).catch(()=>{});
           } finally { await productPage.close(); }
         }
