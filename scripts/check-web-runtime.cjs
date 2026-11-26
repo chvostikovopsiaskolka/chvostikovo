@@ -161,6 +161,17 @@ async function assertCookieChoices(page) {
 // Campaign content-flow contract: preserve the shared cookie/funnel/widget checks,
 // replace only the superseded section-order and hidden-form assertions below.
 // Reuse the TEST chat on paid LEAD; verify only the new route wiring with isolated transports.
+async function assertHeroAriaEntry(page) {
+  const cta=page.locator('[data-aria-lead-hero-cta]');
+  if((await cta.innerText()).trim()!=='Spoznajte našu škôlku'||await cta.getAttribute('aria-haspopup')!=='dialog')throw new Error('Paid Hero CTA label or dialog semantics');
+  await activateFixtureControl(cta);
+  const chat=page.locator('[data-aria-chat]');
+  await chat.waitFor({state:'visible',timeout:5000});
+  await chat.getByRole('button',{name:'Close',exact:true}).click();
+  await chat.waitFor({state:'hidden'});
+  // Radix may keep the exit overlay and body pointer lock briefly after close.
+  await page.waitForFunction(()=>getComputedStyle(document.body).pointerEvents!=='none'&&!document.querySelector('[data-state="closed"][role="dialog"], [data-state="closed"].fixed.inset-0'));
+}
 async function assertPaidAriaChat(page, {visualOnly=false}={}) {
   const posted=[];
   let failNext=false;
@@ -185,9 +196,17 @@ async function assertPaidAriaChat(page, {visualOnly=false}={}) {
       }
       return storageAvailable;
     });
+    await assertHeroAriaEntry(page);
+    if(!visualOnly){
+      const audit=await page.evaluate(()=>window.__ariaMetaAudit.calls);
+      const hero=audit.filter(call=>call[0]==='trackCustom'&&call[1]==='HeroLearnMore'&&call[2]?.source==='lead_landing_hero_aria_cta');
+      if(hero.length!==(marketingAllowed?1:0)||audit.some(call=>call[0]==='track'&&call[1]==='Lead'))throw new Error('Hero chat click must be a consented custom event, never Meta Lead');
+      if(posted.length)throw new Error('Opening chat must not submit a form');
+    }
     const trigger=page.locator('[data-aria-lead-chat] [data-aria-chat-trigger]');
     const launcher=page.locator('[data-aria-lead-chat] [data-aria-bubble-question="pricing"]');
-    await launcher.click();
+    // Use the same settled native touch/mouse fixture as the Hero entry.
+    await activateFixtureControl(launcher);
     const chat=page.locator('[data-aria-chat]');
     await chat.waitFor({state:'visible',timeout:1500});
     const surface=await chat.evaluate(el=>({background:getComputedStyle(el).backgroundColor,blur:getComputedStyle(el).getPropertyValue('backdrop-filter')||getComputedStyle(el).getPropertyValue('-webkit-backdrop-filter')}));
@@ -346,7 +365,7 @@ async function assertPaidReturnNavigation(browser,engine) {
   }finally{await context.close();}
 }
 
-async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
+async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=null}={}) {
   await page.locator('[data-aria-lead-chat] img[alt^="Aria"]').evaluate(async image=>{
     await image.decode();
     if(image.naturalWidth<400||image.naturalHeight<400)throw new Error("Paid Aria must use the approved high-resolution head");
@@ -374,7 +393,7 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==2||structure.benefits!==3||structure.requirements!==4||
     structure.carousel!==1||!structure.checker||!structure.faqLast||!structure.health||!structure.inquiryHeadings||!structure.inquirySubtitles||structure.mapLinks.length<2||structure.mapLinks.some(link=>link!==expected.MAP_LINK)||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
-  for(const [width,height] of [[320,720],[360,780],[375,667],[390,740],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
+  for(const [width,height] of [[320,720],[360,780],[375,667],[390,740],[430,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
     await page.setViewportSize({width,height});
     await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
     await page.waitForTimeout(160);
@@ -419,11 +438,11 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
         actionArrowDecorative:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]'),'::after').pointerEvents==='none',
         pillBold:visiblePills.every(el=>Number(getComputedStyle(el).fontWeight)>=700),
         pillGap:parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pills]')).columnGap),
-        photoCrop:[...document.querySelectorAll('[data-lead-hero-photo] img')].length===2&&[...document.querySelectorAll('[data-lead-hero-photo] img')].every(el=>getComputedStyle(el).objectPosition==='50% 50%'),
+        photoCrop:(()=>{const imgs=[...document.querySelectorAll('[data-lead-hero-photo] img')],short=innerWidth<640&&innerHeight<=740;return imgs.length===2&&imgs.every(el=>getComputedStyle(el).objectFit==='cover'&&getComputedStyle(el).objectPosition===(short?'50% 20%':'50% 50%'))&&(!short||innerWidth<390||(imgs.every(el=>el.getBoundingClientRect().height>=108)&&cta.top-photos.bottom>=14));})(),
         reviewGap:parseFloat(getComputedStyle(document.querySelector('[data-aria-lead-review-spacing]')).marginTop),
         galleryBelow:box('#lead-photo-carousel').top>=innerHeight-2,
         greetingFit:(()=>{const p=document.querySelector('[data-aria-bubble-greeting]'),range=document.createRange();range.selectNodeContents(p);const rects=[...range.getClientRects()].filter(r=>r.width>0&&r.height>0);const expected=innerWidth<640?'Ahoj, volám sa Aria. Čo ťa zaujíma?':'Ahoj, volám sa Aria. Čo ťa zaujíma v našej škôlke?';return p.innerText.replace(/\s+/g,' ').trim()===expected&&new Set(rects.map(r=>Math.round(r.top))).size===1&&p.scrollWidth<=p.clientWidth+1&&Math.abs(p.getBoundingClientRect().right-Math.max(...rects.map(r=>r.right))-parseFloat(getComputedStyle(p).paddingRight))<=2&&(innerWidth>=640||face.left>=6&&face.left<=10);})(),
-        compactLauncher:(()=>{const buttons=[...document.querySelectorAll('[data-aria-bubble-question]')],s=box('[data-aria-speech]'),rs=buttons.map(e=>e.getBoundingClientRect());return rs.length===2&&Math.abs(rs[0].top-rs[1].top)<2&&rs[0].right<rs[1].left&&rs.every(r=>r.height>=44&&r.left>=s.left&&r.right<=s.right)&&buttons.every(e=>e.scrollWidth<=e.clientWidth+1);})(),
+        compactLauncher:(()=>{const buttons=[...document.querySelectorAll('[data-aria-bubble-question]')],s=box('[data-aria-speech]'),rs=buttons.map(e=>e.getBoundingClientRect());return rs.length===2&&Math.abs(rs[0].top-rs[1].top)<2&&rs[0].right<rs[1].left&&rs.every(r=>r.height>=44&&r.left>=s.left&&r.right<=s.right)&&buttons.every(e=>e.scrollWidth<=e.clientWidth+1&&Math.abs(parseFloat(getComputedStyle(e).borderTopLeftRadius)-12)<0.5&&Math.abs(parseFloat(getComputedStyle(e).borderBottomRightRadius)-12)<0.5);})(),
         // Test a shorter in-app-sized viewport and the full review cards, not only their heading.
         mobileLauncherLayout:(()=>{if(innerWidth>=640)return true;const service=box('[data-aria-service-group]'),speech=box('[data-aria-speech]');const cards=[...document.querySelectorAll('#recenzie [data-review-card]')].map(e=>e.getBoundingClientRect());const cardBottom=Math.max(...cards.map(r=>r.bottom));const gap=Math.min(speech.top,face.top)-cardBottom;const guide=getComputedStyle(document.querySelector('[data-aria-guide]'));return cards.length>0&&service.top<=64&&parseFloat(guide.bottom)>=12&&speech.bottom<=innerHeight-12&&gap>=4;})(),
         dockInside:dock.top>=0&&dock.bottom<=innerHeight+1,
@@ -462,8 +481,12 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
   await centerFixtureControl(puppyLink);
   await puppyLink.click();
   await page.waitForFunction(()=>Math.abs(document.getElementById('aria-puppy-check').getBoundingClientRect().top)<140);
-  await activateFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
-  await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
+  const beforeHeroSubmits=trackedEvents?.filter(e=>e.name==='form_submit').length;
+  await assertHeroAriaEntry(page);
+  if(trackedEvents){
+    for(let i=0;i<15&&!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='lead_landing_hero_aria_cta');i++)await page.waitForTimeout(100);
+    if(!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='lead_landing_hero_aria_cta')||trackedEvents.filter(e=>e.name==='form_submit').length!==beforeHeroSubmits)throw new Error('Hero CTA source missing or chat click emitted conversion');
+  }
   await activateFixtureControl(page.locator('[data-lead-faq-cta]'));
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
   if(await page.getByRole('dialog').count())throw new Error('Campaign CTA must scroll to its in-page form');
@@ -994,7 +1017,7 @@ async function assertPublicContent(browser,engine){
           if(await page.locator('main [data-lead-step-form]').count()!==2)throw Error('Paid enquiry missing or duplicated');
           for(const width of [320,390,1440]){await page.setViewportSize({width,height:844});await fit('#aria-hero-form [data-lead-form-shell]');await fit('#lead-friendship-form [data-lead-form-shell]');}
           await page.setViewportSize({width:390,height:844});
-          await activateFixtureControl(page.locator('[data-aria-lead-hero-cta]'));await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
+          await assertHeroAriaEntry(page);await activateFixtureControl(page.locator('[data-lead-faq-cta]'));await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
           const form=page.locator('#aria-hero-form [data-lead-step-form]');await advanceLeadContact(form);await assertLeadContactIntro(form);
           await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
           await page.waitForFunction(()=>scrollY<5);
@@ -1215,7 +1238,7 @@ async function assertPublicContent(browser,engine){
             results.push({engine,restricted,route:url.pathname,scope:'aria-visual',status:'PASS'});
             console.log('PASS LEAD visual geometry and chat surface '+engine);continue;
           }
-          if(revisedLead) await assertCampaignContentFlow(page);
+          if(revisedLead) await assertCampaignContentFlow(page,{trackedEvents:restricted?null:trackedEvents});
           // Candidate-only regression for the three unified Chvostíkovo galleries.
           // Production-baseline CI keeps testing its already published version.
           if (!bellaris && !restricted && !revisedLead && new URL(base).hostname === '127.0.0.1') {
@@ -1359,7 +1382,7 @@ async function assertPublicContent(browser,engine){
                     liquidBadge: liquidGlass(badgeNode) && getComputedStyle(badgeNode).color === 'rgb(38, 50, 43)',
                     liquidCta: getComputedStyle(ctaNode).backgroundColor === 'rgb(255, 255, 255)' && getComputedStyle(ctaNode).color === 'rgb(169, 84, 0)' && getComputedStyle(ctaNode,'::after').backgroundColor === 'rgb(184, 46, 127)' &&
                       cta.width >= 225 && cta.width <= 300 &&
-                      ctaNode.getAttribute('aria-controls') === 'aria-hero-form',
+                      ctaNode.getAttribute('aria-haspopup') === 'dialog',
                     liquidDock: liquidGlass(dockNode) &&
                       !!dockNode.querySelector('[data-aria-interest-cta]'),
                     fixed: dock ? getComputedStyle(dock).position === 'fixed' && !hero.contains(dock) : false,
@@ -1695,7 +1718,7 @@ async function assertPublicContent(browser,engine){
                     proof:q.left>=0&&q.right<=innerWidth+1&&q.height<=parseFloat(getComputedStyle(proof).lineHeight)*1.55&&proof.scrollWidth<=proof.clientWidth+2,
                     reviews:!!reviewCard&&!!track&&getComputedStyle(reviews).overflowY!=='hidden'&&getComputedStyle(reviewCard).boxShadow!=='none',
                     fixedDock:getComputedStyle(guide).position==='fixed'&&dockOffset>=6&&dockOffset<=54,
-                    controlledForm:cta.getAttribute('aria-controls')==='aria-hero-form'&&cta.getAttribute('aria-expanded')===String(!form.hidden),
+                    controlledChat:cta.getAttribute('aria-haspopup')==='dialog'&&cta.textContent.trim()==='Spoznajte našu škôlku'&&!form.hidden,
                     carouselOrder:carousel.getBoundingClientRect().top>=(form.hidden?hero.getBoundingClientRect().bottom:form.getBoundingClientRect().bottom)-8,
                     caretakers:benefits.children.length===3&&aboutHeading.scrollWidth<=aboutHeading.clientWidth+2,
                     crownInForm:!!form.querySelector('[data-crown-ground]')&&!!document.querySelector('#aria-first-visit-form [data-crown-ground]')
@@ -1905,16 +1928,8 @@ async function assertPublicContent(browser,engine){
               // The puppy message starts at caretakers, never over the review gap
               // or the first contact form. Check both the live lead and preview.
               const leadInfoForm = page.locator('#aria-hero-form');
-              if (url.pathname === '/psia-skolka-kosice/' &&
-                  !await leadInfoForm.isVisible()) {
-                const heroCta = page.locator('[data-aria-lead-hero-cta]');
-                if (await heroCta.count() !== 1 || await heroCta.getAttribute('aria-expanded') !== 'false')
-                  throw new Error('Paid CTA must initially hide its linked information form');
-                await heroCta.click();
-                await leadInfoForm.waitFor({ state: 'visible' });
-                if (await heroCta.getAttribute('aria-expanded') !== 'true')
-                  throw new Error('Paid CTA failed to reveal the shared 2-step form');
-              }
+              if (url.pathname === '/psia-skolka-kosice/' && !await leadInfoForm.isVisible())
+                 throw new Error('Paid direct inline form must remain available independently of Hero chat');
               await leadInfoForm.scrollIntoViewIfNeeded();
               await page.waitForFunction(() => document.getElementById('aria-hero-form')?.getBoundingClientRect().top < window.innerHeight);
               if (url.pathname === '/psia-skolka-kosice/') {
@@ -2882,10 +2897,12 @@ async function assertPublicContent(browser,engine){
                 body: JSON.stringify(success ? { ok: true } : { ok: false, recovery_saved: false }) });
             });
             await page.setViewportSize({ width: 390, height: 844 });
-            await centerFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
-            await page.locator('[data-aria-lead-hero-cta]').click();
-            // Retained paid hero CTA scrolls to the existing inline shared form rather
-            // than opening the retired modal. Preserve failure/retry tracking.
+            const priorSubmits=trackedEvents.filter(e=>e.name==='form_submit').length;
+            await assertHeroAriaEntry(page);
+            for(let i=0;i<15&&!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='lead_landing_hero_aria_cta');i++)await page.waitForTimeout(100);
+            if(!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='lead_landing_hero_aria_cta')||trackedEvents.filter(e=>e.name==='form_submit').length!==priorSubmits||submissions.length)throw new Error('Hero CTA source missing or chat click emitted conversion');
+            // The FAQ CTA still scrolls to the direct inline form. Preserve failure/retry tracking.
+            await activateFixtureControl(page.locator('[data-lead-faq-cta]'));
             const contact = page.locator('#aria-hero-form [data-lead-step-form]');
             await contact.waitFor({ state: 'visible' });
             await page.waitForFunction(() => {
@@ -2912,7 +2929,7 @@ async function assertPublicContent(browser,engine){
             for (let i = 0; i < 15 && !trackedEvents.some(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_hero_inline'); i++)
               await page.waitForTimeout(100);
             const sent = trackedEvents.filter(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_hero_inline');
-            const cta = trackedEvents.filter(e => e.name === 'inquiry_cta' && e.source === 'lead_landing_hero_orange_cta');
+            const cta = trackedEvents.filter(e => e.name === 'explore_daycare' && e.source === 'lead_landing_hero_aria_cta');
             if (submissions.length !== 2 || recoveries.length !== 1 || sent.length !== 1 ||
                 !cta.length || !submissions.every(data => data.form_type === 'lead' &&
                   data.cta_source === 'lead_landing_aria_hero_inline' &&
@@ -3740,7 +3757,7 @@ async function assertPublicContent(browser,engine){
                 throw new Error('Revealed interest selection was lost on back');
             } else {
               const entry = url.pathname === '/psia-skolka-kosice/'
-                ? page.locator('[data-aria-lead-hero-cta]')
+                ? page.locator('[data-lead-faq-cta]')
                 : (isAriaPage || isPuppyAria)
                 ? page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' })
                 : page.locator('.mobile-dock .mobile-dock-apply').first();

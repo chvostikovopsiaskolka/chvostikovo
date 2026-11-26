@@ -1,5 +1,5 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import leadAriaHead from "@/assets/aria-assistant-head-lead.webp";
 import leadHeroPhotoOne from "@/assets/lead-hero-user-1.jpg";
 import leadHeroPhotoTwo from "@/assets/lead-hero-user-2.jpg";
@@ -132,7 +132,7 @@ export function AriaPreviewPage() {
     </div>
   );
   const [leadModalOpen, setLeadModalOpen] = useState(false);
-  const [leadHeroFormOpen, setLeadHeroFormOpen] = useState(false);
+  const ariaChatRef = useRef<{ open: () => void }>(null);
   const [puppyModalOpen, setPuppyModalOpen] = useState(false);
   const [reviewPhotoOpen, setReviewPhotoOpen] = useState<number | null>(null);
   const [leadModalSource, setLeadModalSource] = useState("lead_landing_modal");
@@ -145,13 +145,19 @@ export function AriaPreviewPage() {
   function revealLeadHeroForm(source: string) {
     trackMarketingInteraction("inquiry_cta", source);
     void trackCookielessInteraction("inquiry_cta", source);
-    setLeadHeroFormOpen(true);
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
       const target = document.getElementById("aria-hero-form");
       if (!target) return;
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       target.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
     }));
+  }
+
+  function openHeroAriaChat() {
+    const source = "lead_landing_hero_aria_cta";
+    trackMarketingInteraction("hero_learn_more", source);
+    void trackCookielessInteraction("explore_daycare", source);
+    ariaChatRef.current?.open();
   }
 
   function openLeadModal(source: string) {
@@ -496,7 +502,7 @@ export function AriaPreviewPage() {
       {/* Keep Aria floating in the viewport throughout the lead journey.
           The paid lead hero stays visually unchanged; the menu no longer
           participates in the document layout. */}
-      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} leadChat={isLiveLead} {...(isLiveLead ? { portraitSrc: leadAriaHead } : {})} portraitOnRight={false} sectionNavigation={isLiveLead} {...(isLiveLead ? { anchorOverrides: { "lead-requirements": "lead-knowledge" } } : {})} onRevealInlineForm={isLiveLead ? () => revealLeadHeroForm("lead_landing_aria_dock_interest") : undefined} hidden={leadModalOpen || puppyModalOpen} />
+      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} openChatRef={isLiveLead ? ariaChatRef : undefined} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} leadChat={isLiveLead} {...(isLiveLead ? { portraitSrc: leadAriaHead } : {})} portraitOnRight={false} sectionNavigation={isLiveLead} {...(isLiveLead ? { anchorOverrides: { "lead-requirements": "lead-knowledge" } } : {})} onRevealInlineForm={isLiveLead ? () => revealLeadHeroForm("lead_landing_aria_dock_interest") : undefined} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
         <section className={isLiveLead ? "hero-safe-top relative flex flex-col sm:min-h-[100svh] sm:justify-start sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
@@ -548,11 +554,10 @@ export function AriaPreviewPage() {
               )}
               {isLiveLead && (
                 <div data-lead-hero-action className="mx-auto mt-4 flex w-full max-w-[294px] flex-col items-center justify-center">
-                  <button type="button" data-aria-lead-hero-cta aria-controls="aria-hero-form"
-                    aria-expanded={isLiveLead ? undefined : leadHeroFormOpen}
-                    onClick={() => revealLeadHeroForm("lead_landing_hero_orange_cta")}
+                  <button type="button" data-aria-lead-hero-cta aria-haspopup="dialog"
+                    onClick={openHeroAriaChat}
                     className="inline-flex min-h-[46px] w-full items-center justify-center whitespace-nowrap rounded-full border px-2.5 py-2 text-center font-display text-[clamp(11px,3.35vw,15px)] font-bold leading-tight transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest">
-                    Chcem sa informovať o škôlke
+                    Spoznajte našu škôlku
                   </button>
                 </div>
               )}
