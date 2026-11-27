@@ -108,9 +108,9 @@ async function assertPawsTransmit(page,selector,background){
   assert(weekly.every(r=>r.line===(r.adjacent?1:0)),'subtle separator only between adjacent weekly rows, no full frames');
   // Thursday cutoff, delayed next-month unlock, and the crossing week stay consistent for one/two dogs.
   await page.evaluate(()=>{const days=state.data.availability.days;for(let d=new Date('2027-01-01T12:00:00Z');d<=new Date('2027-01-31T12:00:00Z');d.setUTCDate(d.getUTCDate()+1))if(d.getUTCDay()>=1&&d.getUTCDay()<=5)days.push({date:d.toISOString().slice(0,10),available:8,capacity:10,occupied:2,bookings_open:true,dogs:[]});window.__calendarTestNowV442='2026-11-26T18:59:00.000Z';window.customerDesignRefreshCalendarV351();});
-  assert.equal(await page.locator('[data-week-from="2026-11-23"]').count(),1,'Thursday 19:59 retains ending week');
+  assert.equal(await page.locator('#bookingPickerDaysV37>.calendar-row-v438[data-week-from="2026-11-23"]').count(),1,'Thursday 19:59 retains ending week');
   await page.evaluate(()=>{window.__calendarTestNowV442='2026-11-26T19:00:00.000Z';document.dispatchEvent(new Event('visibilitychange'));});
-  assert.equal(await page.locator('[data-week-from="2026-11-23"]').count(),0,'Thursday 20:00 hides ending week');
+  assert.equal(await page.locator('#bookingPickerDaysV37>.calendar-row-v438[data-week-from="2026-11-23"]').count(),0,'Thursday 20:00 hides ending week');
   assert.equal(await page.locator('#bookingPickerDaysV37>.calendar-row-v438').first().getAttribute('data-week-from'),'2026-11-30');
   assert.equal(await page.locator('#bookingPickerDaysV37 .calendar-month-v438').count(),1);
   assert.equal(await page.locator('[data-date="2026-12-31"].booking-day-v37').count(),1);
