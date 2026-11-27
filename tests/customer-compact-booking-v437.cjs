@@ -12,7 +12,7 @@ days[2].available=1;assert.deepEqual(dates(),[]);days[2].available=2;
 days[2].bookings_open=false;assert.deepEqual(dates(),[]);days[2].bookings_open=true;
 assert.equal(c.compactEligibleV437('2026-12-31',dogs,[{date:'2026-12-31',available:2,bookings_open:true}]),true);
 assert.equal(c.compactEligibleV437('2027-01-01',dogs,[{date:'2027-01-01',available:2,bookings_open:true}]),false);
-assert.equal(c.calendarMonthEndV438('2027-12-25'),'2028-01-31');assert.equal(c.calendarMonthEndV438('2028-01-01'),'2028-02-29');
+assert.equal(c.calendarMonthEndV438('2027-12-25'),'2028-01-31');assert.equal(c.calendarMonthEndV438('2028-01-01'),'2028-01-31');assert.equal(c.calendarMonthEndV438('2028-01-13',{minutes:1200}),'2028-02-29');
 const rows=JSON.parse(JSON.stringify(c.calendarRowsV438(days,'2026-11-26')));assert.equal(rows.length,1);assert.equal(rows[0].month,'2026-12');assert.equal(rows[0].kind,'next');assert.equal(rows[0].days.length,5);assert.equal(rows[0].days[0].date,'2026-11-30');
 assert.equal(c.compactEligibleV437('2026-12-17',dogs,[{date:'2026-12-17',available:2,bookings_open:true}]),true);
 assert.match(src,/compactSeedPickerV437\(pickerDaysV393\(\),extraDate\);/);

@@ -9,10 +9,12 @@ for(const selector of ['#bookingGradebook','#designTicket.design-ticket','#desig
  assert(block.includes(selector),selector);
 assert(block.includes('margin:2px 0 0 -27px!important'),'book icon aligns with visits gutter');
 assert(block.includes('focus-visible')&&block.includes('prefers-reduced-motion'));
-assert(js.includes('text:`Prosíme o rezerváciu miesta do nedele ${parts[2]}. ${parts[1]}. do 20:00.`'));
+assert(js.includes('text:`Prosíme o rezerváciu miesta na nasledujúci týždeň do nedele ${parts[2]}. ${parts[1]}. do 20:00.`'));
 assert(js.includes('reminder.hidden=hasWeekBookingV337(reminder.from,reminder.to)'));
-assert(design.includes('notice.hidden=!nextHeading||!!reminder?.hidden'));
-assert(design.includes("notice?.classList.contains('hidden')"));
+assert(design.includes('overviewGuidanceV442(root)'));
+assert(design.includes('next.hidden=!!model.next.hidden'));
+assert(design.includes('missed.hidden=!model.missed'));
+assert(design.includes("picker.querySelectorAll('#designReservationNotice,#designWeekDeadline').forEach(node=>node.remove())"));
 // Visual v361 invariants persist across later customer releases.
 assert(/^v[0-9]+$/.test(ver.build)&&Number(ver.build.slice(1))>=361);
 assert(js.includes("const APP_BUILD='"+ver.build+"'")&&js.includes("const APP_VERSION='"+ver.version+"'"));

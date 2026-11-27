@@ -8,8 +8,8 @@ try{for(const width of [320,360,390,430,844]){
 const {page,context,errors}=await fixture(browser,1,width,type.name());
 await page.waitForSelector('.bottom-nav>.lg-v3-material',{state:'attached'});
 const nav=page.locator('.bottom-nav'),before=await nav.boundingBox();
-const style=await nav.locator(':scope>.lg-v3-material').evaluate(el=>({milk:getComputedStyle(el).getPropertyValue('--lg-v3-milk').trim(),background:getComputedStyle(el).backgroundColor,overlay:getComputedStyle(el,'::after').backgroundColor}));
-if(type===chromium){assert.equal(style.milk,'.92');assert.equal(style.background,'rgba(255, 255, 255, 0.92)');}else{assert.equal(style.milk,'');assert([style.background,style.overlay].includes('rgba(255, 255, 255, 0.24)'),'iOS original milk is painted on the material or WebGL overlay');}
+const style=await nav.locator(':scope>.lg-v3-material').evaluate(el=>({background:getComputedStyle(el).backgroundColor,image:getComputedStyle(el).backgroundImage,blur:getComputedStyle(el).backdropFilter,renderer:el.dataset.renderer}));
+assert.equal(style.renderer,'fallback');assert.match(style.image,/linear-gradient/);assert.match(style.blur,/blur\(20px\)/);if(type===chromium)assert.equal(style.background,'rgba(255, 255, 255, 0.92)');assert.equal(await nav.evaluate(el=>getComputedStyle(el).borderTopLeftRadius),'19px');assert.equal(await page.locator('#navBookAddV220').evaluate(el=>getComputedStyle(el).borderTopLeftRadius),'13px');assert.equal(await nav.locator('.lg-v3-output').count(),0);
 await page.evaluate(()=>{window.__noticeFixture=[{id:51,active:true,show_in_overview:true,title:'Syntetický oznam',body:'Obrázok pod lištou',valid_from:'2020-01-01'}];return loadAnnouncements(true)});
 await page.evaluate(()=>scrollTo(0,document.body.scrollHeight));await page.waitForTimeout(100);assert.deepEqual(await nav.boundingBox(),before);
 await page.locator('#navDog').click();await page.waitForTimeout(100);assert.deepEqual(await nav.boundingBox(),before);

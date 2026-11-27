@@ -215,7 +215,7 @@
     if(match)return 'Valid until '+match[1];
     match=text.match(/^Platí do (.+)$/);
     if(match)return 'Valid until '+match[1];
-    match=text.match(/^Prosíme o rezerváciu miesta do nedele (.+?) do 20:00\.$/);
+    match=text.match(/^Prosíme o rezerváciu miesta (?:na nasledujúci týždeň )?do nedele (.+?) do 20:00\.$/);
     if(match)return 'Please book by Sunday '+match[1]+', 8:00 PM.';
     return null;
   };

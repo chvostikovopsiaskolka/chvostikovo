@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v441';
-const APP_VERSION='2.0.114';
+const APP_BUILD='v442';
+const APP_VERSION='2.0.115';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -514,7 +514,7 @@ function renderUpcoming(){return typeof customerRenderers.upcoming==='function'?
 function overviewClock(now=new Date()){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now),m=Object.fromEntries(parts.map(p=>[p.type,p.value]));return {date:m.year+'-'+m.month+'-'+m.day,minutes:Number(m.hour)*60+Number(m.minute)}}
 function overviewDayVisible(date,clock=overviewClock()){return date>clock.date||date===clock.date&&clock.minutes<18*60}
 let overviewCutoffTimer=null;
-function scheduleOverviewCutoff(){clearTimeout(overviewCutoffTimer);overviewCutoffTimer=null;if(document.visibilityState!=='visible'||!state.data)return;const now=new Date(),clock=overviewClock(now),minutes=clock.minutes<1080?1080-clock.minutes:1440-clock.minutes;overviewCutoffTimer=setTimeout(()=>{overviewCutoffTimer=null;renderDays()},Math.max(1000,minutes*60000-now.getSeconds()*1000-now.getMilliseconds()))}
+function scheduleOverviewCutoff(){clearTimeout(overviewCutoffTimer);overviewCutoffTimer=null;if(document.visibilityState!=='visible'||!state.data)return;const now=new Date(),clock=overviewClock(now),minutes=clock.minutes<1080?1080-clock.minutes:([0,4].includes(new Date(clock.date+'T12:00:00Z').getUTCDay())&&clock.minutes<1200?1200-clock.minutes:1440-clock.minutes);overviewCutoffTimer=setTimeout(()=>{overviewCutoffTimer=null;renderDays()},Math.max(1000,minutes*60000-now.getSeconds()*1000-now.getMilliseconds()))}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&state.data)renderDays();else{clearTimeout(overviewCutoffTimer);overviewCutoffTimer=null}});
 function renderDays(){const out=typeof customerRenderers.days==='function'?customerRenderers.days():undefined;scheduleOverviewCutoff();return out}
 function renderAll(){renderWeekHeader();renderNotifications();renderPassSummary();renderUpcoming();renderDays();renderMessages();renderDogSelector();renderDog();renderProfile();renderStaff();updateUnread()}
@@ -2762,7 +2762,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   function applyNav(){
     const booking=$('navBooking'),menu=$('navDog');
     if(!booking||!menu)return;
-    booking.innerHTML='<span class="nav-icon-v36">'+calendarSvg+'</span><span>Prehľad</span>';
+    booking.innerHTML='<span class="nav-icon-v36"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-6h6v6"/></svg></span><span>Prehľad</span>';
     menu.innerHTML='<span class="nav-icon-v36">'+gearSvg+'</span><span>Menu</span>';
     booking.classList.add('nav-item-v36');menu.classList.add('nav-item-v36');
   }
@@ -3018,15 +3018,26 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     return dates.length?{dates,sourceWeek:proposals[0].sourceWeek}:null;
   }
   let compactSeedV437=null;
-  function calendarMonthEndV438(today){
-    const [y,m]=today.split('-').map(Number);return new Date(Date.UTC(y,m+1,0,12)).toISOString().slice(0,10);
+  // Month unlock follows the second displayed calendar row, owned by its Wednesday.
+  // Thursday 20:00 Bratislava time is a display boundary, never a server write rule.
+  function calendarMonthEndV438(today,clock=bratislavaClockV95()){
+    const [y,m]=today.split('-').map(Number);
+    const first=new Date(Date.UTC(y,m-1,1,12));
+    first.setUTCDate(first.getUTCDate()+(3-first.getUTCDay()+7)%7); // first Wednesday in month
+    const unlock=smartShiftV199(smartMondayV199(first.toISOString().slice(0,10)),10);
+    const open=today>unlock||(today===unlock&&clock.minutes>=1200);
+    return new Date(Date.UTC(y,m+(open?1:0),0,12)).toISOString().slice(0,10);
   }
   function calendarRowsV438(days,today){
     const current=smartMondayV199(today),next=smartShiftV199(current,7),groups=new Map();
     for(const day of days){
       const monday=smartMondayV199(day.date),key=monday;
       if(!groups.has(key))groups.set(key,{month:day.date.slice(0,7),monday,weekEnd:smartShiftV199(monday,6),kind:monday===current?'current':monday===next?'next':'later',days:[]});
-      const row=groups.get(key);row.days.push(day);row.month=day.date.slice(0,7); // A cross-month week belongs to its last actual working day.
+      const row=groups.get(key);row.days.push(day);
+      // A crossing row belongs to the month of its majority weekday (Wednesday).
+      // Thus 30.11.–4.12. is December, and 28.12.–1.1. stays December.
+      const middle=smartShiftV199(monday,2).slice(0,7);
+      row.month=row.days.some(d=>d.date.slice(0,7)===middle)?middle:day.date.slice(0,7);
     }
     const seen=new Set();return [...groups.values()].map(row=>{const first=!seen.has(row.kind);seen.add(row.kind);return {...row,firstForKind:first};});
   }
@@ -3051,8 +3062,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
   window.customerCompactOverviewV437=()=>{
     const dogs=(state.data?.dogs||[]).slice(0,2),all=state.data?.availability?.days||[];
-    const from=smartShiftV199(smartMondayV199(bratislavaClockV95().date),7),to=smartShiftV199(from,6);
-    const days=all.filter(d=>d.date>=from&&d.date<=to);
+    const clock=bratislavaClockV95(),current=smartMondayV199(clock.date);
+    const missed=!pickerWeekEndedV442(clock)&&!hasWeekBookingV337(current,smartShiftV199(current,6));
+    const from=missed?current:smartShiftV199(current,7),to=smartShiftV199(from,6);
+    const days=all.filter(d=>d.date>=from&&d.date<=to&&d.date<=calendarMonthEndV438(clock.date,clock));
     const proposal=dogs.every(d=>customerVaccinationsCompleteV96(d))?compactBookingProposalV437(dogs,days):null;
     return {days:days.map(d=>({...d,selectable:compactEligibleV437(d.date,dogs,days)})),proposal};
   };
@@ -3141,7 +3154,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     to.setUTCDate(to.getUTCDate()+6);
     const sunday=previousIsoDayV95(from),parts=sunday.split('-').map(Number);
     const reminder={from,to:to.toISOString().slice(0,10),deadline:sunday,
-      text:`Prosíme o rezerváciu miesta do nedele ${parts[2]}. ${parts[1]}. do 20:00.`};
+      text:`Prosíme o rezerváciu miesta na nasledujúci týždeň do nedele ${parts[2]}. ${parts[1]}. do 20:00.`};
     reminder.hidden=hasWeekBookingV337(reminder.from,reminder.to);
     const box=$('deadlineText');if(!box)return reminder;
     box.classList.toggle('hidden',reminder.hidden);
@@ -3362,23 +3375,51 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const offset=Math.round((new Date(date+'T12:00:00Z')-monday)/86400000);
     return offset<7?'Tento týždeň':offset<14?'Budúci týždeň':offset<21?'O dva týždne':'O tri týždne';
   }
+  // Thursday at 20:00 Bratislava time: the ending week no longer takes up booking space.
+  // This is a presentation filter only; existing reservations and server cutoffs stay unchanged.
+  function pickerWeekEndedV442(clock){
+    const weekday=new Date(clock.date+'T12:00:00Z').getUTCDay();
+    return weekday===0||weekday===6||weekday===5||(weekday===4&&clock.minutes>=1200);
+  }
   function pickerDaysV393(){
-    const days=state.data?.availability?.days||[],today=bratislavaClockV95().date;
-    const clock=new Date(today+'T12:00:00Z'),weekday=clock.getUTCDay();
-    clock.setUTCDate(clock.getUTCDate()-(weekday===0?6:weekday-1));
-    const monday=clock.toISOString().slice(0,10);
-    clock.setUTCDate(clock.getUTCDate()+6);const sunday=clock.toISOString().slice(0,10);
+    const clock=bratislavaClockV95(),today=clock.date,days=(state.data?.availability?.days||[]).filter(day=>day.date<=calendarMonthEndV438(today,clock));
+    const monday=smartMondayV199(today),sunday=smartShiftV199(monday,6);
     const dogs=pickerDogsV254();
     const attended=dogs.length>0&&dogs.every(d=>(state.data?.visits||[]).some(v=>Number(v.dog_id)===Number(d.id)&&v.visit_date>=monday&&v.visit_date<=today));
-    // Obaja keeps the current week if either dog has not attended yet.
-    const offset=attended&&days[0]?.date>=monday&&days[0]?.date<=sunday?5:0;
-    return days.slice(offset);
+    // Keep the existing visit-based rule, plus the same Thursday cutoff for all dogs.
+    // Filter by real dates, not a five-element offset: sparse availability must not skip next week.
+    const start=attended||pickerWeekEndedV442(clock)?smartShiftV199(sunday,1):monday;
+    return days.filter(day=>day.date>=start);
   }
+  let pickerCutoffTimerV442=null;
+  function schedulePickerCutoffV442(){
+    clearTimeout(pickerCutoffTimerV442);pickerCutoffTimerV442=null;
+    const picker=$('bookingPickerV37'),clock=bratislavaClockV95();
+    if(!picker||picker.classList.contains('hidden')||document.visibilityState==='hidden'||!Number.isFinite(clock.minutes))return;
+    const now=new Date(),weekday=new Date(clock.date+'T12:00:00Z').getUTCDay();
+    const minutes=weekday===4&&clock.minutes<1200?1200-clock.minutes:1440-clock.minutes;
+    pickerCutoffTimerV442=setTimeout(refreshPickerCutoffV442,Math.max(1000,minutes*60000-now.getSeconds()*1000-now.getMilliseconds()));
+  }
+  function refreshPickerCutoffV442(){
+    const picker=$('bookingPickerV37');
+    if(picker&&!picker.classList.contains('hidden')&&document.visibilityState!=='hidden'&&!submittingV37){
+      const days=pickerDaysV393(),tiles=$('bookingPickerDaysV37')?.querySelectorAll('.booking-day-v37[data-date]')||[];
+      if((days[0]?.date||'')!==(tiles[0]?.dataset.date||'')||(days[days.length-1]?.date||'')!==(tiles[tiles.length-1]?.dataset.date||''))renderPickerV37();
+    }
+    schedulePickerCutoffV442();
+  }
+  document.addEventListener('visibilitychange',refreshPickerCutoffV442);
+  window.addEventListener('pageshow',refreshPickerCutoffV442);
   window.customerPickerDaysV393=pickerDaysV393;
   function renderPickerV37(){
     ensurePickerV37();
     const dog=selectedDog(),dogs=state.data?.dogs||[],days=pickerDaysV393();
     if(!dog)return;
+    const clock=bratislavaClockV95();
+    if(!submittingV37&&pickerWeekEndedV442(clock)){
+      const nextMonday=smartShiftV199(smartMondayV199(clock.date),7);
+      for(const date of selectedDatesV37)if(date<nextMonday){selectedDatesV37.delete(date);selectedTaxiByDateV91.delete(date);if(expandedTaxiDateV201===date)expandedTaxiDateV201=null;}
+    }
     const dogWrap=$('bookingPickerDogWrapV37'),dogSelect=$('bookingPickerDogV37');
     dogWrap.classList.toggle('hidden',dogs.length<=1);
     dogSelect.disabled=submittingV37;dogSelect.innerHTML=(dogs.length===2?'<option value="both" '+(pairBookingV254?'selected':'')+'>Obaja psíkovia</option>':'')+dogs.map(d=>`<option value="${d.id}" ${!pairBookingV254&&Number(d.id)===Number(dog.id)?'selected':''}>${esc(d.name)}</option>`).join('');
@@ -3399,13 +3440,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       if(activeMonth!==row.month){
         activeMonth=row.month;groups.push('<h3 class="calendar-month-v438">'+esc(calendarMonthNameV438(row.month))+'</h3>');
       }
-      const weekNotice=currentWeek
-        ? `<div id="designWeekDeadline" data-week-from="${week[0].date}" data-week-to="${weekEnd.toISOString().slice(0,10)}" ${hasWeekBookingV337(week[0].date,weekEnd.toISOString().slice(0,10))?'hidden':''}><strong>Nestihli ste rezervovať miesto do nedele?</strong><span>Kliknite na deň, odošlite žiadosť a počkajte na schválenie v prípade voľného miesta.</span></div>`
-        : '';
       // All real available dates stay visible in one compact calendar.
       const monday=row.monday,friday=smartShiftV199(monday,4);
-      const heading=row.kind==='current'&&row.firstForKind?'Tento týždeň · '+compactDateV37(monday)+' – '+compactDateV37(friday):'';
-      groups.push(`<div class="booking-picker-week-v127 calendar-row-v438" data-calendar-kind="${row.kind}" data-week-from="${monday}" data-first-date="${week[0].date}" data-week-to="${row.weekEnd}"><div class="booking-picker-week-label-v127">${heading}</div><div class="booking-picker-future-body-v235">${weekNotice}${calendarWeekLettersV438()}<div class="booking-picker-week-days-v127">${Array.from({length:(new Date(week[0].date+'T12:00:00Z').getUTCDay()+6)%7},()=>'<div class="calendar-empty-v438" aria-hidden="true"></div>').join('')}${week.map(d=>{
+      const heading=''; // The month heading and the two existing reminders supply all context.
+      groups.push(`<div class="booking-picker-week-v127 calendar-row-v438" data-calendar-kind="${row.kind}" data-week-from="${monday}" data-first-date="${week[0].date}" data-week-to="${row.weekEnd}"><div class="booking-picker-week-label-v127">${heading}</div><div class="booking-picker-future-body-v235">${calendarWeekLettersV438()}<div class="booking-picker-week-days-v127">${Array.from({length:(new Date(week[0].date+'T12:00:00Z').getUTCDay()+6)%7},()=>'<div class="calendar-empty-v438" aria-hidden="true"></div>').join('')}${week.map(d=>{
         const existing=pickerDogsV254().some(x=>bookingFor(x.id,d.date)),deadlineClosed=pickerDogsV254().some(x=>bookingDeadlineClosedV95(d.date,x)),closed=d.bookings_open===false,full=Number(d.available)<pickerDogsV254().length;
         const past=d.date<=bratislavaClockV95().date;
         const lateContact=(deadlineClosed||full)&&!existing&&!past&&!closed;
@@ -3493,6 +3531,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     document.documentElement.classList.add('booking-picker-open-v37');
     $('bookingPickerV37').scrollTop=0;
     window.customerDesignPickerOpened?.();
+    schedulePickerCutoffV442();
   }
   window.openBookingPickerV37=openPickerV37;
   window.closeBookingPickerV305=()=>{closePickerV37();window.customerDesignPickerClosed?.();};
@@ -3504,9 +3543,16 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     return cancelBooking(button);
   };
   window.customerDesignRefreshDeadline=()=>updateBookingDeadlineNoticeV127();
+  window.customerOverviewBookingGuidanceV442=()=>{
+    const clock=bratislavaClockV95(),from=smartMondayV199(clock.date),to=smartShiftV199(from,6);
+    const next=updateBookingDeadlineNoticeV127();
+    const missed=!pickerWeekEndedV442(clock)&&!hasWeekBookingV337(from,to);
+    const sundayAfterDeadline=new Date(clock.date+'T12:00:00Z').getUTCDay()===0&&clock.minutes>=1200;
+    return {from,to,missed,next:{...next,hidden:next.hidden||missed||sundayAfterDeadline}};
+  };
   window.customerDesignRefreshCalendarV351=()=>renderPickerV37();
   window.customerDesignCanEditTaxi=row=>allowedTaxiEditV201(row);
-  function closePickerV37(){if(submittingV37)return;pickerEpochV157++;$('bookingPickerV37')?.classList.add('hidden');document.documentElement.classList.remove('booking-picker-open-v37');window.customerDesignPickerClosed?.();pickerErrorV95('');if(pendingPassRenewalV95){const renewal=pendingPassRenewalV95;pendingPassRenewalV95=null;setTimeout(()=>window.showPassRenewalAfterBookingV94?.(renewal.dogId,renewal.date),100)}}
+  function closePickerV37(){if(submittingV37)return;clearTimeout(pickerCutoffTimerV442);pickerCutoffTimerV442=null;pickerEpochV157++;$('bookingPickerV37')?.classList.add('hidden');document.documentElement.classList.remove('booking-picker-open-v37');window.customerDesignPickerClosed?.();pickerErrorV95('');if(pendingPassRenewalV95){const renewal=pendingPassRenewalV95;pendingPassRenewalV95=null;setTimeout(()=>window.showPassRenewalAfterBookingV94?.(renewal.dogId,renewal.date),100)}}
 
   async function submitPickerV37(){
     const dog=selectedDog(),dates=[...selectedDatesV37].sort();

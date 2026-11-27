@@ -1210,3 +1210,36 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 .customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438:last-of-type{margin-bottom:0!important}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .calendar-weekletters-v438{margin:0 0 5px!important;gap:5px!important}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-picker-week-days-v127{margin:0!important}
+
+/* v442: one compact calendar surface; month headings, real week rows and existing notices. */
+.customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438{margin:0 0 7px!important;padding:2px 6px!important;background:transparent!important;box-shadow:none!important;border:0!important;border-radius:0!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438:last-of-type{margin-bottom:0!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-v438:not(:first-child){margin-top:14px}
+.customer-design #bookingPickerV37 #designWeekDeadline{background:#fff4cf!important;border-color:#e4c772!important;color:#694908!important}
+
+/* v442: deadline guidance only in My reservations, not in the booking picker. */
+#designNearest .design-booking-guidance-v442[hidden],#designNearest .design-booking-guidance-v442>[hidden]{display:none!important}
+#designNearest #designReservationNotice:not([hidden]){display:block!important;text-align:center;margin:5px 0 9px;padding:8px 10px}
+#designNearest #designWeekDeadline:not([hidden]){display:block!important;background:#fff4cf;border:1px solid #e4c772;color:#694908;text-align:center;margin:5px 0 9px;padding:8px 10px;border-radius:12px}
+#designNearest #designWeekDeadline span{font-size:11px}
+
+/* v442 approved finish: solid capacity tiles, hairline only between adjacent weeks in the same month. */
+.customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438+.calendar-row-v438{border-top:1px solid rgba(112,91,69,.15)!important;padding-top:3px!important}
+
+/* v442: compact rounded-rectangle dock. Real backdrop blur; no wallpaper copy or noise in the dock. */
+.customer-design .bottom-nav.lg-v3-host{border-radius:19px!important;padding:3px!important;gap:2px!important;width:min(460px,calc(100% - 16px))!important;max-width:calc(100% - 16px)!important;box-sizing:border-box!important;overflow:visible!important}
+html.customer-design .bottom-nav>.lg-v3-material[data-renderer="fallback"]{border:1px solid rgba(255,255,255,.85)!important;border-radius:inherit!important;background:linear-gradient(145deg,rgba(255,255,255,.82),rgba(247,248,251,.68))!important;box-shadow:0 6px 24px rgba(32,42,59,.13),inset 0 1px 2px rgba(255,255,255,.9)!important;-webkit-backdrop-filter:blur(20px) saturate(160%)!important;backdrop-filter:blur(20px) saturate(160%)!important}
+.customer-design .bottom-nav>.lg-v3-material::after,.customer-design .bottom-nav>.lg-v3-material>.lg-v3-output{display:none!important}
+.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#navBookAddV220,#customerMessagesV363,#customerShopV414){height:44px!important;min-height:44px!important;max-height:44px!important;border-radius:13px!important;gap:2px!important;padding:2px 1px!important;background:transparent!important;box-shadow:none!important;border:0!important;color:#566170!important;font-weight:750!important;white-space:nowrap!important}
+.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#customerMessagesV363,#customerShopV414) svg,.customer-design .bottom-nav #navBookAddV220 svg{width:22px!important;height:22px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round;stroke-linejoin:round}
+.customer-design .bottom-nav #navBookAddV220 .booking-fab-symbol-v220{width:22px!important;min-width:22px!important;max-width:22px!important;height:22px!important;flex:0 0 22px!important;background:transparent!important;box-shadow:none!important;color:inherit!important}
+.customer-design .bottom-nav #navBookAddV220:not(:disabled):not([aria-busy=true]){box-shadow:none!important;color:#bd4d09!important;background:rgba(255,116,22,.12)!important}
+.customer-design:not(.design-reservations-open) .bottom-nav :is(#navBooking,#navDog,#navStaff).active,.customer-design.design-reservations-open .bottom-nav #navBookAddV220{color:#bd4d09!important;background:rgba(255,116,22,.18)!important}
+.customer-design.design-reservations-open .bottom-nav #navBooking.active{color:#566170!important;background:transparent!important}
+.customer-design .bottom-nav #navBookAddV220 .booking-action-label-v369{color:inherit!important;text-align:center!important}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){html.customer-design .bottom-nav>.lg-v3-material[data-renderer="fallback"]{background:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){html.customer-design .bottom-nav>.lg-v3-material[data-renderer="fallback"]{background:#fff!important}}
+
+/* Keep the previously approved opaque-enough Android fallback beneath the glass gradient. */
+html.customer-android.customer-design .bottom-nav>.lg-v3-material[data-renderer="fallback"]{background-color:rgba(255,255,255,.92)!important}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){html.customer-android.customer-design .bottom-nav>.lg-v3-material[data-renderer="fallback"]{background:#fff!important}}

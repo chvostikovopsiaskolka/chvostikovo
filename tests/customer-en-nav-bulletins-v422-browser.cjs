@@ -8,6 +8,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
  try{
   for(const width of [320,390]){
    const {page,context,errors}=await fixture(browser,1,width,engine.name());
+   await page.clock.setFixedTime(new Date('2026-11-24T10:00:00Z'));
    await page.evaluate(()=>{
     const today=new Date().toISOString().slice(0,10),monday=new Date(today+'T12:00:00Z'),weekday=monday.getUTCDay();
     monday.setUTCDate(monday.getUTCDate()-(weekday===0?6:weekday-1));
@@ -26,10 +27,10 @@ const fixture=require('./liquid-v3-fixture.cjs');
    await expect(page.locator('#customerShopV414')).toHaveText(/Shop/);
    await page.locator('#navBookAddV220').click();
    await page.waitForFunction(()=>document.querySelector('#bookingPickerV37')&&!document.querySelector('#bookingPickerV37').classList.contains('hidden'));
-   await page.waitForFunction(()=>document.querySelector('.booking-picker-week-label-v127')?.textContent?.includes('This week'));
-   assert.match(await page.locator('#bookingPickerTitleV37').innerText(),/Bookings|Choose a day/);
-   assert.match(await page.locator('.booking-picker-week-label-v127').first().innerText(),/This week/);
-   assert.equal(await page.locator('.booking-picker-week-label-v127').last().textContent(),'');assert.match(await page.locator('#designReservationNotice').textContent(),/Please book by Sunday/);
+   await expect(page.locator('#bookingPickerTitleV37')).toHaveText(/Bookings|Choose a day/);
+   assert.equal(await page.locator('#bookingPickerV37 #designReservationNotice,#bookingPickerV37 #designWeekDeadline').count(),0);
+   assert.equal(await page.locator('.booking-picker-week-label-v127').first().textContent(),'');
+   await expect(page.locator('#designNearest #designWeekDeadline')).toContainText(/Missed the Sunday booking deadline/);
    // Late-contact days remain clickable but open their own contact flow after
    // the 19:00 deadline. This test exercises the ordinary booking/taxi form.
    const available=page.locator('.booking-day-v37:not(:disabled):not([data-contact="true"])').first();
