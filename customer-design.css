@@ -1206,14 +1206,14 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 .compact-overview-grid-v437 button[data-level=limited]:not([aria-pressed=true]){background:#ffdf75;color:#694908;border-color:#dfb43c}
 
 /* v440: each week has its own liquid boundary and aligned weekday legend. */
-.customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438{margin:0 0 8px!important;padding:10px 6px!important;background:#ffffff24!important;box-shadow:inset 0 1px 0 #ffffffb0,inset 0 0 0 1px #b58b713b,0 4px 10px #73543a12!important;border-radius:15px!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438:last-of-type{margin-bottom:0!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,#bookingPickerDaysV37 .calendar-month-pane-v445)>.calendar-row-v438{margin:0 0 8px!important;padding:10px 6px!important;background:#ffffff24!important;box-shadow:inset 0 1px 0 #ffffffb0,inset 0 0 0 1px #b58b713b,0 4px 10px #73543a12!important;border-radius:15px!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,#bookingPickerDaysV37 .calendar-month-pane-v445)>.calendar-row-v438:last-of-type{margin-bottom:0!important}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .calendar-weekletters-v438{margin:0 0 5px!important;gap:5px!important}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-picker-week-days-v127{margin:0!important}
 
 /* v442: one compact calendar surface; month headings, real week rows and existing notices. */
-.customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438{margin:0 0 7px!important;padding:2px 6px!important;background:transparent!important;box-shadow:none!important;border:0!important;border-radius:0!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438:last-of-type{margin-bottom:0!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,#bookingPickerDaysV37 .calendar-month-pane-v445)>.calendar-row-v438{margin:0 0 7px!important;padding:2px 6px!important;background:transparent!important;box-shadow:none!important;border:0!important;border-radius:0!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,#bookingPickerDaysV37 .calendar-month-pane-v445)>.calendar-row-v438:last-of-type{margin-bottom:0!important}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-v438:not(:first-child){margin-top:14px}
 .customer-design #bookingPickerV37 #designWeekDeadline{background:#fff4cf!important;border-color:#e4c772!important;color:#694908!important}
 
@@ -1224,7 +1224,7 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 #designNearest #designWeekDeadline span{font-size:11px}
 
 /* v442 approved finish: solid capacity tiles, hairline only between adjacent weeks in the same month. */
-.customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438+.calendar-row-v438{border-top:1px solid rgba(112,91,69,.15)!important;padding-top:3px!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,#bookingPickerDaysV37 .calendar-month-pane-v445)>.calendar-row-v438+.calendar-row-v438{border-top:1px solid rgba(112,91,69,.15)!important;padding-top:3px!important}
 
 /* v442: compact rounded-rectangle dock. Real backdrop blur; no wallpaper copy or noise in the dock. */
 .customer-design .bottom-nav.lg-v3-host{border-radius:19px!important;padding:3px!important;gap:2px!important;width:min(460px,calc(100% - 16px))!important;max-width:calc(100% - 16px)!important;box-sizing:border-box!important;overflow:visible!important}
@@ -1259,3 +1259,22 @@ html.customer-design.design-reservations-open .bottom-nav #navBookAddV220:not(:d
 html.customer-design:not(.design-reservations-open) .bottom-nav :is(#navBooking,#navDog,#navStaff).active :is(span,svg),html.customer-design.design-reservations-open .bottom-nav #navBookAddV220 :is(span,svg){color:inherit!important}
 html.customer-design :is(#designTicket.design-ticket,#designNearest.design-nearest){box-shadow:0 7px 19px rgba(89,58,40,.16),0 2px 6px rgba(89,58,40,.10),0 0 0 1px rgba(173,138,112,.19),inset 0 1px 2px rgba(255,255,255,.82)!important}
 html.customer-design #designTicket .design-ticket-usage .design-validity{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;color:#247646!important;font-weight:800!important}
+
+/* v445 month rail: the next month peeks into view; keep the outer liquid surface. */
+#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-controls-v445{display:flex;align-items:center;gap:6px;min-width:0;margin:0 0 8px;color:#737b86;font-size:11px}
+#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-controls-v445 span{flex:1;min-width:0}
+#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-controls-v445 button{width:44px;height:44px;border:1px solid #dcd5cd;border-radius:12px;background:#ffffffa8;color:#5d5148;font-size:24px;line-height:1;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-controls-v445 button:disabled{opacity:.35}
+#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-rail-v445{position:relative;display:flex;align-items:flex-start;gap:8px;max-width:100%;min-width:0;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:5px}
+#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445{flex:0 0 calc(100% - 24px);min-width:0;box-sizing:border-box;scroll-snap-align:start}
+#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445:last-child{flex-basis:100%}
+#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445>.calendar-month-v438{margin-top:0}
+#bookingPickerV37 #bookingPickerDaysV37 .calendar-opening-preview-v445{border:1px solid #e1d8ce;border-radius:15px;padding:8px 6px;background:#ffffff38}
+.calendar-preview-note-v445{font-size:11px;color:#73706a;line-height:1.4;margin:4px 0 10px}
+.calendar-opening-grid-v445{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.calendar-opening-letter-v445{text-align:center;font-size:10px;color:#737b86}
+.calendar-opening-day-v445{min-width:0;box-sizing:border-box;min-height:48px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1px solid #dedde0;border-radius:10px;background:#f5f4f3;color:#68666b;padding:3px 1px}
+.calendar-opening-day-v445 small{font-size:9px;overflow-wrap:anywhere;line-height:1.15}
+.calendar-opening-day-v445[data-opening=closed]{background:#e8e8eb;color:#555963;border-color:#cdd0d5}
+.calendar-opening-day-v445[data-opening=open]{background:#e7f5eb;color:#17623b;border-color:#a5d8b5}
+@media(max-width:350px){#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445:not(:last-child){flex-basis:calc(100% - 16px)}}

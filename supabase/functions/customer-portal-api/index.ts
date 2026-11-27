@@ -357,13 +357,16 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
   const [year, month] = today.split('-').map(Number);
   const endDate = new Date(Date.UTC(year, month + 1, 0, 12)).toISOString().slice(0, 10);
   const dates = nextWeekdays(firstMonday, 50).filter(date => date <= endDate);
+  // Read only January opening overrides, never extend availability or the reservation horizon.
+  const openingPreviewDates = today >= '2026-11-27' && today < '2027-01-01' ? nextWeekdays('2027-01-01', 23).filter(date => date < '2027-02-01') : [];
+  const openingSettingsEnd = openingPreviewDates.length ? openingPreviewDates[openingPreviewDates.length - 1] : dates[dates.length - 1];
   const rosterDates = new Set(dates.filter(date=>date<=addDays(today,21)).slice(0,20));
   const monday = dates[0];
   const friday = dates[dates.length - 1];
   const results = await Promise.all([
     availabilityRows('reservations?reservation_date=gte.' + monday + '&reservation_date=lte.' + friday + '&status=in.(booked,attended)&select=id,reservation_date,dog_id'),
     availabilityRows('customer_booking_requests?reservation_date=gte.' + monday + '&reservation_date=lte.' + friday + '&status=eq.pending&select=id,reservation_date'),
-    rest('portal_day_settings?day=gte.' + monday + '&day=lte.' + friday + '&select=day,capacity,bookings_open,note'),
+    rest('portal_day_settings?day=gte.' + monday + '&day=lte.' + openingSettingsEnd + '&select=day,capacity,bookings_open,note'),
     linkedDogRows ? Promise.resolve(linkedDogRows) : linkedDogs(userId),
     rest('customer_booking_requests?user_id=eq.' + encodeURIComponent(userId) + '&reservation_date=gte.' + monday + '&reservation_date=lte.' + friday + '&status=eq.approved&select=reservation_date'),
     getAppSetting('daycare_default_capacity'),
@@ -438,7 +441,8 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
       anonymous_dogs: viewerApproved ? Math.max(0, booked - visibleDogs.length) : booked,
     };
   }));
-  return { monday, friday, deadline_label: 'deň vopred 19:00', days };
+  const opening_preview = openingPreviewDates.map(date => ({ date, bookings_open: settingMap.get(date)?.bookings_open === false ? false : settingMap.get(date)?.bookings_open === true ? true : null }));
+  return { monday, friday, deadline_label: 'deň vopred 19:00', days, opening_preview };
 }
 
 async function customerBootstrap(user: Json, token: string) {
