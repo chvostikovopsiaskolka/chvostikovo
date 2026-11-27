@@ -211,6 +211,18 @@
       const hint=document.createElement('small');hint.textContent='Výber môžete zmeniť. Rezerváciu odošlete sami.';host.append(hint);
     }
   }
+  function overviewGuidanceV442(root){
+    const model=window.customerOverviewBookingGuidanceV442?.();if(!model)return;
+    const host=root.querySelector('.design-visit-empty')||root;
+    let block=root.querySelector('.design-booking-guidance-v442');
+    if(!block){block=document.createElement('div');block.className='design-booking-guidance-v442';block.innerHTML='<div id="designReservationNotice" class="design-empty-reminder"></div><div id="designWeekDeadline"><strong>Nestihli ste rezervovať miesto do nedele?</strong><span>Kliknite na deň, odošlite žiadosť a počkajte na schválenie v prípade voľného miesta.</span></div>';}
+    if(block.parentElement!==host){const anchor=host.querySelector(':scope > .design-empty-heading,:scope > .design-visits-title');if(anchor)anchor.after(block);else host.prepend(block);}
+    const next=block.querySelector('#designReservationNotice'),missed=block.querySelector('#designWeekDeadline');
+    if(next.dataset.deadline!==model.next.deadline){next.textContent=model.next.text;next.dataset.deadline=model.next.deadline;}
+    next.dataset.weekFrom=model.next.from;next.dataset.weekTo=model.next.to;next.hidden=!!model.next.hidden;
+    missed.dataset.weekFrom=model.from;missed.dataset.weekTo=model.to;missed.hidden=!model.missed;
+    block.hidden=next.hidden&&missed.hidden;
+  }
   function nearest() {
     if(!state.data)return;
     if(!selectedDog()){byId('designNearest')?.remove();byId('designTicket')?.remove();byId('designBulletinTitle')?.remove();return;}
@@ -253,11 +265,12 @@
     }else{
       const key=all.length?'outside-range':'empty';
       if(root.dataset.date!==key||root.querySelector('.design-overview-carousel')){
-        root.dataset.date=key;root.innerHTML=`<div class="design-visits-title"><h2>📅 Moje rezervácie</h2></div><article class="design-visit-card design-visit-empty"><p class="design-empty-heading">${all.length?'Najbližšia rezervácia je neskôr než o dva týždne.':'Zatiaľ nemáte vytvorenú rezerváciu.'}</p><div class="design-empty-reminder"></div>${all.length?'<button type="button" class="btn full">Moje rezervácie</button>':''}</article>`;
+        root.dataset.date=key;root.innerHTML=`<div class="design-visits-title"><h2>📅 Moje rezervácie</h2></div><article class="design-visit-card design-visit-empty"><p class="design-empty-heading">${all.length?'Najbližšia rezervácia je neskôr než o dva týždne.':'Zatiaľ nemáte vytvorenú rezerváciu.'}</p>${all.length?'<button type="button" class="btn full">Moje rezervácie</button>':''}</article>`;
         root.querySelector('button')?.addEventListener('click',()=>window.openBookingPickerV37?.());
       }
-      const target=root.querySelector('.design-empty-reminder'),notice=byId('deadlineText');target.textContent=notice?.textContent?.trim()||'Prosíme o rezerváciu miesta do nedele 20:00.';target.hidden=!!notice?.classList.contains('hidden');target.classList.remove('design-deadline-closed');compactOverviewV437(root);
+      compactOverviewV437(root);
     }
+    overviewGuidanceV442(root);
     byId('designBulletinTitle')?.remove();
     const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile');if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);
     window.customerRefreshNoticeOverviewV376?.();
@@ -297,17 +310,8 @@
     const legacy=byId('designMyBookings');
     if(legacy){const weeks=byId('weekDays');if(weeks)byId('bookingTab')?.append(weeks);legacy.remove();}
     byId('designBookingCarousel')?.remove();byId('designBookingSwipeHint')?.remove();
-    const reminder=window.customerDesignRefreshDeadline?.();
-    const calendar=byId('bookingPickerDaysV37');
-    // Reattach exactly one reminder under the matching next-week heading.
-    let notice=byId('designReservationNotice');if(!notice){notice=document.createElement('div');notice.id='designReservationNotice';}
-    const nextWeek=[...calendar.querySelectorAll('.booking-picker-week-v127')].find(week=>week.dataset.weekFrom===reminder?.from);
-    const nextHeading=nextWeek?.querySelector('.booking-picker-week-label-v127');
-    if(nextHeading)nextHeading.after(notice);else calendar.append(notice);
-    notice.hidden=!nextHeading||!!reminder?.hidden;notice.textContent=reminder?.text||'';
-    notice.dataset.weekFrom=reminder?.from||'';notice.dataset.weekTo=reminder?.to||'';notice.dataset.deadline=reminder?.deadline||'';
-    // The core calendar owns the Monday-to-Sunday notice and its visibility.
-    const weekNotice=byId('designWeekDeadline');if(weekNotice){weekNotice.hidden=!!window.customerDesignHasWeekBooking?.(weekNotice.dataset.weekFrom,weekNotice.dataset.weekTo);weekNotice.closest('.booking-picker-week-v127')?.querySelector('.booking-picker-week-label-v127')?.after(weekNotice);}
+    // Reservation guidance is owned exclusively by the Overview card.
+    picker.querySelectorAll('#designReservationNotice,#designWeekDeadline').forEach(node=>node.remove());
 
     const selectedSection=byId('bookingPickerTaxiSectionV91');
     const taxiTitle=byId('designSelectedDaysTitle')||selectedSection?.querySelector('.booking-picker-taxi-title-v37');

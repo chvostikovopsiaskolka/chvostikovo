@@ -1216,3 +1216,9 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 .customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438:last-of-type{margin-bottom:0!important}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-v438:not(:first-child){margin-top:14px}
 .customer-design #bookingPickerV37 #designWeekDeadline{background:#fff4cf!important;border-color:#e4c772!important;color:#694908!important}
+
+/* v442: deadline guidance only in My reservations, not in the booking picker. */
+#designNearest .design-booking-guidance-v442[hidden],#designNearest .design-booking-guidance-v442>[hidden]{display:none!important}
+#designNearest #designReservationNotice:not([hidden]){display:block!important;text-align:center;margin:5px 0 9px;padding:8px 10px}
+#designNearest #designWeekDeadline:not([hidden]){display:block!important;background:#fff4cf;border:1px solid #e4c772;color:#694908;text-align:center;margin:5px 0 9px;padding:8px 10px;border-radius:12px}
+#designNearest #designWeekDeadline span{font-size:11px}
