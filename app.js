@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v444';
-const APP_VERSION='2.0.117';
+const APP_BUILD='v445';
+const APP_VERSION='2.0.118';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -3049,6 +3049,59 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   function calendarWeekLettersV438(){
     return '<div class="calendar-weekletters-v438" aria-hidden="true">'+['P','U','S','Š','P'].map((s,i)=>'<span data-weekday-index="'+i+'">'+s+'</span>').join('')+'</div>';
   }
+
+  // Seasonal read-only opening schedule: never merge preview dates into bookable days.
+  function calendarOpeningPreviewV445(today,clock,availability){
+    if(today<'2026-11-27'||today>='2027-01-01'||calendarMonthEndV438(today,clock)!=='2026-12-31'||!Array.isArray(availability?.opening_preview))return [];
+    const rows=new Map(availability.opening_preview.map(r=>[r.date,r.bookings_open]));
+    const out=[];for(let d=new Date('2027-01-01T12:00:00Z');d.getUTCMonth()===0;d.setUTCDate(d.getUTCDate()+1)){
+      if(d.getUTCDay()<1||d.getUTCDay()>5)continue;
+      const date=d.toISOString().slice(0,10),value=rows.get(date);
+      out.push({date,opening:value===false?'closed':value===true?'open':rows.has(date)&&value===null?'usual':'unknown'});
+    }
+    return out;
+  }
+  let calendarMonthSelectionV445='';
+  function mountCalendarMonthsV445(root,groups,preview){
+    root.innerHTML=groups.join('');
+    const sections=[];
+    let section=null;
+    for(const node of [...root.children]){
+      if(node.matches('.calendar-month-v438')){
+        section=document.createElement('section');section.className='calendar-month-pane-v445';section.dataset.month=node.dataset.month||'';sections.push(section);
+      }
+      if(section)section.append(node);
+    }
+    const en=document.documentElement.lang==='en';
+    if(preview.length){
+      const pane=document.createElement('section');pane.className='calendar-month-pane-v445 calendar-opening-preview-v445';pane.dataset.month='2027-01';
+      const title=document.createElement('h3');title.className='calendar-month-v438';title.textContent=en?'January 2027':'Január 2027';pane.append(title);
+      const note=document.createElement('p');note.className='calendar-preview-note-v445';note.textContent=en?'Opening hours preview · Booking opens later. Holiday exceptions may change.':'Náhľad prevádzky · Rezervácie neskôr. Sviatočný režim sa môže upraviť.';pane.append(note);
+      const grid=document.createElement('div');grid.className='calendar-opening-grid-v445';
+      for(const letter of en?['M','T','W','T','F']:['P','U','S','Š','P']){const el=document.createElement('span');el.className='calendar-opening-letter-v445';el.textContent=letter;grid.append(el)}
+      for(let i=1;i<new Date(preview[0].date+'T12:00:00Z').getUTCDay();i++){const blank=document.createElement('span');blank.setAttribute('aria-hidden','true');grid.append(blank)}
+      const labels=en?{closed:'Closed',open:'Open',usual:'Usual hours',unknown:'Unconfirmed'}:{closed:'Zatvorené',open:'Otvorené',usual:'Bežný režim',unknown:'Nepotvrdené'};
+      for(const row of preview){const tile=document.createElement('div');tile.className='calendar-opening-day-v445';tile.dataset.previewDate=row.date;tile.dataset.opening=row.opening;const day=document.createElement('strong');day.textContent=Number(row.date.slice(8))+'.';const label=document.createElement('small');label.textContent=labels[row.opening];tile.append(day,label);grid.append(tile)}
+      pane.append(grid);sections.push(pane);
+    }
+    if(!sections.length)return;
+    if(sections.length===1){root.append(...sections[0].children);calendarMonthSelectionV445=sections[0].dataset.month;return}
+    const controls=document.createElement('div');controls.className='calendar-month-controls-v445';
+    const hint=document.createElement('span');hint.textContent=en?'Swipe for the next month':'Posuňte doľava pre ďalší mesiac';
+    const prev=document.createElement('button'),next=document.createElement('button');
+    for(const [button,label,symbol] of [[prev,en?'Previous month':'Predchádzajúci mesiac','‹'],[next,en?'Next month':'Ďalší mesiac','›']]){button.type='button';button.setAttribute('aria-label',label);button.textContent=symbol}
+    controls.append(hint,prev,next);
+    const rail=document.createElement('div');rail.className='calendar-month-rail-v445';rail.setAttribute('role','region');rail.setAttribute('aria-label',en?'Calendar months':'Mesiace kalendára');rail.tabIndex=0;
+    rail.append(...sections);root.append(controls,rail);
+    const offset=i=>sections[i].offsetLeft-sections[0].offsetLeft;
+    const index=()=>sections.reduce((best,p,i)=>Math.abs(offset(i)-rail.scrollLeft)<Math.abs(offset(best)-rail.scrollLeft)?i:best,0);
+    const sync=()=>{const i=index();calendarMonthSelectionV445=sections[i].dataset.month;prev.disabled=i===0;next.disabled=i===sections.length-1};
+    const go=i=>{const target=Math.max(0,Math.min(sections.length-1,i));rail.scrollLeft=offset(target);sync()};
+    prev.onclick=()=>go(index()-1);next.onclick=()=>go(index()+1);rail.addEventListener('scroll',sync,{passive:true});
+    const oldIndex=sections.findIndex(p=>p.dataset.month===calendarMonthSelectionV445);
+    go(oldIndex<0?0:oldIndex);
+  }
+
   function compactEligibleV437(date,dogs,days){
     const day=days.find(d=>d.date===date),today=bratislavaClockV95().date;
     return !!day&&date>today&&date<=calendarMonthEndV438(today)&&day.bookings_open!==false&&Number(day.available)>=dogs.length&&dogs.length>0&&dogs.every(d=>!bookingFor(d.id,date)&&!bookingDeadlineClosedV95(date,d));
@@ -3441,7 +3494,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     for(const row of rows){
       const week=row.days,weekEnd=new Date(row.weekEnd+'T12:00:00Z'),currentWeek=row.kind==='current'&&row.firstForKind;
       if(activeMonth!==row.month){
-        activeMonth=row.month;groups.push('<h3 class="calendar-month-v438">'+esc(calendarMonthNameV438(row.month))+'</h3>');
+        activeMonth=row.month;groups.push('<h3 class="calendar-month-v438" data-month="'+esc(row.month)+'">'+esc(calendarMonthNameV438(row.month))+'</h3>');
       }
       // All real available dates stay visible in one compact calendar.
       const monday=row.monday,friday=smartShiftV199(monday,4);
@@ -3459,7 +3512,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         return bookingDayMarkupV360(d,{selected,existing,lateContact,full,disabled,ownStatus,closed,stateText,taxiToggle});
       }).join('')}${Array.from({length:Math.max(0,5-(new Date(week[week.length-1].date+'T12:00:00Z').getUTCDay()))},()=>'<div class="calendar-empty-v438" aria-hidden="true"></div>').join('')}</div>${expandedTaxiDateV201&&week.some(d=>d.date===expandedTaxiDateV201)&&selectedDatesV37.has(expandedTaxiDateV201)?`<div class="booking-taxi-inline-v201" data-taxi-date="${expandedTaxiDateV201}"><p class="booking-taxi-inline-title-v201">🚕 Taxi · ${esc(skDay(expandedTaxiDateV201))} ${esc(skDate(expandedTaxiDateV201))}</p>${taxiChoicesV254(expandedTaxiDateV201)}</div>`:' '}</div></div>`);
     }
-    $('bookingPickerDaysV37').innerHTML=groups.join('');
+    mountCalendarMonthsV445($('bookingPickerDaysV37'),groups,calendarOpeningPreviewV445(today,clock,state.data?.availability));
     $('bookingPickerDaysV37').querySelectorAll('[data-future-toggle]').forEach(b=>b.addEventListener('click',()=>{futureWeekExpandedV235=b.getAttribute('aria-expanded')!=='true';renderPickerV37()}));
     $('bookingPickerDaysV37').querySelectorAll('.booking-day-v37:not(:disabled)').forEach(btn=>btn.addEventListener('click',async()=>{
       if(checkingRenewalV157||submittingV37)return;
@@ -3529,6 +3582,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     }
     selectedDatesV37.clear();selectedTaxiByDateV91.clear();expandedTaxiDateV201=null;renewalCheckedDogV157=null;smartDaysDismissedV199=false;futureWeekExpandedV235=false;pickerErrorV95('');
     compactSeedPickerV437(pickerDaysV393(),extraDate);
+    calendarMonthSelectionV445='';
     renderPickerV37();
     $('bookingPickerV37').classList.remove('hidden');
     document.documentElement.classList.add('booking-picker-open-v37');
