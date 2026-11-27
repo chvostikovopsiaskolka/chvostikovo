@@ -3018,12 +3018,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     return dates.length?{dates,sourceWeek:proposals[0].sourceWeek}:null;
   }
   let compactSeedV437=null;
-  // Month unlock follows the second calendar row containing working days.
+  // Month unlock follows the second displayed calendar row, owned by its Wednesday.
   // Thursday 20:00 Bratislava time is a display boundary, never a server write rule.
   function calendarMonthEndV438(today,clock=bratislavaClockV95()){
     const [y,m]=today.split('-').map(Number);
     const first=new Date(Date.UTC(y,m-1,1,12));
-    while(first.getUTCDay()===0||first.getUTCDay()===6)first.setUTCDate(first.getUTCDate()+1);
+    first.setUTCDate(first.getUTCDate()+(3-first.getUTCDay()+7)%7); // first Wednesday in month
     const unlock=smartShiftV199(smartMondayV199(first.toISOString().slice(0,10)),10);
     const open=today>unlock||(today===unlock&&clock.minutes>=1200);
     return new Date(Date.UTC(y,m+(open?1:0),0,12)).toISOString().slice(0,10);
@@ -3386,7 +3386,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const attended=dogs.length>0&&dogs.every(d=>(state.data?.visits||[]).some(v=>Number(v.dog_id)===Number(d.id)&&v.visit_date>=monday&&v.visit_date<=today));
     // Keep the existing visit-based rule, plus the same Thursday cutoff for all dogs.
     // Filter by real dates, not a five-element offset: sparse availability must not skip next week.
-    return attended||pickerWeekEndedV442(clock)?days.filter(day=>day.date>sunday):days;
+    const start=attended||pickerWeekEndedV442(clock)?smartShiftV199(sunday,1):monday;
+    return days.filter(day=>day.date>=start);
   }
   let pickerCutoffTimerV442=null;
   function schedulePickerCutoffV442(){

@@ -121,6 +121,11 @@ async function assertPawsTransmit(page,selector,background){
   assert.equal(await page.locator('[data-date="2027-01-29"].booking-day-v37').count(),1);
   assert.deepEqual(await page.locator('#bookingPickerDaysV37 .calendar-month-v438').allTextContents(),['December','Január']);
   assert.equal(await page.locator('[data-week-from="2026-12-28"] .booking-day-v37').count(),5);
+  await page.evaluate(()=>{const days=state.data.availability.days;for(let d=new Date('2027-02-01T12:00:00Z');d<=new Date('2027-02-28T12:00:00Z');d.setUTCDate(d.getUTCDate()+1))if(d.getUTCDay()>=1&&d.getUTCDay()<=5)days.push({date:d.toISOString().slice(0,10),available:8,capacity:10,occupied:2,bookings_open:true,dogs:[]});bratislavaClockV95=()=>({date:'2027-01-07',minutes:1200});window.customerDesignRefreshCalendarV351();});
+  assert.equal(await page.locator('[data-date="2027-02-01"].booking-day-v37').count(),0,'January begins Friday; December crossing row does not count toward January two rows');
+  await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2027-01-14',minutes:1200});window.customerDesignRefreshCalendarV351();});
+  assert.equal(await page.locator('[data-date="2027-02-01"].booking-day-v37').count(),1,'February opens after two January rows');
+
   await page.evaluate(()=>{state.data.availability.days=state.data.availability.days.filter(d=>d.date<='2026-12-31');bratislavaClockV95=()=>({date:'2026-11-26'});window.customerDesignRefreshCalendarV351();});
   await page.evaluate(()=>{for(const [date,occupied] of [['2026-12-07',0],['2026-12-08',5],['2026-12-09',6],['2026-12-10',10],['2026-12-11',11]]){const d=state.data.availability.days.find(x=>x.date===date);Object.assign(d,{occupied,capacity:11,available:11-occupied});}window.customerDesignRefreshCalendarV351();});
   const tiles=await page.locator('[data-week-from="2026-12-07"] .booking-day-v37').evaluateAll(nodes=>nodes.map(el=>({h:el.getBoundingClientRect().height,level:el.dataset.capacityLevel,bg:getComputedStyle(el).backgroundColor,fg:getComputedStyle(el.querySelector('strong')).color,count:getComputedStyle(el.querySelector(':scope > span')).display,dot:!!el.querySelector('.design-capacity-dot')})));
