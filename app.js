@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v445';
-const APP_VERSION='2.0.118';
+const APP_BUILD='v446';
+const APP_VERSION='2.0.119';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -3088,16 +3088,14 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(sections.length===1){root.append(...sections[0].children);calendarMonthSelectionV445=sections[0].dataset.month;return}
     const controls=document.createElement('div');controls.className='calendar-month-controls-v445';
     const hint=document.createElement('span');hint.textContent=en?'Swipe for the next month':'Posuňte doľava pre ďalší mesiac';
-    const prev=document.createElement('button'),next=document.createElement('button');
-    for(const [button,label,symbol] of [[prev,en?'Previous month':'Predchádzajúci mesiac','‹'],[next,en?'Next month':'Ďalší mesiac','›']]){button.type='button';button.setAttribute('aria-label',label);button.textContent=symbol}
-    controls.append(hint,prev,next);
+    controls.append(hint);
     const rail=document.createElement('div');rail.className='calendar-month-rail-v445';rail.setAttribute('role','region');rail.setAttribute('aria-label',en?'Calendar months':'Mesiace kalendára');rail.tabIndex=0;
     rail.append(...sections);root.append(controls,rail);
     const offset=i=>sections[i].offsetLeft-sections[0].offsetLeft;
     const index=()=>sections.reduce((best,p,i)=>Math.abs(offset(i)-rail.scrollLeft)<Math.abs(offset(best)-rail.scrollLeft)?i:best,0);
-    const sync=()=>{const i=index();calendarMonthSelectionV445=sections[i].dataset.month;prev.disabled=i===0;next.disabled=i===sections.length-1};
+    const sync=()=>{calendarMonthSelectionV445=sections[index()].dataset.month};
     const go=i=>{const target=Math.max(0,Math.min(sections.length-1,i));rail.scrollLeft=offset(target);sync()};
-    prev.onclick=()=>go(index()-1);next.onclick=()=>go(index()+1);rail.addEventListener('scroll',sync,{passive:true});
+    rail.addEventListener('scroll',sync,{passive:true});
     const oldIndex=sections.findIndex(p=>p.dataset.month===calendarMonthSelectionV445);
     go(oldIndex<0?0:oldIndex);
   }

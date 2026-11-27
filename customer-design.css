@@ -1261,10 +1261,7 @@ html.customer-design :is(#designTicket.design-ticket,#designNearest.design-neare
 html.customer-design #designTicket .design-ticket-usage .design-validity{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;color:#247646!important;font-weight:800!important}
 
 /* v445 month rail: the next month peeks into view; keep the outer liquid surface. */
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-controls-v445{display:flex;align-items:center;gap:6px;min-width:0;margin:0 0 8px;color:#737b86;font-size:11px}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-controls-v445 span{flex:1;min-width:0}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-controls-v445 button{width:44px;height:44px;border:1px solid #dcd5cd;border-radius:12px;background:#ffffffa8;color:#5d5148;font-size:24px;line-height:1;flex-shrink:0;-webkit-tap-highlight-color:transparent}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-controls-v445 button:disabled{opacity:.35}
+#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-controls-v445{display:block;min-width:0;margin:0 0 8px;color:#737b86;font-size:11px;text-align:center;line-height:1.4}
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-rail-v445{position:relative;display:flex;align-items:flex-start;gap:8px;max-width:100%;min-width:0;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:5px}
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445{flex:0 0 calc(100% - 24px);min-width:0;box-sizing:border-box;scroll-snap-align:start}
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445:last-child{flex-basis:100%}

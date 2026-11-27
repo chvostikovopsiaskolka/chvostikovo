@@ -121,7 +121,16 @@ async function assertPawsTransmit(page,selector,background){
   assert.equal(await page.locator('[data-date="2027-01-01"].booking-day-v37').count(),0);
   await page.evaluate(()=>{window.__calendarTestNowV442='2026-11-27T09:00:00.000Z';state.data.availability.opening_preview=[{date:'2027-01-01',bookings_open:false},{date:'2027-01-06',bookings_open:null}];window.customerDesignRefreshCalendarV351();});
   const rail=page.locator('.calendar-month-rail-v445');assert.equal(await rail.count(),1);assert.equal(await page.locator('.calendar-opening-preview-v445 [data-preview-date]').count(),21);assert.equal(await page.locator('[data-preview-date="2027-01-01"]').getAttribute('data-opening'),'closed');assert.equal(await page.locator('[data-preview-date="2027-01-06"]').getAttribute('data-opening'),'usual');assert.equal(await page.locator('.calendar-opening-preview-v445 button').count(),0);assert.equal(await page.locator('[data-date="2027-01-01"].booking-day-v37').count(),0);
-  assert(await rail.evaluate(el=>el.scrollWidth>el.clientWidth));await page.locator('.calendar-month-controls-v445 button').last().click();assert(await rail.evaluate(el=>el.scrollLeft>0));
+  assert.equal(await page.locator('.calendar-month-controls-v445 button').count(),0,'no arrows in swipe-only calendar');
+  assert.equal(await page.locator('.calendar-month-controls-v445').innerText(),'Posuňte doľava pre ďalší mesiac');
+  assert(await rail.evaluate(el=>el.scrollWidth>el.clientWidth));
+  // Scroll to the actual last snap point and assert geometry, not merely a positive scrollLeft.
+  await rail.evaluate(el=>{el.scrollLeft=el.scrollWidth-el.clientWidth});
+  await page.waitForFunction(()=>{const el=document.querySelector('.calendar-month-rail-v445'),pane=el.lastElementChild,r=el.getBoundingClientRect(),p=pane.getBoundingClientRect();return Math.abs(p.left-r.left)<2&&Math.abs(p.right-r.right)<2});
+  const finalBounds=await rail.evaluate(el=>{const r=el.getBoundingClientRect(),tiles=[...el.lastElementChild.querySelectorAll('[data-preview-date]')];return tiles.every(t=>{const b=t.getBoundingClientRect();return b.left>=r.left-1&&b.right<=r.right+1})});
+  assert(finalBounds,'all five columns of January are visible at the final snap point');
+  await rail.evaluate(el=>{el.scrollLeft=0});
+  await page.waitForFunction(()=>{const el=document.querySelector('.calendar-month-rail-v445');return Math.abs(el.scrollLeft)<2});
   await page.evaluate(()=>{delete state.data.availability.opening_preview;});
   await page.evaluate(()=>{window.__calendarTestNowV442='2026-12-10T18:59:00.000Z';window.customerDesignRefreshCalendarV351();});
   assert.equal(await page.locator('[data-date="2027-01-01"].booking-day-v37').count(),0,'January stays hidden until second Thursday 20:00');
