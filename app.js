@@ -3627,7 +3627,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const missed=!pickerWeekEndedV442(clock)&&!hasWeekBookingV337(from,to);
     const sundayAfterDeadline=new Date(clock.date+'T12:00:00Z').getUTCDay()===0&&clock.minutes>=1200;
     const remaining=Math.max(0,Math.round((Date.parse(next.deadline+'T12:00:00Z')-Date.parse(clock.date+'T12:00:00Z'))/86400000));
-    const countdown=remaining===0?'Rezervujte dnes':remaining===1?'Na rezerváciu zostáva 1 deň':`Na rezerváciu zostávajú ${remaining} ${remaining<=4?'dni':'dní'}`;
+    const countdown=remaining===0?'Rezervujte dnes':remaining===1?'Na rezerváciu zostáva 1 deň':remaining<=4?`Na rezerváciu zostávajú ${remaining} dni`:`Na rezerváciu zostáva ${remaining} dní`;
     const deadlineText=countdown+' · '+next.text.slice(next.text.indexOf('do nedele'));
     return {from,to,missed,next:{...next,text:deadlineText,hidden:next.hidden||missed||sundayAfterDeadline}};
   };

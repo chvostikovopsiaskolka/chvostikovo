@@ -281,6 +281,9 @@ async function scenario(count){
   datedReminder('2026-10-26T09:00:00Z','2026-10-26','2026-11-01');
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'Monday with no current-week booking retains existing guidance');
   assert.match(w.document.getElementById('designReservationNotice').textContent,/1\. 11\. do 20:00/);
+  assert.match(datedReminder('2026-11-27T11:00:00Z','2026-11-23','2026-11-29').textContent,/zostávajú 2 dni/);
+  assert.match(datedReminder('2026-11-28T11:00:00Z','2026-11-23','2026-11-29').textContent,/zostáva 1 deň/);
+  assert.match(datedReminder('2026-11-29T11:00:00Z','2026-11-23','2026-11-29').textContent,/Rezervujte dnes/);
   datedReminder('2026-12-31T11:00:00Z','2026-12-28','2027-01-03');
   datedReminder('2027-03-28T22:00:00Z','2027-03-29','2027-04-04');
   run(`state.data=JSON.parse(${JSON.stringify(rolloverFixture)})`);
