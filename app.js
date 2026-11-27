@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v440';
-const APP_VERSION='2.0.113';
+const APP_BUILD='v441';
+const APP_VERSION='2.0.114';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -224,10 +224,20 @@ function loading(on){const el=$('loading');if(!el)return;const inApp=!!on&&!$('a
 function box(type,msg){return `<div class="${type}-box">${esc(msg)}</div>`}
 function authMessage(type,msg){$('authMessage').innerHTML=box(type,msg)}
 function currentSession(){for(const s of [localStorage,sessionStorage]){try{const x=JSON.parse(s.getItem(SESSION_KEY)||'null');if(x?.access_token){state.storage=s;return x}}catch(_){}}return null}
-function saveSession(s,remember=true){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.storage=remember?localStorage:sessionStorage;state.storage.setItem(SESSION_KEY,JSON.stringify(s));state.session=s}
+function saveSession(s,remember=true){state.storage=remember?localStorage:sessionStorage;state.storage.setItem(SESSION_KEY,JSON.stringify(s));(remember?sessionStorage:localStorage).removeItem(SESSION_KEY);state.session=s}
 function clearSession(){document.documentElement.classList.remove('customer-liquid-v364');window.customerGuideAbortV358?.();window.customerBulletinAbortV358?.();void clearCustomerAppBadgeV171();localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['passInterestConfirmationV44','schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
 async function authFetch(path,opts={}){const r=await fetch(SUPABASE_URL+path,{...opts,headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',...(opts.headers||{})}});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok){const error=new Error(data?.msg||data?.error_description||data?.message||'Požiadavka sa nepodarila.');error.status=r.status;error.code=data?.code||data?.error_code||'';if(error.code==='user_banned'||/user is banned/i.test(error.message))error.message='Prístup k účtu je zablokovaný. Kontaktujte Chvostíkovo.';throw error}return data}
 let sessionRefreshInFlight=null,sessionRefreshOwnerV357=null;
+// A suspended tab must adopt the token another tab rotated before using its copy.
+function syncStoredCustomerSessionV441(){
+  let stored;
+  try{stored=JSON.parse(state.storage.getItem(SESSION_KEY)||'null')}catch(_){return false}
+  if(stored?.refresh_token===state.session?.refresh_token&&stored?.access_token===state.session?.access_token)return false;
+  if(!stored?.access_token){clearSession();return true}
+  if(stored.user?.id!==state.session?.user?.id){const remember=state.storage===localStorage;clearSession();saveSession(stored,remember)}
+  else state.session=stored;
+  return true;
+}
 function customerSessionNeedsRefreshV357(session=state.session){
   if(!session?.access_token)return false;
   let expires=Number(session.expires_at);
@@ -238,6 +248,7 @@ function customerSessionNeedsRefreshV357(session=state.session){
   return expires>0&&expires*1000<=Date.now()+60000;
 }
 async function ensureCustomerSessionV357(){
+  syncStoredCustomerSessionV441();
   const session=state.session;
   if(!session?.access_token)throw Object.assign(new Error('Najprv sa prihláste.'),{sessionInvalid:true});
   if(sessionRefreshInFlight&&sessionRefreshOwnerV357===session)await sessionRefreshInFlight;
@@ -261,18 +272,26 @@ async function syncCustomerOwnerTermsV423(version){
   }
 }
 async function refreshSession(){
+  syncStoredCustomerSessionV441();
   const previous=state.session;
   if(sessionRefreshInFlight&&sessionRefreshOwnerV357===previous)return sessionRefreshInFlight;
   if(!previous?.refresh_token)throw Object.assign(new Error('Prihlásenie vypršalo.'),{sessionInvalid:true});
   const token=previous.refresh_token,remember=state.storage===localStorage;
-  const run=(async()=>{
+  const execute=async()=>{
+    syncStoredCustomerSessionV441();
+    if(state.session!==previous){if(state.session?.user?.id===previous.user?.id)return state.session;throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'})}
     let s;
     try{s=await authFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:token})})}
-    catch(error){if(state.session!==previous)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});error.sessionInvalid=/^(refresh_token_not_found|refresh_token_already_used|invalid_grant|user_banned)$/.test(error.code||'')||error.status===400||error.status===401;error.authRefreshTransient=!error.sessionInvalid;throw error}
+    catch(error){syncStoredCustomerSessionV441();if(state.session!==previous){if(state.session?.user?.id===previous.user?.id)return state.session;throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'})}error.sessionInvalid=/^(refresh_token_not_found|refresh_token_already_used|invalid_grant|user_banned|session_not_found|session_expired)$/.test(error.code||'');error.authRefreshTransient=!error.sessionInvalid;throw error}
+    syncStoredCustomerSessionV441();
+    if(state.session!==previous&&state.session?.user?.id===previous.user?.id)return state.session;
     if(state.session!==previous)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});
     if(!s?.access_token||!s?.refresh_token)throw Object.assign(new Error('Server nevrátil úplnú reláciu. Skúste znova.'),{authRefreshTransient:true});
     saveSession(s,remember);startCustomerLive(true);return s;
-  })();
+  };
+  // Web Locks are available in current Chromium/WebKit. The legacy fallback
+  // still coalesces this page and reconciles storage before/after the request.
+  const run=remember&&navigator.locks?.request?navigator.locks.request(SESSION_KEY+':refresh',execute):execute();
   sessionRefreshInFlight=run;sessionRefreshOwnerV357=previous;
   try{return await run}finally{if(sessionRefreshInFlight===run){sessionRefreshInFlight=null;sessionRefreshOwnerV357=null}}
 }
@@ -1978,8 +1997,9 @@ $('logoutBtn').addEventListener('click',async()=>{
   ['dogSettingsModalV36','privacyInfoModal','schoolTermsModal','dogDetailsModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal','customerContactModal','customerGradebookModal'].forEach(id=>$(id)?.classList.add('hidden'));
   document.documentElement.classList.remove('settings-open-v36','customer-modal-open');
   if(state.session&&window.ChvoNative?.active)try{await window.ChvoNative.logout(state.session)}catch(_){}
-  try{if(state.session)await authFetch('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+state.session.access_token}})}catch(_){}
-  clearSession();showAuth('login'); // v431: no installation popup after logout.
+  const logoutToken=state.session?.access_token;
+  clearSession();showAuth('login'); // End locally before awaiting a pending refresh/logout.
+  try{if(logoutToken)await authFetch('/auth/v1/logout?scope=local',{method:'POST',headers:{Authorization:'Bearer '+logoutToken}})}catch(_){}
 });
 $('navBooking').addEventListener('click',()=>switchTab('booking'));$('navDog').addEventListener('click',()=>switchTab('menu'));$('navMessages').addEventListener('click',()=>switchTab('messages'));$('navStaff').addEventListener('click',()=>switchTab('staff'));
 $('dogSelector').addEventListener('change',e=>{const editing=!$('dogDetailsModal')?.classList.contains('hidden'),mode=dogDetailsModeV96;rememberVaccineDraftV287();clearVaccinationProofStageV104();state.selectedDogId=Number(e.target.value);renderPassSummary();renderDog();if(editing)openDogDetails(mode,false)});['input','change'].forEach(type=>$('dogBirthDate').addEventListener(type,syncDogAgeField));

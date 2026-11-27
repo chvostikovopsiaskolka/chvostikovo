@@ -43,5 +43,9 @@ await login(partner);assert.equal((await db.query('select portal_customer_access
 await login(staff);await db.query('select portal_set_customer_blocked_v336($1,false)',[a]);
 await login(a);assert.equal((await db.query('select portal_customer_access_allowed_v336() ok')).rows[0].ok,true);await db.exec('reset role');assert.equal((await db.query('select banned_until from auth.users where id=$1',[a])).rows[0].banned_until,null);assert.equal((await db.query('select count(*)::int n from dogs')).rows[0].n,3);assert.equal((await db.query('select count(*)::int n from customer_owner_links')).rows[0].n,3);
 await login('', 'service_role');const results=await Promise.all(Array.from({length:21},()=>db.query("select consume_request_limit_v336('form_ip',repeat('a',64)) ok")));assert.equal(results.filter(x=>x.rows[0].ok).length,20);assert.equal((await db.query("select consume_request_limit_v336('form_ip',repeat('b',64)) ok")).rows[0].ok,true);
-await db.exec('reset role');await db.exec(fs.readFileSync('supabase/changes/security-access-rollback-v336.sql','utf8'));
-console.log('PASS isolated PostgreSQL: full current guarded function compilation, customer/staff denial, two owners and allowed dogs, old-JWT block/RLS, session+refresh revocation, subscription disable, unblock/ban restore, unchanged dogs/links, atomic ceilings and caller grants, selective rollback');await db.close();
+await db.exec('reset role');
+// Current function definitions have moved beyond the historical v336 checksum.
+// The production rollback must refuse to overwrite these newer guards.
+await assert.rejects(db.exec(fs.readFileSync('supabase/changes/security-access-rollback-v336.sql','utf8')),/Newer function exists/);
+assert.equal((await db.query('select count(*)::int n from dogs')).rows[0].n,3);
+console.log('PASS isolated PostgreSQL: full current guarded function compilation, customer/staff denial, two owners and allowed dogs, old-JWT block/RLS, session+refresh revocation, subscription disable, unblock/ban restore, unchanged dogs/links, atomic ceilings and caller grants; historical rollback safely refuses newer functions');await db.close();

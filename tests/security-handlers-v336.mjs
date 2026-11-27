@@ -16,7 +16,7 @@ function boot(slug){let handler;const calls=[];const fixture={allow:true,access:
  };
  const sandbox={Request,Response,Headers,URL,AbortSignal,crypto:webcrypto,TextEncoder,Uint8Array,atob,btoa,fetch,console:{log(){},error(){},warn(){}},setTimeout,clearTimeout,EdgeRuntime:{waitUntil(){}},Deno:{env:{get:k=>({SUPABASE_URL:'https://fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-service'}[k])},serve:h=>handler=h},webpush:{setVapidDetails(){},sendNotification(){throw Error('No sends allowed')}}};
  const helper=fs.readFileSync('supabase/functions/'+slug+'/security-v336.ts','utf8').replace(/export /g,'');
- let code=fs.readFileSync('supabase/functions/'+slug+'/index.ts','utf8').replace(/^import .*;\n/gm,'');
+ let code=fs.readFileSync('supabase/functions/'+slug+'/index.ts','utf8').replace(/^import .*;\r?\n/gm,'');
  const js=stripTypeScriptTypes(helper+'\n'+code,{mode:'transform'});vm.runInNewContext(js,sandbox,{filename:slug});
  return{handler,fixture,calls,post:body=>handler(new Request('https://fixture.invalid/functions/'+slug,{method:'POST',headers:{origin:'https://chvostikovo.sk',authorization:'Bearer synthetic','content-type':'application/json','cf-connecting-ip':'192.0.2.1'},body:JSON.stringify(body)}))};
 }
