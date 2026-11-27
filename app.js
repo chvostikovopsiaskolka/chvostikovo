@@ -3076,13 +3076,27 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(preview.length){
       const pane=document.createElement('section');pane.className='calendar-month-pane-v445 calendar-opening-preview-v445';pane.dataset.month='2027-01';
       const title=document.createElement('h3');title.className='calendar-month-v438';title.textContent=en?'January 2027':'Január 2027';pane.append(title);
-      const note=document.createElement('p');note.className='calendar-preview-note-v445';note.textContent=en?'Opening hours preview · Booking opens later. Holiday exceptions may change.':'Náhľad prevádzky · Rezervácie neskôr. Sviatočný režim sa môže upraviť.';pane.append(note);
-      const grid=document.createElement('div');grid.className='calendar-opening-grid-v445';
-      for(const letter of en?['M','T','W','T','F']:['P','U','S','Š','P']){const el=document.createElement('span');el.className='calendar-opening-letter-v445';el.textContent=letter;grid.append(el)}
-      for(let i=1;i<new Date(preview[0].date+'T12:00:00Z').getUTCDay();i++){const blank=document.createElement('span');blank.setAttribute('aria-hidden','true');grid.append(blank)}
-      const labels=en?{closed:'Closed',open:'Open',usual:'Usual hours',unknown:'Unconfirmed'}:{closed:'Zatvorené',open:'Otvorené',usual:'Bežný režim',unknown:'Nepotvrdené'};
-      for(const row of preview){const tile=document.createElement('div');tile.className='calendar-opening-day-v445';tile.dataset.previewDate=row.date;tile.dataset.opening=row.opening;const day=document.createElement('strong');day.textContent=Number(row.date.slice(8))+'.';const label=document.createElement('small');label.textContent=labels[row.opening];tile.append(day,label);grid.append(tile)}
-      pane.append(grid);sections.push(pane);
+      const note=document.createElement('p');note.className='calendar-preview-note-v445';note.textContent=en?'Booking opens later.':'Rezervácie budú sprístupnené neskôr.';pane.append(note);
+      // Reuse the same week structure and weekday alignment as December.
+      // Preview dates deliberately have no data-date, booking button or selection handler.
+      const weeks=calendarRowsV438(preview,'2027-01-01');
+      for(const week of weeks){
+        const row=document.createElement('div');row.className='booking-picker-week-v127 calendar-row-v438';
+        const body=document.createElement('div');body.className='booking-picker-future-body-v235';body.innerHTML=calendarWeekLettersV438();
+        const grid=document.createElement('div');grid.className='booking-picker-week-days-v127';
+        const blank=()=>{const el=document.createElement('div');el.className='calendar-empty-v438';el.setAttribute('aria-hidden','true');grid.append(el)};
+        const first=(new Date(week.days[0].date+'T12:00:00Z').getUTCDay()+6)%7;
+        for(let i=0;i<first;i++)blank();
+        for(const day of week.days){
+          const tile=document.createElement('div');tile.className='calendar-opening-day-v445';tile.dataset.previewDate=day.date;tile.dataset.opening=day.opening;
+          const date=document.createElement('strong');date.textContent=Number(day.date.slice(8))+'.'+Number(day.date.slice(5,7))+'.';tile.append(date);
+          if(day.opening==='closed'||day.opening==='unknown'){const label=document.createElement('span');label.textContent=day.opening==='closed'?(en?'Closed':'Zatvorené'):(en?'Unconfirmed':'Nepotvrdené');tile.append(label)}
+          grid.append(tile);
+        }
+        for(let i=first+week.days.length;i<5;i++)blank();
+        body.append(grid);row.append(body);pane.append(row);
+      }
+      sections.push(pane);
     }
     if(!sections.length)return;
     if(sections.length===1){root.append(...sections[0].children);calendarMonthSelectionV445=sections[0].dataset.month;return}
