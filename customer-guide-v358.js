@@ -72,7 +72,7 @@
     picker.querySelector('.booking-picker-card-v37')?.setAttribute('data-guide-stashed-v360','');
     const frame=document.createElement('section');frame.id='guidePickerPreviewV360';frame.className='booking-picker-card-v37 guide-picker-preview-v360';frame.inert=true;
     frame.innerHTML='<div class="booking-picker-days-v37 guide-preview-calendar">'+markup.calendar+'</div><div class="booking-picker-taxi-title-v37">Vybraté dni ↓</div><div class="booking-picker-taxi-by-day-v91 design-selected-days">'+markup.selected+'</div><button type="button" class="btn full booking-picker-submit-v37">Rezervovať 2 dni</button>';
-    frame.querySelectorAll('.booking-day-v37').forEach(button=>{button.dataset.capacityLevel='free';const span=button.querySelector('span');if(span){const dot=document.createElement('i');dot.className='design-capacity-dot';dot.setAttribute('aria-hidden','true');span.prepend(dot);}});
+    // Capacity and weekday labels come from the shared day renderer; no synthetic booking handlers.
     picker.append(frame);return frame;
   }
   function union(nodes){
@@ -104,11 +104,11 @@
     shell().querySelector('.guide-top').append($('guideSkipV358'));
     const titles=['Váš psík v Prehľade','Permanentka a vaše rezervácie','Rezervovať miesto','Vaše rezervácie','Výber dní a taxi','Všetko ostatné v Menu'];
     const texts=[
-      'Ťuknutím na profil otvoríte údaje a fotografiu psíka. Pri očkovaniach nájdete ich platnosť, pri grafe počet návštev. Pri zapnutých upozorneniach pripomenieme končiace očkovanie 14 a 7 dní vopred.',
-      'Ak máte zakúpenú permanentku, tu uvidíte jej platnosť a počet využitých vstupov. Pod ňou nájdete svoje rezervácie a možnosť Upraviť. Cez Oznamy otvoríte novinky zo škôlky a cez Správy nám priamo napíšete.',
-      'Tlačidlom Rezervovať miesto v spodnej lište otvoríte dostupné dni. Po výbere uvidíte Vybraté dni a potvrdenie rezervácie.',
+      'Ťuknutím na profil otvoríte údaje a fotografiu psíka. Očkovania rozkliknete šípkou ↗ a uvidíte ich platnosť. Pri grafe nájdete počet návštev. Upozornenia na očkovanie posielame 14 a 7 dní vopred, ak ich máte zapnuté.',
+      'Pri permanentke vidíte použité vstupy a dátum Využiť do. Pod ňou sú vaše rezervácie, možnosť Upraviť a pripomienka termínu rezervovania. Oznamy a Správy nájdete v aplikácii.',
+      'Tlačidlom Rezervovať miesto otvoríte kalendár. Zelené a žlté dni ukazujú voľné miesta. Posunutím doľava zobrazíte ďalší mesiac, ak je dostupný.',
       'Tu nájdete vytvorené rezervácie a stav schválenia. Podľa dostupných možností pridáte alebo upravíte taxi či zrušíte návštevu. Ak chcete zmeniť termín, zrušíte pôvodný a vyberiete nový.',
-      'Ukážka: vyberte dni v kalendári. Vybraté dni a tlačidlo Rezervovať nájdete pod kalendárom. Ku každému dňu môžete pridať taxi.',
+      'Ukážka: voľné miesta vidíte pod dátumom. Vybraté dni a taxi sú pod kalendárom. Rezerváciu odošlete tlačidlom Rezervovať.',
       'V Menu nájdete údaje psíka, očkovania, svoje kontakty aj správy pre škôlku. V Nastaveniach si môžete tohto sprievodcu kedykoľvek zopakovať. Pripravujeme aj rozšírenú žiacku knižku a odmeny.'
     ];
     const next=$('guideNextV358');next.disabled=true;

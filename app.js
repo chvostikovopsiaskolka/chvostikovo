@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v448';
-const APP_VERSION='2.0.121';
+const APP_BUILD='v449';
+const APP_VERSION='2.0.122';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -3752,8 +3752,14 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const now=new Date(bratislavaToday()+'T12:00:00Z'),offset=(8-now.getUTCDay())%7||7;now.setUTCDate(now.getUTCDate()+offset);
     const dateAt=n=>{const d=new Date(now);d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
     const dates=[dateAt(1),dateAt(9)],row={id:-360,reservation_id:-360,dog_id:dog.id,reservation_date:dateAt(2),status:'approved',taxi_mode:'none',can_manage:true,entry_type:'single'};
-    const weeks=[0,7].map((start,i)=>'<div class="booking-picker-week-v127"><div class="booking-picker-week-label-v127">'+['Tento týždeň','Budúci týždeň'][i]+'</div><div class="booking-picker-future-body-v235"><div class="booking-picker-week-days-v127">'+Array.from({length:5},(_,n)=>{const date=dateAt(start+n);return bookingDayMarkupV360({date},{selected:dates.includes(date),stateText:'3/10'})}).join('')+'</div></div></div>').join('');
-    return {reservation:reservationCardMarkupV360(row,new Map(),(state.data?.dogs||[]).length===2),calendar:weeks,selected:selectedDaysMarkupV360(dates,dates[0],dog),dates};
+    // Two synthetic weeks use the actual calendar tile markup; no live data or handlers.
+    const demoMonth=now.toISOString().slice(0,7);
+    const weeks=[0,7].map(start=>'<div class="booking-picker-week-v127 calendar-row-v438"><div class="booking-picker-future-body-v235">'+calendarWeekLettersV438()+'<div class="booking-picker-week-days-v127">'+Array.from({length:5},(_,n)=>{
+      const date=dateAt(start+n),closed=n===4&&start===7,full=n===3&&start===7,available=closed||full?0:n===2?2:9-n;
+      return bookingDayMarkupV360({date},{selected:dates.includes(date),closed,full,disabled:closed,stateText:closed?'Zatvorené':full?'Plno':'Voľné: '+available}).replace('data-date="'+date+'"','data-guide-date="'+date+'" data-capacity-level="'+(closed?'closed':full?'full':available<=2?'limited':'free')+'"');
+    }).join('')+'</div></div></div>').join('');
+    const calendar='<div class="calendar-month-controls-v445"><span>Posuňte doľava pre ďalší mesiac</span></div><h3 class="calendar-month-v438">'+esc(calendarMonthNameV438(demoMonth))+'</h3>'+weeks;
+    return {reservation:reservationCardMarkupV360(row,new Map(),(state.data?.dogs||[]).length===2),calendar,selected:selectedDaysMarkupV360(dates,dates[0],dog),dates};
   };
 
   function startV37(){
