@@ -163,14 +163,32 @@ async function assertCookieChoices(page) {
 // Reuse the TEST chat on paid LEAD; verify only the new route wiring with isolated transports.
 async function assertHeroAriaEntry(page) {
   const cta=page.locator('[data-aria-lead-hero-cta]');
-  if((await cta.innerText()).trim()!=='Spoznajte našu škôlku'||await cta.getAttribute('aria-haspopup')!=='dialog')throw new Error('Paid Hero CTA label or dialog semantics');
+  if((await cta.innerText()).trim()!=='Chcem zistiť viac o škôlke'||await cta.getAttribute('aria-controls')!=='aria-caretakers'||await cta.getAttribute('aria-haspopup'))throw new Error('Paid Hero CTA label or section semantics');
   await activateFixtureControl(cta);
+  await page.waitForFunction(()=>{const r=document.getElementById('aria-caretakers')?.getBoundingClientRect();return r&&r.top>=-2&&r.top<130;},null,{timeout:5000});
+  if(await page.locator('[data-aria-chat]').isVisible())throw new Error('Paid Hero CTA must navigate without opening chat');
+  await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+  await page.waitForFunction(()=>scrollY<5);
+}
+async function assertPaidAriaAdEntry(page, freshConsent=false) {
+  const url=new URL('/psia-skolka-kosice/?aria=open&utm_source=fixture&utm_campaign=aria&utm_content=aria_visual',base);
+  if(freshConsent)await page.evaluate(()=>localStorage.removeItem('chvostikovo-cookies'));
+  await page.goto(url.href,{waitUntil:'domcontentloaded'});
   const chat=page.locator('[data-aria-chat]');
-  await chat.waitFor({state:'visible',timeout:5000});
+  if(freshConsent){
+    const cookies=page.locator('[data-cookie-consent][role="dialog"]');
+    await cookies.waitFor({state:'visible'});
+    if(await chat.isVisible())throw new Error('Aria ad entry must wait for cookie choice');
+    await activateFixtureControl(cookies.locator('[data-cookie-action="necessary"]'));
+    await cookies.waitFor({state:'hidden'});
+  }
+  await chat.waitFor({state:'visible',timeout:8000});
+  if(!await page.evaluate(search=>location.search===search,url.search))throw new Error('Aria ad entry lost attribution query');
   await chat.getByRole('button',{name:'Close',exact:true}).click();
   await chat.waitFor({state:'hidden'});
-  // Radix may keep the exit overlay and body pointer lock briefly after close.
-  await page.waitForFunction(()=>getComputedStyle(document.body).pointerEvents!=='none'&&!document.querySelector('[data-state="closed"][role="dialog"], [data-state="closed"].fixed.inset-0'));
+  await page.evaluate(()=>window.dispatchEvent(new Event('chvostikovo-consent-changed')));
+  await page.waitForTimeout(250);
+  if(await chat.isVisible())throw new Error('Closed ad chat must not reopen on repeated consent event');
 }
 async function assertPaidAriaChat(page, {visualOnly=false}={}) {
   const posted=[];
@@ -200,7 +218,7 @@ async function assertPaidAriaChat(page, {visualOnly=false}={}) {
     if(!visualOnly){
       const audit=await page.evaluate(()=>window.__ariaMetaAudit.calls);
       const hero=audit.filter(call=>call[0]==='trackCustom'&&call[1]==='HeroLearnMore'&&call[2]?.source==='lead_landing_hero_aria_cta');
-      if(hero.length!==(marketingAllowed?1:0)||audit.some(call=>call[0]==='track'&&call[1]==='Lead'))throw new Error('Hero chat click must be a consented custom event, never Meta Lead');
+      if(hero.length!==(marketingAllowed?1:0)||audit.some(call=>call[0]==='track'&&call[1]==='Lead'))throw new Error('Hero About click must be a consented custom event, never Meta Lead');
       if(posted.length)throw new Error('Opening chat must not submit a form');
     }
     const trigger=page.locator('[data-aria-lead-chat] [data-aria-chat-trigger]');
@@ -360,6 +378,8 @@ async function assertPaidReturnNavigation(browser,engine) {
     if(await cookie.isVisible())await cookie.click();
     await page.evaluate(()=>history.replaceState(history.state,'',location.pathname+location.search+'#lead-pricing'));
     await assertPaidReturnArrow(page);
+    await assertPaidAriaAdEntry(page);
+    await assertPaidAriaAdEntry(page,true);
     if(errors.length)throw new Error('Paid navigation runtime errors: '+errors.join('; '));
     console.log('PASS paid LEAD mobile return arrow and desktop absence '+engine);
   }finally{await context.close();}
@@ -485,7 +505,7 @@ async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=n
   await assertHeroAriaEntry(page);
   if(trackedEvents){
     for(let i=0;i<15&&!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='lead_landing_hero_aria_cta');i++)await page.waitForTimeout(100);
-    if(!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='lead_landing_hero_aria_cta')||trackedEvents.filter(e=>e.name==='form_submit').length!==beforeHeroSubmits)throw new Error('Hero CTA source missing or chat click emitted conversion');
+    if(!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='lead_landing_hero_aria_cta')||trackedEvents.filter(e=>e.name==='form_submit').length!==beforeHeroSubmits)throw new Error('Hero CTA source missing or About click emitted conversion');
   }
   await activateFixtureControl(page.locator('[data-lead-faq-cta]'));
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
@@ -1401,7 +1421,7 @@ async function assertPublicContent(browser,engine){
                     liquidBadge: liquidGlass(badgeNode) && getComputedStyle(badgeNode).color === 'rgb(38, 50, 43)',
                     liquidCta: getComputedStyle(ctaNode).backgroundColor === 'rgb(255, 255, 255)' && getComputedStyle(ctaNode).color === 'rgb(169, 84, 0)' && getComputedStyle(ctaNode,'::after').backgroundColor === 'rgb(184, 46, 127)' &&
                       cta.width >= 225 && cta.width <= 300 &&
-                      ctaNode.getAttribute('aria-haspopup') === 'dialog',
+                      ctaNode.getAttribute('aria-controls') === 'aria-caretakers' && !ctaNode.getAttribute('aria-haspopup'),
                     liquidDock: liquidGlass(dockNode) &&
                       !!dockNode.querySelector('[data-aria-interest-cta]'),
                     fixed: dock ? getComputedStyle(dock).position === 'fixed' && !hero.contains(dock) : false,
@@ -1737,7 +1757,7 @@ async function assertPublicContent(browser,engine){
                     proof:q.left>=0&&q.right<=innerWidth+1&&q.height<=parseFloat(getComputedStyle(proof).lineHeight)*1.55&&proof.scrollWidth<=proof.clientWidth+2,
                     reviews:!!reviewCard&&!!track&&getComputedStyle(reviews).overflowY!=='hidden'&&getComputedStyle(reviewCard).boxShadow!=='none',
                     fixedDock:getComputedStyle(guide).position==='fixed'&&dockOffset>=6&&dockOffset<=54,
-                    controlledChat:cta.getAttribute('aria-haspopup')==='dialog'&&cta.textContent.trim()==='Spoznajte našu škôlku'&&!form.hidden,
+                    controlledChat:cta.getAttribute('aria-controls')==='aria-caretakers'&&!cta.getAttribute('aria-haspopup')&&cta.textContent.trim()==='Chcem zistiť viac o škôlke'&&!form.hidden,
                     carouselOrder:carousel.getBoundingClientRect().top>=(form.hidden?hero.getBoundingClientRect().bottom:form.getBoundingClientRect().bottom)-8,
                     caretakers:benefits.children.length===3&&aboutHeading.scrollWidth<=aboutHeading.clientWidth+2,
                     crownInForm:!!form.querySelector('[data-crown-ground]')&&!!document.querySelector('#aria-first-visit-form [data-crown-ground]')
@@ -2926,7 +2946,7 @@ async function assertPublicContent(browser,engine){
             const priorSubmits=trackedEvents.filter(e=>e.name==='form_submit').length;
             await assertHeroAriaEntry(page);
             for(let i=0;i<15&&!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='lead_landing_hero_aria_cta');i++)await page.waitForTimeout(100);
-            if(!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='lead_landing_hero_aria_cta')||trackedEvents.filter(e=>e.name==='form_submit').length!==priorSubmits||submissions.length)throw new Error('Hero CTA source missing or chat click emitted conversion');
+            if(!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='lead_landing_hero_aria_cta')||trackedEvents.filter(e=>e.name==='form_submit').length!==priorSubmits||submissions.length)throw new Error('Hero CTA source missing or About click emitted conversion');
             // The FAQ CTA still scrolls to the direct inline form. Preserve failure/retry tracking.
             await activateFixtureControl(page.locator('[data-lead-faq-cta]'));
             const contact = page.locator('#aria-hero-form [data-lead-step-form]');
