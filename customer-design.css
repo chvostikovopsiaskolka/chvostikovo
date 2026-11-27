@@ -1210,3 +1210,9 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 .customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438:last-of-type{margin-bottom:0!important}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .calendar-weekletters-v438{margin:0 0 5px!important;gap:5px!important}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-picker-week-days-v127{margin:0!important}
+
+/* v442: one compact calendar surface; month headings, real week rows and existing notices. */
+.customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438{margin:0 0 7px!important;padding:2px 6px!important;background:transparent!important;box-shadow:none!important;border:0!important;border-radius:0!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438:last-of-type{margin-bottom:0!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-v438:not(:first-child){margin-top:14px}
+.customer-design #bookingPickerV37 #designWeekDeadline{background:#fff4cf!important;border-color:#e4c772!important;color:#694908!important}

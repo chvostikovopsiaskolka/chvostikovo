@@ -514,7 +514,7 @@ function renderUpcoming(){return typeof customerRenderers.upcoming==='function'?
 function overviewClock(now=new Date()){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now),m=Object.fromEntries(parts.map(p=>[p.type,p.value]));return {date:m.year+'-'+m.month+'-'+m.day,minutes:Number(m.hour)*60+Number(m.minute)}}
 function overviewDayVisible(date,clock=overviewClock()){return date>clock.date||date===clock.date&&clock.minutes<18*60}
 let overviewCutoffTimer=null;
-function scheduleOverviewCutoff(){clearTimeout(overviewCutoffTimer);overviewCutoffTimer=null;if(document.visibilityState!=='visible'||!state.data)return;const now=new Date(),clock=overviewClock(now),minutes=clock.minutes<1080?1080-clock.minutes:1440-clock.minutes;overviewCutoffTimer=setTimeout(()=>{overviewCutoffTimer=null;renderDays()},Math.max(1000,minutes*60000-now.getSeconds()*1000-now.getMilliseconds()))}
+function scheduleOverviewCutoff(){clearTimeout(overviewCutoffTimer);overviewCutoffTimer=null;if(document.visibilityState!=='visible'||!state.data)return;const now=new Date(),clock=overviewClock(now),minutes=clock.minutes<1080?1080-clock.minutes:(new Date(clock.date+'T12:00:00Z').getUTCDay()===4&&clock.minutes<1200?1200-clock.minutes:1440-clock.minutes);overviewCutoffTimer=setTimeout(()=>{overviewCutoffTimer=null;renderDays()},Math.max(1000,minutes*60000-now.getSeconds()*1000-now.getMilliseconds()))}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&state.data)renderDays();else{clearTimeout(overviewCutoffTimer);overviewCutoffTimer=null}});
 function renderDays(){const out=typeof customerRenderers.days==='function'?customerRenderers.days():undefined;scheduleOverviewCutoff();return out}
 function renderAll(){renderWeekHeader();renderNotifications();renderPassSummary();renderUpcoming();renderDays();renderMessages();renderDogSelector();renderDog();renderProfile();renderStaff();updateUnread()}
@@ -3018,15 +3018,26 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     return dates.length?{dates,sourceWeek:proposals[0].sourceWeek}:null;
   }
   let compactSeedV437=null;
-  function calendarMonthEndV438(today){
-    const [y,m]=today.split('-').map(Number);return new Date(Date.UTC(y,m+1,0,12)).toISOString().slice(0,10);
+  // Month unlock follows the second calendar row containing working days.
+  // Thursday 20:00 Bratislava time is a display boundary, never a server write rule.
+  function calendarMonthEndV438(today,clock=bratislavaClockV95()){
+    const [y,m]=today.split('-').map(Number);
+    const first=new Date(Date.UTC(y,m-1,1,12));
+    while(first.getUTCDay()===0||first.getUTCDay()===6)first.setUTCDate(first.getUTCDate()+1);
+    const unlock=smartShiftV199(smartMondayV199(first.toISOString().slice(0,10)),10);
+    const open=today>unlock||(today===unlock&&clock.minutes>=1200);
+    return new Date(Date.UTC(y,m+(open?1:0),0,12)).toISOString().slice(0,10);
   }
   function calendarRowsV438(days,today){
     const current=smartMondayV199(today),next=smartShiftV199(current,7),groups=new Map();
     for(const day of days){
       const monday=smartMondayV199(day.date),key=monday;
       if(!groups.has(key))groups.set(key,{month:day.date.slice(0,7),monday,weekEnd:smartShiftV199(monday,6),kind:monday===current?'current':monday===next?'next':'later',days:[]});
-      const row=groups.get(key);row.days.push(day);row.month=day.date.slice(0,7); // A cross-month week belongs to its last actual working day.
+      const row=groups.get(key);row.days.push(day);
+      // A crossing row belongs to the month of its majority weekday (Wednesday).
+      // Thus 30.11.–4.12. is December, and 28.12.–1.1. stays December.
+      const middle=smartShiftV199(monday,2).slice(0,7);
+      row.month=row.days.some(d=>d.date.slice(0,7)===middle)?middle:day.date.slice(0,7);
     }
     const seen=new Set();return [...groups.values()].map(row=>{const first=!seen.has(row.kind);seen.add(row.kind);return {...row,firstForKind:first};});
   }
@@ -3141,7 +3152,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     to.setUTCDate(to.getUTCDate()+6);
     const sunday=previousIsoDayV95(from),parts=sunday.split('-').map(Number);
     const reminder={from,to:to.toISOString().slice(0,10),deadline:sunday,
-      text:`Prosíme o rezerváciu miesta do nedele ${parts[2]}. ${parts[1]}. do 20:00.`};
+      text:`Prosíme o rezerváciu miesta na nasledujúci týždeň do nedele ${parts[2]}. ${parts[1]}. do 20:00.`};
     reminder.hidden=hasWeekBookingV337(reminder.from,reminder.to);
     const box=$('deadlineText');if(!box)return reminder;
     box.classList.toggle('hidden',reminder.hidden);
@@ -3362,18 +3373,18 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const offset=Math.round((new Date(date+'T12:00:00Z')-monday)/86400000);
     return offset<7?'Tento týždeň':offset<14?'Budúci týždeň':offset<21?'O dva týždne':'O tri týždne';
   }
-  // Friday at 08:00 Bratislava time: the ending week no longer takes up booking space.
+  // Thursday at 20:00 Bratislava time: the ending week no longer takes up booking space.
   // This is a presentation filter only; existing reservations and server cutoffs stay unchanged.
   function pickerWeekEndedV442(clock){
     const weekday=new Date(clock.date+'T12:00:00Z').getUTCDay();
-    return weekday===0||weekday===6||(weekday===5&&clock.minutes>=480);
+    return weekday===0||weekday===6||weekday===5||(weekday===4&&clock.minutes>=1200);
   }
   function pickerDaysV393(){
-    const days=state.data?.availability?.days||[],clock=bratislavaClockV95(),today=clock.date;
+    const clock=bratislavaClockV95(),today=clock.date,days=(state.data?.availability?.days||[]).filter(day=>day.date<=calendarMonthEndV438(today,clock));
     const monday=smartMondayV199(today),sunday=smartShiftV199(monday,6);
     const dogs=pickerDogsV254();
     const attended=dogs.length>0&&dogs.every(d=>(state.data?.visits||[]).some(v=>Number(v.dog_id)===Number(d.id)&&v.visit_date>=monday&&v.visit_date<=today));
-    // Keep the existing visit-based rule, plus the same Friday cutoff for all dogs.
+    // Keep the existing visit-based rule, plus the same Thursday cutoff for all dogs.
     // Filter by real dates, not a five-element offset: sparse availability must not skip next week.
     return attended||pickerWeekEndedV442(clock)?days.filter(day=>day.date>sunday):days;
   }
@@ -3383,14 +3394,14 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const picker=$('bookingPickerV37'),clock=bratislavaClockV95();
     if(!picker||picker.classList.contains('hidden')||document.visibilityState==='hidden'||!Number.isFinite(clock.minutes))return;
     const now=new Date(),weekday=new Date(clock.date+'T12:00:00Z').getUTCDay();
-    const minutes=weekday===5&&clock.minutes<480?480-clock.minutes:1440-clock.minutes;
+    const minutes=weekday===4&&clock.minutes<1200?1200-clock.minutes:1440-clock.minutes;
     pickerCutoffTimerV442=setTimeout(refreshPickerCutoffV442,Math.max(1000,minutes*60000-now.getSeconds()*1000-now.getMilliseconds()));
   }
   function refreshPickerCutoffV442(){
     const picker=$('bookingPickerV37');
     if(picker&&!picker.classList.contains('hidden')&&document.visibilityState!=='hidden'&&!submittingV37){
-      const first=pickerDaysV393()[0]?.date||'',rendered=$('bookingPickerDaysV37')?.querySelector('[data-first-date]')?.dataset.firstDate||'';
-      if(first!==rendered)renderPickerV37();
+      const days=pickerDaysV393(),tiles=$('bookingPickerDaysV37')?.querySelectorAll('.booking-day-v37[data-date]')||[];
+      if((days[0]?.date||'')!==(tiles[0]?.dataset.date||'')||(days[days.length-1]?.date||'')!==(tiles[tiles.length-1]?.dataset.date||''))renderPickerV37();
     }
     schedulePickerCutoffV442();
   }
@@ -3431,7 +3442,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         : '';
       // All real available dates stay visible in one compact calendar.
       const monday=row.monday,friday=smartShiftV199(monday,4);
-      const heading=row.kind==='current'&&row.firstForKind?'Tento týždeň · '+compactDateV37(monday)+' – '+compactDateV37(friday):'';
+      const heading=''; // The month heading and the two existing reminders supply all context.
       groups.push(`<div class="booking-picker-week-v127 calendar-row-v438" data-calendar-kind="${row.kind}" data-week-from="${monday}" data-first-date="${week[0].date}" data-week-to="${row.weekEnd}"><div class="booking-picker-week-label-v127">${heading}</div><div class="booking-picker-future-body-v235">${weekNotice}${calendarWeekLettersV438()}<div class="booking-picker-week-days-v127">${Array.from({length:(new Date(week[0].date+'T12:00:00Z').getUTCDay()+6)%7},()=>'<div class="calendar-empty-v438" aria-hidden="true"></div>').join('')}${week.map(d=>{
         const existing=pickerDogsV254().some(x=>bookingFor(x.id,d.date)),deadlineClosed=pickerDogsV254().some(x=>bookingDeadlineClosedV95(d.date,x)),closed=d.bookings_open===false,full=Number(d.available)<pickerDogsV254().length;
         const past=d.date<=bratislavaClockV95().date;

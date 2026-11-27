@@ -91,7 +91,7 @@ async function assertPawsTransmit(page,selector,background){
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'long name no horizontal overflow');if(dogs===1){const p=await page.locator('#bookingDogAvatar').boundingBox(),i=await page.locator('.dog-overview-content').boundingBox();assert(Math.abs(p.height-i.height)<1,'long name keeps matching panel heights');}
   await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2099-01-01'});bratislavaToday=()=> '2099-01-01';state.data.availability={days:Array.from({length:15},(_,i)=>({date:'2099-01-'+String(5+i+Math.floor(i/5)*2).padStart(2,'0'),available:8,capacity:10,occupied:2,bookings_open:true,dogs:[]}))};});await page.locator('#navBookAddV220').click();await page.waitForTimeout(100);
   assert.equal(await page.locator('#designCapacityLegend').count(),0);assert.equal(await page.locator('#designMyBookings').count(),0,'booking page does not repeat Overview reservations');assert(await page.locator('#bookingPickerDaysV37').isVisible());assert.equal(await page.locator('#bookingPickerV37').evaluate(el=>getComputedStyle(el).backgroundColor),await page.locator('body').evaluate(el=>getComputedStyle(el).backgroundColor));
-  assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'reservation rail stable');const firstWeekFrame=page.locator('.booking-picker-week-v127').first();const frame=await firstWeekFrame.evaluate(el=>({padding:parseFloat(getComputedStyle(el).paddingTop),shadow:getComputedStyle(el).boxShadow}));assert(frame.padding>=10,'calendar group has safe outer inset');
+  assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'reservation rail stable');const firstWeekFrame=page.locator('#bookingPickerDaysV37');const frame=await firstWeekFrame.evaluate(el=>({padding:parseFloat(getComputedStyle(el).paddingTop),shadow:getComputedStyle(el).boxShadow}));assert(frame.padding>=10,'calendar group has safe outer inset');
   const bounds=await page.locator('#bookingPickerDaysV37').evaluate(el=>({width:el.clientWidth,scroll:el.scrollWidth}));assert(bounds.scroll<=bounds.width+1);assert(frame.shadow.includes('inset'),'visible week/group boundary');assert((await page.locator('.booking-day-v37').first().evaluate(el=>getComputedStyle(el).boxShadow)).includes('inset'),'day boundary');
   if(width===390){await assertPawsTransmit(page,'#bookingPickerDaysV37','#bookingPickerV37');assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'nav stable after calendar pixel check');assert(await page.locator('.bottom-nav').isVisible(),'nav visible after calendar pixel check');}
   // A full next month is a real five-column calendar, including split month boundaries.
@@ -102,20 +102,26 @@ async function assertPawsTransmit(page,selector,background){
   assert.equal(await page.locator('#bookingPickerDaysV37 .calendar-empty-v438').count(),1,'only the trailing Friday slot is empty');assert.equal(await page.locator('[data-week-from="2026-12-28"] .booking-day-v37').count(),4);assert.equal(await page.locator('[data-week-from="2026-12-28"] .calendar-empty-v438[aria-hidden=true]').count(),1);assert.equal(await page.locator('[data-week-from="2026-11-30"] .booking-day-v37').count(),5);assert.equal(await page.locator('[data-week-from="2026-11-30"] .booking-day-v37').first().getAttribute('data-date'),'2026-11-30');
   assert.equal(await page.locator('#bookingPickerDaysV37 .calendar-weekletters-v438').count(),6);
   const weekly=await page.locator('#bookingPickerDaysV37>.calendar-row-v438').evaluateAll(rows=>rows.map(row=>{const letters=[...row.querySelectorAll('.calendar-weekletters-v438 span')],days=[...row.querySelectorAll('.booking-picker-week-days-v127>*')];return {letters:letters.map(x=>x.textContent).join(''),aligned:letters.length===days.length&&letters.every((el,i)=>Math.abs((el.getBoundingClientRect().left+el.getBoundingClientRect().width/2)-(days[i].getBoundingClientRect().left+days[i].getBoundingClientRect().width/2))<2),shadow:getComputedStyle(row).boxShadow,padding:parseFloat(getComputedStyle(row).paddingTop),y:row.getBoundingClientRect().top,bottom:row.getBoundingClientRect().bottom};}));
-  assert(weekly.every(r=>r.letters==='PUSŠP'&&r.aligned&&r.shadow.includes('inset')&&r.padding>=10),'each week has aligned labels and its own liquid frame');
+  assert(weekly.every(r=>r.letters==='PUSŠP'&&r.aligned&&r.shadow==='none'&&r.padding<=3),'each week has aligned labels without duplicated liquid frame');
   assert(weekly.slice(1).every((r,i)=>r.y-weekly[i].bottom>=5),'weekly cards visibly separated');
-  // Friday cutoff is independent of recorded attendance and does not change the month horizon.
-  await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2026-11-27',minutes:479});window.customerDesignRefreshCalendarV351();});
-  assert.equal(await page.locator('[data-week-from="2026-11-23"]').count(),1,'Friday 07:59 retains current week without visits');
-  await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2026-11-27',minutes:480});document.dispatchEvent(new Event('visibilitychange'));});
-  assert.equal(await page.locator('[data-week-from="2026-11-23"]').count(),0,'Friday 08:00 hides current week for one and two dogs');
+  // Thursday cutoff, delayed next-month unlock, and the crossing week stay consistent for one/two dogs.
+  await page.evaluate(()=>{const days=state.data.availability.days;for(let d=new Date('2027-01-01T12:00:00Z');d<=new Date('2027-01-31T12:00:00Z');d.setUTCDate(d.getUTCDate()+1))if(d.getUTCDay()>=1&&d.getUTCDay()<=5)days.push({date:d.toISOString().slice(0,10),available:8,capacity:10,occupied:2,bookings_open:true,dogs:[]});bratislavaClockV95=()=>({date:'2026-11-26',minutes:1199});window.customerDesignRefreshCalendarV351();});
+  assert.equal(await page.locator('[data-week-from="2026-11-23"]').count(),1,'Thursday 19:59 retains ending week');
+  await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2026-11-26',minutes:1200});document.dispatchEvent(new Event('visibilitychange'));});
+  assert.equal(await page.locator('[data-week-from="2026-11-23"]').count(),0,'Thursday 20:00 hides ending week');
   assert.equal(await page.locator('#bookingPickerDaysV37>.calendar-row-v438').first().getAttribute('data-week-from'),'2026-11-30');
-  assert.equal(await page.locator('[data-date="2026-12-31"].booking-day-v37').count(),1,'December horizon remains');
-  assert.equal(await page.locator('[data-date="2027-01-01"].booking-day-v37').count(),0,'no January added early');
-  await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2026-11-28',minutes:600});window.customerDesignRefreshCalendarV351();});
-  assert.equal(await page.locator('[data-week-from="2026-11-23"]').count(),0,'weekend stays hidden');
-  await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2026-11-26'});window.customerDesignRefreshCalendarV351();});
-
+  assert.equal(await page.locator('#bookingPickerDaysV37 .calendar-month-v438').count(),1);
+  assert.equal(await page.locator('[data-date="2026-12-31"].booking-day-v37').count(),1);
+  assert.equal(await page.locator('[data-date="2027-01-01"].booking-day-v37').count(),0);
+  await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2026-12-10',minutes:1199});window.customerDesignRefreshCalendarV351();});
+  assert.equal(await page.locator('[data-date="2027-01-01"].booking-day-v37').count(),0,'January stays hidden until second Thursday 20:00');
+  await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2026-12-10',minutes:1200});document.dispatchEvent(new Event('visibilitychange'));});
+  assert.equal(await page.locator('#bookingPickerDaysV37>.calendar-row-v438').first().getAttribute('data-week-from'),'2026-12-14');
+  assert.equal(await page.locator('[data-date="2027-01-01"].booking-day-v37').count(),1);
+  assert.equal(await page.locator('[data-date="2027-01-29"].booking-day-v37').count(),1);
+  assert.deepEqual(await page.locator('#bookingPickerDaysV37 .calendar-month-v438').allTextContents(),['December','Január']);
+  assert.equal(await page.locator('[data-week-from="2026-12-28"] .booking-day-v37').count(),5);
+  await page.evaluate(()=>{state.data.availability.days=state.data.availability.days.filter(d=>d.date<='2026-12-31');bratislavaClockV95=()=>({date:'2026-11-26'});window.customerDesignRefreshCalendarV351();});
   await page.evaluate(()=>{for(const [date,occupied] of [['2026-12-07',0],['2026-12-08',5],['2026-12-09',6],['2026-12-10',10],['2026-12-11',11]]){const d=state.data.availability.days.find(x=>x.date===date);Object.assign(d,{occupied,capacity:11,available:11-occupied});}window.customerDesignRefreshCalendarV351();});
   const tiles=await page.locator('[data-week-from="2026-12-07"] .booking-day-v37').evaluateAll(nodes=>nodes.map(el=>({h:el.getBoundingClientRect().height,level:el.dataset.capacityLevel,bg:getComputedStyle(el).backgroundColor,fg:getComputedStyle(el.querySelector('strong')).color,count:getComputedStyle(el.querySelector(':scope > span')).display,dot:!!el.querySelector('.design-capacity-dot')})));
   assert.equal(tiles.length,5);assert(tiles.every(t=>Math.abs(t.h-tiles[0].h)<1&&!t.dot),'identical tile heights and no dots');
