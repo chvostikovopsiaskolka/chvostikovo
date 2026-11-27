@@ -24,7 +24,7 @@ const schema={tables:fixture.rls_tables,policies:fixture.policies,grants:fixture
 for(const t of schema.tables)if(t.rls)await db.exec(`alter table ${t.schema}."${t.name}" enable row level security`);
 for(const p of schema.policies){await db.exec(`create policy "${p.policyname}" on ${p.schemaname}."${p.tablename}" for ${p.cmd} to ${p.roles.join(',')}${p.qual?' using ('+p.qual+')':''}${p.with_check?' with check ('+p.with_check+')':''}`)}
 for(const g of schema.grants)if(g.grantee==='authenticated'&&['SELECT','INSERT','UPDATE','DELETE'].includes(g.privilege_type))await db.exec(`grant ${g.privilege_type} on ${g.table_schema}."${g.table_name}" to authenticated`);
-await db.exec(fs.readFileSync('supabase/changes/security-access-v336.sql','utf8'));
+await db.exec(fs.readFileSync('supabase/changes/security-access-v336.sql','utf8').replace(/\r\n/g,'\n'));
 const staff='10000000-0000-0000-0000-000000000001',a='20000000-0000-0000-0000-000000000001',b='20000000-0000-0000-0000-000000000002',partner='20000000-0000-0000-0000-000000000003';
 await db.exec(`insert into auth.users(id) values('${staff}'),('${a}'),('${b}'),('${partner}');insert into public.staff(user_id,display_name,role,active) values('${staff}','Synthetic Staff','owner',true);insert into public.customer_profiles(user_id,full_name,status) values('${a}','Synthetic A','active'),('${b}','Synthetic B','active'),('${partner}','Synthetic Partner','active');insert into public.customer_owner_links(user_id,owner_id,allowed_dog_ids) values('${a}',901,array[901,902]),('${b}',903,array[903]),('${partner}',901,array[901]);insert into public.dogs(id,owner_id,name,active) overriding system value values(901,901,'Synthetic One',true),(902,901,'Synthetic Two',true),(903,903,'Synthetic Other',true);insert into auth.sessions values('90000000-0000-0000-0000-000000000001','${a}'),('90000000-0000-0000-0000-000000000002','${b}');insert into auth.refresh_tokens values(1,'${a}','90000000-0000-0000-0000-000000000001'),(2,'${b}','90000000-0000-0000-0000-000000000002');insert into public.portal_push_subscriptions(user_id,endpoint,p256dh,auth,active) values('${a}','https://fixture.invalid/a','fake','fake',true),('${b}','https://fixture.invalid/b','fake','fake',true);`);
 async function login(uid,role='authenticated'){await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[uid]);await db.exec('set role '+role)}
@@ -44,8 +44,14 @@ await login(staff);await db.query('select portal_set_customer_blocked_v336($1,fa
 await login(a);assert.equal((await db.query('select portal_customer_access_allowed_v336() ok')).rows[0].ok,true);await db.exec('reset role');assert.equal((await db.query('select banned_until from auth.users where id=$1',[a])).rows[0].banned_until,null);assert.equal((await db.query('select count(*)::int n from dogs')).rows[0].n,3);assert.equal((await db.query('select count(*)::int n from customer_owner_links')).rows[0].n,3);
 await login('', 'service_role');const results=await Promise.all(Array.from({length:21},()=>db.query("select consume_request_limit_v336('form_ip',repeat('a',64)) ok")));assert.equal(results.filter(x=>x.rows[0].ok).length,20);assert.equal((await db.query("select consume_request_limit_v336('form_ip',repeat('b',64)) ok")).rows[0].ok,true);
 await db.exec('reset role');
-// Current function definitions have moved beyond the historical v336 checksum.
-// The production rollback must refuse to overwrite these newer guards.
+// Exercise a genuinely newer function in an isolated transaction: rollback must
+// refuse to overwrite it. Then restore the fixture and test its valid rollback.
+await db.exec('begin');
+const guarded=(await db.query("select pg_get_functiondef('portal_accept_owner_terms_v254(bigint,text,text,text)'::regprocedure) as definition")).rows[0].definition;
+assert(guarded.includes('BEGIN'));
+await db.exec(guarded.replace('BEGIN','BEGIN\n-- Synthetic newer Auth function for rollback refusal\n'));
 await assert.rejects(db.exec(fs.readFileSync('supabase/changes/security-access-rollback-v336.sql','utf8')),/Newer function exists/);
+await db.exec('rollback');
 assert.equal((await db.query('select count(*)::int n from dogs')).rows[0].n,3);
-console.log('PASS isolated PostgreSQL: full current guarded function compilation, customer/staff denial, two owners and allowed dogs, old-JWT block/RLS, session+refresh revocation, subscription disable, unblock/ban restore, unchanged dogs/links, atomic ceilings and caller grants; historical rollback safely refuses newer functions');await db.close();
+await db.exec(fs.readFileSync('supabase/changes/security-access-rollback-v336.sql','utf8').replace(/\r\n/g,'\n'));
+console.log('PASS isolated PostgreSQL: full current guarded function compilation, customer/staff denial, two owners and allowed dogs, old-JWT block/RLS, session+refresh revocation, subscription disable, unblock/ban restore, unchanged dogs/links, atomic ceilings and caller grants; rollback refuses newer functions and restores the unchanged fixture');await db.close();
