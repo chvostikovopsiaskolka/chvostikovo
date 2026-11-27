@@ -25,5 +25,8 @@ function client({store=storage(),locks,fetch=async()=>({...fixture('new'),expire
  let release;const logout=client({fetch:async()=>{await new Promise(r=>release=r);return fixture('late')}});const pending=logout.run('refreshSession()');logout.run('clearSession()');release();await assert.rejects(pending,e=>e.code==='session_changed');assert.equal(logout.store.getItem(key),null);
  const fallback=client();fallback.store.setItem(key,JSON.stringify({...fixture('fallback'),expires_at:9999999999}));assert.equal((await fallback.run('ensureCustomerSessionV357()')).access_token,'fallback');
  assert(source.includes("'/auth/v1/logout?scope=local'"));assert(!fs.readFileSync('sw.js','utf8').includes('localStorage'));
+ const memory=client();memory.store.removeItem(key);memory.ctx.state.session={access_token:'memory-only',expires_at:9999999999,user:{id:'synthetic-owner'}};
+ assert.equal((await memory.run('ensureCustomerSessionV357()')).access_token,'memory-only');
+ const removed=client();removed.store.removeItem(key);await assert.rejects(removed.run('ensureCustomerSessionV357()'),e=>e.sessionInvalid);assert.equal(removed.ctx.state.session,null);
  console.log('PASS customer: shared rotation, suspended tab, transient vs invalid, offline/online, late logout, legacy fallback, scoped logout and update storage');
 })().catch(e=>{console.error(e);process.exitCode=1});

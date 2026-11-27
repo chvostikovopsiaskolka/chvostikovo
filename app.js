@@ -231,7 +231,13 @@ let sessionRefreshInFlight=null,sessionRefreshOwnerV357=null;
 // A suspended tab must adopt the token another tab rotated before using its copy.
 function syncStoredCustomerSessionV441(){
   let stored;
-  try{stored=JSON.parse(state.storage.getItem(SESSION_KEY)||'null')}catch(_){return false}
+  try{
+    const raw=state.storage.getItem(SESSION_KEY);
+    // An access-token-only in-memory session has no persisted refresh identity.
+    // Keep that existing flow; the API still validates its token and privileges.
+    if(!raw&&!state.session?.refresh_token)return false;
+    stored=JSON.parse(raw||'null');
+  }catch(_){return false}
   if(stored?.refresh_token===state.session?.refresh_token&&stored?.access_token===state.session?.access_token)return false;
   if(!stored?.access_token){clearSession();return true}
   if(stored.user?.id!==state.session?.user?.id){const remember=state.storage===localStorage;clearSession();saveSession(stored,remember)}
