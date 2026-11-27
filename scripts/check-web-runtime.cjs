@@ -172,7 +172,7 @@ async function assertHeroAriaEntry(page) {
 }
 async function assertPaidAriaAdEntry(page, freshConsent=false) {
   const url=new URL('/psia-skolka-kosice/?aria=open&utm_source=fixture&utm_campaign=aria&utm_content=aria_visual',base);
-  if(freshConsent)await page.evaluate(()=>localStorage.removeItem('chvostikovo-cookies'));
+  if(freshConsent)url.searchParams.set('fixture_fresh','1');
   await page.goto(url.href,{waitUntil:'domcontentloaded'});
   const chat=page.locator('[data-aria-chat]');
   if(freshConsent){
@@ -367,7 +367,7 @@ async function assertPaidReturnArrow(page) {
 async function assertPaidReturnNavigation(browser,engine) {
   const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
   try {
-    await context.addInitScript(()=>localStorage.setItem('chvostikovo-cookies',JSON.stringify({version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,functional:false,analytics:false,marketing:false})));
+    await context.addInitScript(()=>{if(new URLSearchParams(location.search).has('fixture_fresh'))localStorage.removeItem('chvostikovo-cookies');else localStorage.setItem('chvostikovo-cookies',JSON.stringify({version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,functional:false,analytics:false,marketing:false}));});
     await context.route('**/*',route=>{const req=route.request(),u=new URL(req.url());return u.origin===new URL(base).origin&&['GET','HEAD'].includes(req.method())?route.continue():route.abort();});
     const page=await context.newPage();
     const errors=[];page.on('pageerror',e=>errors.push(e.message));
