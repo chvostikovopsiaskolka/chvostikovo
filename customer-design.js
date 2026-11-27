@@ -187,22 +187,23 @@
   }
   function compactOverviewV437(root){
     const model=window.customerCompactOverviewV437?.();
-    const card=root.querySelector('.design-visit-empty');if(!card)return;if(!model?.days?.length){card.querySelector('.compact-overview-v437')?.remove();return;}
+    const card=root.querySelector('.design-visit-empty')||root;if(!model?.days?.length){root.querySelector('.compact-overview-v437')?.remove();return;}
     let host=card.querySelector('.compact-overview-v437');
-    if(!host){host=document.createElement('div');host.className='compact-overview-v437';card.append(host);}
+    if(!host){host=document.createElement('div');host.className='compact-overview-v437';const carousel=root.querySelector('.design-overview-carousel');if(card===root&&carousel)carousel.before(host);else card.append(host);}
     const selected=new Set(model.proposal?.dates||[]);
-    const key=JSON.stringify([model.days.map(d=>[d.date,d.occupied,d.capacity,d.available,d.bookings_open,d.selectable]),model.proposal]);
+    const key=JSON.stringify([model.days.map(d=>[d.date,d.occupied,d.capacity,d.available,d.bookings_open,d.selectable,d.ownStatus,d.ownCount,d.ownNames]),model.proposal]);
     if(host.dataset.key===key)return;host.dataset.key=key;
     host.innerHTML='';
     const grid=document.createElement('div');grid.className='compact-overview-grid-v437';
     for(const d of model.days){
       const button=document.createElement('button');button.type='button';button.disabled=!d.selectable;
-      button.dataset.overviewDate=d.date;button.dataset.level=calendarCapacityLevelV439(d);
+      button.dataset.overviewDate=d.date;button.dataset.level=calendarCapacityLevelV439(d);button.dataset.ownStatus=d.ownStatus||'';
       button.setAttribute('aria-pressed',String(selected.has(d.date)));
       const title=document.createElement('strong');title.textContent=new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric'}).format(new Date(d.date+'T12:00:00'));
       const count=document.createElement('small');count.textContent=d.bookings_open===false?'Zatvorené':Number(d.available)<=0?'Plno':d.occupied+'/'+d.capacity;
-      count.classList.toggle('calendar-count-hidden-v439',button.dataset.level==='free');
-      button.setAttribute('aria-label',title.textContent+' · '+count.textContent);
+      if(d.ownStatus)count.textContent=(d.ownStatus==='pending'?'?':'✓')+(d.dogCount>1?' '+d.ownCount+'/'+d.dogCount:'');
+      count.classList.toggle('calendar-count-hidden-v439',button.dataset.level==='free'&&!d.ownStatus);
+      button.setAttribute('aria-label',title.textContent+' · '+(d.ownStatus?(d.ownStatus==='pending'?'Čaká na schválenie: ':'Schválené: ')+d.ownNames:count.textContent));
       button.append(title,count);button.onclick=()=>window.openBookingPickerV37?.(null,d.date);grid.append(button);
     }
     const letters=document.createElement('div');letters.className='calendar-weekletters-v438';letters.setAttribute('aria-hidden','true');for(const s of (document.documentElement.lang==='en'?['M','T','W','T','F']:['P','U','S','Š','P'])){const span=document.createElement('span');span.textContent=s;letters.append(span);}host.append(letters,grid);
@@ -268,8 +269,8 @@
         root.dataset.date=key;root.innerHTML=`<div class="design-visits-title"><h2>📅 Moje rezervácie</h2></div><article class="design-visit-card design-visit-empty"><p class="design-empty-heading">${all.length?'Najbližšia rezervácia je neskôr než o dva týždne.':'Zatiaľ nemáte vytvorenú rezerváciu.'}</p>${all.length?'<button type="button" class="btn full">Moje rezervácie</button>':''}</article>`;
         root.querySelector('button')?.addEventListener('click',()=>window.openBookingPickerV37?.());
       }
-      compactOverviewV437(root);
     }
+    compactOverviewV437(root);
     overviewGuidanceV442(root);
     byId('designBulletinTitle')?.remove();
     const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile');if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);

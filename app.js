@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v442';
-const APP_VERSION='2.0.115';
+const APP_BUILD='v443';
+const APP_VERSION='2.0.116';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -3067,7 +3067,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const from=missed?current:smartShiftV199(current,7),to=smartShiftV199(from,6);
     const days=all.filter(d=>d.date>=from&&d.date<=to&&d.date<=calendarMonthEndV438(clock.date,clock));
     const proposal=dogs.every(d=>customerVaccinationsCompleteV96(d))?compactBookingProposalV437(dogs,days):null;
-    return {days:days.map(d=>({...d,selectable:compactEligibleV437(d.date,dogs,days)})),proposal};
+    return {days:days.map(d=>{
+      const own=dogs.map(dog=>({dog,booking:bookingFor(dog.id,d.date)})).filter(x=>x.booking);
+      return {...d,selectable:compactEligibleV437(d.date,dogs,days),ownStatus:own.length?(own.some(x=>x.booking.status==='pending')?'pending':'approved'):'',ownCount:own.length,dogCount:dogs.length,ownNames:own.map(x=>x.dog.name||'Psík').join(' a ')};
+    }),proposal};
   };
   function renderCompactSeedV437(){
     const root=$('bookingPickerSmartDaysV199');if(!root)return;

@@ -19,3 +19,7 @@ assert.match(src,/compactSeedPickerV437\(pickerDaysV393\(\),extraDate\);/);
 assert.match(src,/if\(pairBookingV254\)return submitPairV254\(dates\)/);
 assert.match(fs.readFileSync('supabase/functions/customer-portal-api/index.ts','utf8'),/nextWeekdays\(firstMonday, 50\)\.filter\(date => date <= endDate\)/);
 console.log('PASS compact booking common history, capacity, closed, and existing horizon');
+
+// Actual bookings are not proposals, including a partial two-dog reservation.
+c.state.data.dogs=dogs;c.state.data.availability={days};c.pickerWeekEndedV442=()=>true;c.hasWeekBookingV337=()=>true;c.customerVaccinationsCompleteV96=()=>true;c.bookingFor=(id,date)=>id===1&&date==='2026-12-02'?{status:'approved'}:null;
+const own=c.window.customerCompactOverviewV437().days.find(d=>d.date==='2026-12-02');assert.equal(own.ownStatus,'approved');assert.equal(own.ownCount,1);assert.equal(own.dogCount,2);assert.equal(own.selectable,false);
