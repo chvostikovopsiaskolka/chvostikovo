@@ -301,7 +301,8 @@
   window.customerDesignPickerRender=()=>{
     const picker=byId('bookingPickerV37'),card=picker?.querySelector('.booking-picker-card-v37');if(!card)return;
     // Resume/bootstrap can advance availability while this page remains open.
-    const days=window.customerPickerDaysV393?.()||[],tiles=byId('bookingPickerDaysV37')?.querySelectorAll('.booking-day-v37[data-date]')||[];
+    const calendar=byId('bookingPickerDaysV37');if(!calendar)return;
+    const days=window.customerPickerDaysV393?.()||[],tiles=calendar.querySelectorAll('.booking-day-v37[data-date]');
     if((days[0]?.date||'')!==(tiles[0]?.dataset.date||'')||(days[days.length-1]?.date||'')!==(tiles[tiles.length-1]?.dataset.date||'')){window.customerDesignRefreshCalendarV351?.();return;}
     picker.classList.add('design-reservations-page');picker.setAttribute('role','region');picker.removeAttribute('aria-modal');
     byId('bookingPickerTitleV37').textContent='Rezervácie';
