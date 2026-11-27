@@ -123,6 +123,34 @@ export function AriaLeadAssistant({
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
   const [pricingVisitOpen, setPricingVisitOpen] = useState(false);
   const [activeLeadSection, setActiveLeadSection] = useState("");
+  const [pastLeadHero, setPastLeadHero] = useState(false);
+
+  // Paid-only: use the actual Hero boundary, not a timer or raw scrollY.
+  useEffect(() => {
+    if (!leadChat) return;
+    const hero = document.querySelector<HTMLElement>("main > section.hero-safe-top");
+    if (!hero) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const bottom = hero.getBoundingClientRect().bottom;
+      setPastLeadHero(previous => previous ? bottom <= 32 : bottom <= 0);
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+    const observer = new ResizeObserver(schedule);
+    observer.observe(hero);
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    window.visualViewport?.addEventListener("resize", schedule);
+    update();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      window.visualViewport?.removeEventListener("resize", schedule);
+      cancelAnimationFrame(frame);
+    };
+  }, [leadChat]);
 
   const speechRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLImageElement>(null);
@@ -620,10 +648,17 @@ export function AriaLeadAssistant({
                             className="min-h-11 min-w-0 rounded-xl border border-[#b82e7f]/25 bg-white/85 px-1 py-1 text-center font-display text-[11px] font-bold leading-tight text-[#26322b] shadow-sm hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9e336f] sm:text-xs">
                             Aký je cenník škôlky?
                           </button>
-                          <button type="button" data-aria-bubble-question="requirements" onClick={() => openChat("requirements")}
-                            className="min-h-11 min-w-0 rounded-xl border border-[#b82e7f]/25 bg-white/85 px-1 py-1 text-center font-display text-[11px] font-bold leading-tight text-[#26322b] shadow-sm hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9e336f] sm:text-xs">
-                            Aké sú podmienky prijatia?
-                          </button>
+                          {pastLeadHero ? (
+                            <button type="button" data-aria-bubble-interest-cta aria-haspopup="dialog" onClick={openInterest}
+                              className="min-h-11 min-w-0 rounded-xl border border-transparent bg-[#ffa414] px-1 py-1 text-center font-display text-[11px] font-bold leading-tight text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9e336f] sm:text-xs">
+                              Mám záujem
+                            </button>
+                          ) : (
+                            <button type="button" data-aria-bubble-question="requirements" onClick={() => openChat("requirements")}
+                              className="min-h-11 min-w-0 rounded-xl border border-[#b82e7f]/25 bg-white/85 px-1 py-1 text-center font-display text-[11px] font-bold leading-tight text-[#26322b] shadow-sm hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9e336f] sm:text-xs">
+                              Aké sú podmienky prijatia?
+                            </button>
+                          )}
                         </div>
                       </>
                     ) : (
