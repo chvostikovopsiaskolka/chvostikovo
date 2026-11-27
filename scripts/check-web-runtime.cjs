@@ -163,7 +163,7 @@ async function assertCookieChoices(page) {
 // Reuse the TEST chat on paid LEAD; verify only the new route wiring with isolated transports.
 async function assertHeroAriaEntry(page) {
   const cta=page.locator('[data-aria-lead-hero-cta]');
-  if((await cta.innerText()).trim()!=='Chcem zistiť viac o škôlke'||await cta.getAttribute('aria-controls')!=='aria-caretakers'||await cta.getAttribute('aria-haspopup'))throw new Error('Paid Hero CTA label or section semantics');
+  if((await cta.innerText()).trim()!=='Spoznajte našu škôlku'||await cta.getAttribute('aria-controls')!=='aria-caretakers'||await cta.getAttribute('aria-haspopup'))throw new Error('Paid Hero CTA label or section semantics');
   await activateFixtureControl(cta);
   await page.waitForFunction(()=>{const r=document.getElementById('aria-caretakers')?.getBoundingClientRect();return r&&r.top>=-2&&r.top<130;},null,{timeout:5000});
   if(await page.locator('[data-aria-chat]').isVisible())throw new Error('Paid Hero CTA must navigate without opening chat');
@@ -378,6 +378,24 @@ async function assertPaidReturnNavigation(browser,engine) {
     if(await cookie.isVisible())await cookie.click();
     await page.evaluate(()=>history.replaceState(history.state,'',location.pathname+location.search+'#lead-pricing'));
     await assertPaidReturnArrow(page);
+    const interest=page.locator('[data-aria-bubble-interest-cta]');
+    const requirements=page.locator('[data-aria-bubble-question="requirements"]');
+    await requirements.waitFor({state:'visible'});
+    await page.evaluate(()=>{const h=document.querySelector('main > section.hero-safe-top');scrollTo({top:scrollY+h.getBoundingClientRect().bottom+60,behavior:'instant'});});
+    await interest.waitFor({state:'visible'});
+    if(await requirements.isVisible()||await interest.innerText()!=='Mám záujem')throw new Error('Paid launcher must replace only the requirements choice after Hero');
+    const style=await interest.evaluate(el=>({bg:getComputedStyle(el).backgroundColor,fg:getComputedStyle(el).color,h:el.getBoundingClientRect().height}));
+    if(style.bg!=='rgb(255, 164, 20)'||style.fg!=='rgb(255, 255, 255)'||style.h<44)throw new Error('Paid interest button styling/tap target '+JSON.stringify(style));
+    await activateFixtureControl(interest);
+    const modal=page.locator('[data-form-dialog]');
+    await modal.waitFor({state:'visible'});
+    await modal.locator('[data-lead-step-form]').waitFor({state:'visible'});
+    if(await page.locator('[data-aria-chat]').isVisible())throw new Error('Interest must open direct form instead of chat');
+    await page.keyboard.press('Escape');
+    await modal.waitFor({state:'hidden'});
+    await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+    await requirements.waitFor({state:'visible'});
+    if(await interest.isVisible())throw new Error('Return to Hero must restore original questions');
     await assertPaidAriaAdEntry(page);
     await assertPaidAriaAdEntry(page,true);
     if(errors.length)throw new Error('Paid navigation runtime errors: '+errors.join('; '));
@@ -458,7 +476,7 @@ async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=n
         actionArrowDecorative:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]'),'::after').pointerEvents==='none',
         pillBold:visiblePills.every(el=>Number(getComputedStyle(el).fontWeight)>=700),
         pillGap:parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pills]')).columnGap),
-        photoCrop:(()=>{const imgs=[...document.querySelectorAll('[data-lead-hero-photo] img')],short=innerWidth<640&&innerHeight<=740;return imgs.length===2&&imgs.every(el=>getComputedStyle(el).objectFit==='cover'&&getComputedStyle(el).objectPosition===(short?'50% 20%':'50% 50%'))&&(!short||innerWidth<390||(imgs.every(el=>el.getBoundingClientRect().height>=108)&&cta.top-photos.bottom>=14));})(),
+        photoCrop:(()=>{const imgs=[...document.querySelectorAll('[data-lead-hero-photo] img')],short=innerWidth<640&&innerHeight<=740;return imgs.length===2&&imgs.every(el=>getComputedStyle(el).objectFit==='cover'&&getComputedStyle(el).objectPosition===(short?'50% 35%':innerWidth<640?'50% 58%':'50% 50%'))&&(!short||innerWidth<390||(imgs.every(el=>el.getBoundingClientRect().height>=108)&&cta.top-photos.bottom>=14));})(),
         reviewGap:parseFloat(getComputedStyle(document.querySelector('[data-aria-lead-review-spacing]')).marginTop),
         galleryBelow:box('#lead-photo-carousel').top>=innerHeight-2,
         greetingFit:(()=>{const p=document.querySelector('[data-aria-bubble-greeting]'),range=document.createRange();range.selectNodeContents(p);const rects=[...range.getClientRects()].filter(r=>r.width>0&&r.height>0);const expected=innerWidth<640?'Ahoj, volám sa Aria. Čo ťa zaujíma?':'Ahoj, volám sa Aria. Čo ťa zaujíma v našej škôlke?';return p.innerText.replace(/\s+/g,' ').trim()===expected&&new Set(rects.map(r=>Math.round(r.top))).size===1&&p.scrollWidth<=p.clientWidth+1&&Math.abs(p.getBoundingClientRect().right-Math.max(...rects.map(r=>r.right))-parseFloat(getComputedStyle(p).paddingRight))<=2&&(innerWidth>=640||face.left>=6&&face.left<=10);})(),
@@ -1757,7 +1775,7 @@ async function assertPublicContent(browser,engine){
                     proof:q.left>=0&&q.right<=innerWidth+1&&q.height<=parseFloat(getComputedStyle(proof).lineHeight)*1.55&&proof.scrollWidth<=proof.clientWidth+2,
                     reviews:!!reviewCard&&!!track&&getComputedStyle(reviews).overflowY!=='hidden'&&getComputedStyle(reviewCard).boxShadow!=='none',
                     fixedDock:getComputedStyle(guide).position==='fixed'&&dockOffset>=6&&dockOffset<=54,
-                    controlledChat:cta.getAttribute('aria-controls')==='aria-caretakers'&&!cta.getAttribute('aria-haspopup')&&cta.textContent.trim()==='Chcem zistiť viac o škôlke'&&!form.hidden,
+                    controlledChat:cta.getAttribute('aria-controls')==='aria-caretakers'&&!cta.getAttribute('aria-haspopup')&&cta.textContent.trim()==='Spoznajte našu škôlku'&&!form.hidden,
                     carouselOrder:carousel.getBoundingClientRect().top>=(form.hidden?hero.getBoundingClientRect().bottom:form.getBoundingClientRect().bottom)-8,
                     caretakers:benefits.children.length===3&&aboutHeading.scrollWidth<=aboutHeading.clientWidth+2,
                     crownInForm:!!form.querySelector('[data-crown-ground]')&&!!document.querySelector('#aria-first-visit-form [data-crown-ground]')
