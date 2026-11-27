@@ -127,6 +127,7 @@ jobs:
           node tests/customer-transient-reads-v391.cjs
           node tests/customer-roster-unlinked-v389.cjs
           node tests/customer-session-startup-v357.cjs
+          node tests/customer-session-rotation.cjs
           node tests/customer-guide-v358.cjs
           node tests/customer-guide-db-v358.cjs
           node tests/customer-taxi-cancel-v326.mjs
@@ -183,6 +184,8 @@ jobs:
           "$RUNNER_TEMP/chvo-v3-browser/node_modules/.bin/playwright" install --with-deps chromium webkit
       - name: Current customer browser regression and pixel proof
         run: |
+          node tests/customer-session-rotation-browser.cjs
+          V3_ENGINE=webkit node tests/customer-session-rotation-browser.cjs
           node tools/build-admin-telemetry-v345.cjs
           node tests/telemetry-browser-v345.cjs
           node tests/customer-welcome-v403-browser.cjs
