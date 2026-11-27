@@ -2762,7 +2762,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   function applyNav(){
     const booking=$('navBooking'),menu=$('navDog');
     if(!booking||!menu)return;
-    booking.innerHTML='<span class="nav-icon-v36">'+calendarSvg+'</span><span>Prehľad</span>';
+    booking.innerHTML='<span class="nav-icon-v36"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-6h6v6"/></svg></span><span>Prehľad</span>';
     menu.innerHTML='<span class="nav-icon-v36">'+gearSvg+'</span><span>Menu</span>';
     booking.classList.add('nav-item-v36');menu.classList.add('nav-item-v36');
   }

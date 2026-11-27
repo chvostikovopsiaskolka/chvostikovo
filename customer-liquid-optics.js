@@ -109,6 +109,8 @@ function sync(){
   // Content renderers can replace their children independently of geometry.
   if(s.layer.parentElement!==materialHolder(el))materialHolder(el).prepend(s.layer);
   const r=el.getBoundingClientRect(),w=Math.round(r.width),h=Math.round(r.height),radius=parseFloat(getComputedStyle(el).borderTopLeftRadius)||16,key=[w,h,radius].join(':');
+  // The dock uses native backdrop glass in both engines, not the reels noise texture.
+  if(el.matches('.bottom-nav')){stop(s);s.layer.dataset.renderer='fallback';continue;}
   if(opaque){stop(s);s.layer.dataset.renderer='fallback';continue;}
   // On long login/signup pages the sampled WebKit wallpaper lags document scroll.
   // Keep the quiet glass fallback, but not a moving refracted paw texture.
