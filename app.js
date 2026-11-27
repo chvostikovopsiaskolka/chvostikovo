@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v441';
-const APP_VERSION='2.0.114';
+const APP_BUILD='v442';
+const APP_VERSION='2.0.115';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -3362,23 +3362,50 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const offset=Math.round((new Date(date+'T12:00:00Z')-monday)/86400000);
     return offset<7?'Tento týždeň':offset<14?'Budúci týždeň':offset<21?'O dva týždne':'O tri týždne';
   }
+  // Friday at 08:00 Bratislava time: the ending week no longer takes up booking space.
+  // This is a presentation filter only; existing reservations and server cutoffs stay unchanged.
+  function pickerWeekEndedV442(clock){
+    const weekday=new Date(clock.date+'T12:00:00Z').getUTCDay();
+    return weekday===0||weekday===6||(weekday===5&&clock.minutes>=480);
+  }
   function pickerDaysV393(){
-    const days=state.data?.availability?.days||[],today=bratislavaClockV95().date;
-    const clock=new Date(today+'T12:00:00Z'),weekday=clock.getUTCDay();
-    clock.setUTCDate(clock.getUTCDate()-(weekday===0?6:weekday-1));
-    const monday=clock.toISOString().slice(0,10);
-    clock.setUTCDate(clock.getUTCDate()+6);const sunday=clock.toISOString().slice(0,10);
+    const days=state.data?.availability?.days||[],clock=bratislavaClockV95(),today=clock.date;
+    const monday=smartMondayV199(today),sunday=smartShiftV199(monday,6);
     const dogs=pickerDogsV254();
     const attended=dogs.length>0&&dogs.every(d=>(state.data?.visits||[]).some(v=>Number(v.dog_id)===Number(d.id)&&v.visit_date>=monday&&v.visit_date<=today));
-    // Obaja keeps the current week if either dog has not attended yet.
-    const offset=attended&&days[0]?.date>=monday&&days[0]?.date<=sunday?5:0;
-    return days.slice(offset);
+    // Keep the existing visit-based rule, plus the same Friday cutoff for all dogs.
+    // Filter by real dates, not a five-element offset: sparse availability must not skip next week.
+    return attended||pickerWeekEndedV442(clock)?days.filter(day=>day.date>sunday):days;
   }
+  let pickerCutoffTimerV442=null;
+  function schedulePickerCutoffV442(){
+    clearTimeout(pickerCutoffTimerV442);pickerCutoffTimerV442=null;
+    const picker=$('bookingPickerV37'),clock=bratislavaClockV95();
+    if(!picker||picker.classList.contains('hidden')||document.visibilityState==='hidden'||!Number.isFinite(clock.minutes))return;
+    const now=new Date(),weekday=new Date(clock.date+'T12:00:00Z').getUTCDay();
+    const minutes=weekday===5&&clock.minutes<480?480-clock.minutes:1440-clock.minutes;
+    pickerCutoffTimerV442=setTimeout(refreshPickerCutoffV442,Math.max(1000,minutes*60000-now.getSeconds()*1000-now.getMilliseconds()));
+  }
+  function refreshPickerCutoffV442(){
+    const picker=$('bookingPickerV37');
+    if(picker&&!picker.classList.contains('hidden')&&document.visibilityState!=='hidden'&&!submittingV37){
+      const first=pickerDaysV393()[0]?.date||'',rendered=$('bookingPickerDaysV37')?.querySelector('[data-first-date]')?.dataset.firstDate||'';
+      if(first!==rendered)renderPickerV37();
+    }
+    schedulePickerCutoffV442();
+  }
+  document.addEventListener('visibilitychange',refreshPickerCutoffV442);
+  window.addEventListener('pageshow',refreshPickerCutoffV442);
   window.customerPickerDaysV393=pickerDaysV393;
   function renderPickerV37(){
     ensurePickerV37();
     const dog=selectedDog(),dogs=state.data?.dogs||[],days=pickerDaysV393();
     if(!dog)return;
+    const clock=bratislavaClockV95();
+    if(!submittingV37&&pickerWeekEndedV442(clock)){
+      const nextMonday=smartShiftV199(smartMondayV199(clock.date),7);
+      for(const date of selectedDatesV37)if(date<nextMonday){selectedDatesV37.delete(date);selectedTaxiByDateV91.delete(date);if(expandedTaxiDateV201===date)expandedTaxiDateV201=null;}
+    }
     const dogWrap=$('bookingPickerDogWrapV37'),dogSelect=$('bookingPickerDogV37');
     dogWrap.classList.toggle('hidden',dogs.length<=1);
     dogSelect.disabled=submittingV37;dogSelect.innerHTML=(dogs.length===2?'<option value="both" '+(pairBookingV254?'selected':'')+'>Obaja psíkovia</option>':'')+dogs.map(d=>`<option value="${d.id}" ${!pairBookingV254&&Number(d.id)===Number(dog.id)?'selected':''}>${esc(d.name)}</option>`).join('');
@@ -3493,6 +3520,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     document.documentElement.classList.add('booking-picker-open-v37');
     $('bookingPickerV37').scrollTop=0;
     window.customerDesignPickerOpened?.();
+    schedulePickerCutoffV442();
   }
   window.openBookingPickerV37=openPickerV37;
   window.closeBookingPickerV305=()=>{closePickerV37();window.customerDesignPickerClosed?.();};
@@ -3506,7 +3534,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   window.customerDesignRefreshDeadline=()=>updateBookingDeadlineNoticeV127();
   window.customerDesignRefreshCalendarV351=()=>renderPickerV37();
   window.customerDesignCanEditTaxi=row=>allowedTaxiEditV201(row);
-  function closePickerV37(){if(submittingV37)return;pickerEpochV157++;$('bookingPickerV37')?.classList.add('hidden');document.documentElement.classList.remove('booking-picker-open-v37');window.customerDesignPickerClosed?.();pickerErrorV95('');if(pendingPassRenewalV95){const renewal=pendingPassRenewalV95;pendingPassRenewalV95=null;setTimeout(()=>window.showPassRenewalAfterBookingV94?.(renewal.dogId,renewal.date),100)}}
+  function closePickerV37(){if(submittingV37)return;clearTimeout(pickerCutoffTimerV442);pickerCutoffTimerV442=null;pickerEpochV157++;$('bookingPickerV37')?.classList.add('hidden');document.documentElement.classList.remove('booking-picker-open-v37');window.customerDesignPickerClosed?.();pickerErrorV95('');if(pendingPassRenewalV95){const renewal=pendingPassRenewalV95;pendingPassRenewalV95=null;setTimeout(()=>window.showPassRenewalAfterBookingV94?.(renewal.dogId,renewal.date),100)}}
 
   async function submitPickerV37(){
     const dog=selectedDog(),dates=[...selectedDatesV37].sort();
