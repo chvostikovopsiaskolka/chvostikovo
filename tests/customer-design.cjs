@@ -33,7 +33,7 @@ async function scenario(count){
   assert.equal(w.document.querySelectorAll('.design-paws .used').length,6);
   assert.equal(w.document.querySelector('.design-visit-label').textContent,'Najbližšia návšteva · ');
   assert.equal(w.document.querySelector('#designDogName > span'),null,'no redundant pencil');
-  assert.match(w.document.querySelector('.design-validity').textContent,/Platnosť do/);
+  assert.match(w.document.querySelector('.design-validity').textContent,/Využiť do/);
   assert.match(w.document.querySelector('.design-validity').textContent,/2099/,'pass expiry retains full year');
   assert(w.document.querySelector('.design-ticket-usage p'),'pass usage and validity share the row above the divider');
   assert.equal(w.document.querySelector('.design-validity').parentElement.className,'design-ticket-usage');
@@ -169,6 +169,8 @@ async function scenario(count){
   assert.equal(w.document.getElementById('designReservationNotice').hidden,true,'Monday missed-deadline notice replaces the next-week reminder');
   assert.match(w.document.getElementById('designReservationNotice').textContent,/do nedele 11\. 1\. do 20:00/);
   assert.equal(w.document.getElementById('designReservationNotice').dataset.weekFrom,'2099-01-12');
+  assert.equal(w.document.querySelectorAll('#designNearest .compact-overview-grid-v437').length,0,'no duplicate overview calendar; booking remains in the picker');
+  assert.match(w.document.getElementById('designReservationNotice').textContent,/Na rezerváciu zostáva[jú]* \d+ d/);
   assert(w.document.getElementById('designReservationNotice').closest('#designNearest'));
   const nextWeekCase=(requests,reservations,hidden,message)=>{
     run(`state.data.requests=${JSON.stringify([...requests,weekRequest])};state.data.reservations=${JSON.stringify(reservations)};state.data.booking_history=[];state.data.visits=[];renderDays();window.customerDesignPickerRender()`);

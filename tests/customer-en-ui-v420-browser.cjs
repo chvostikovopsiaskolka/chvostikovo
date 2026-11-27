@@ -20,7 +20,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
       assert.equal(await page.locator('#passSummary strong').textContent(),'0 of 10','EN source pass count');
       assert.equal(await page.locator('#designTicket .design-paws>span').count(),10,'EN must not lose paw grid at '+width);
       assert.match(await page.locator('#designTicket .design-ticket-usage').innerText(),/Used\s+0 of 10 visits/);
-      assert.match(await page.locator('#designTicket .design-validity').innerText(),/Valid until/);
+      assert.match(await page.locator('#designTicket .design-validity').innerText(),/Use by/);
       const ticket=await page.locator('#designTicket').evaluate(el=>{
         const r=el.getBoundingClientRect(),label=el.querySelector('.design-validity').getBoundingClientRect();
         return {width:r.width,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,badgeRight:label.right,right:r.right};

@@ -1263,7 +1263,7 @@ html.customer-design #designTicket .design-ticket-usage .design-validity{backgro
 /* v445 month rail: the next month peeks into view; keep the outer liquid surface. */
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-controls-v445{display:block;min-width:0;margin:0 0 8px;color:#737b86;font-size:11px;text-align:center;line-height:1.4}
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-rail-v445{position:relative;display:flex;align-items:flex-start;gap:8px;max-width:100%;min-width:0;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:5px}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445{flex:0 0 calc(100% - 24px);min-width:0;box-sizing:border-box;scroll-snap-align:start}
+#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445{flex:0 0 100%;min-width:0;box-sizing:border-box;scroll-snap-align:start}
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445:last-child{flex-basis:100%}
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445>.calendar-month-v438{margin-top:0}
 /* January preview: identical week geometry, neutral read-only dates. */
@@ -1273,9 +1273,13 @@ html.customer-design #designTicket .design-ticket-usage .design-validity{backgro
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-opening-day-v445 strong{font-size:clamp(11px,3.8vw,15px);line-height:1.1;font-weight:800;white-space:nowrap}
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-opening-day-v445 span{font-size:9px;line-height:1.1;max-width:100%;overflow-wrap:anywhere}
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-opening-day-v445[data-opening=closed]{background:#e8ebef;border-color:#cdd3dc}
-@media(max-width:350px){#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445:not(:last-child){flex-basis:calc(100% - 16px)}}
 
 /* v447: reserve identical header space in every carousel pane; no extra January row. */
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-header-v447{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;box-sizing:border-box;height:32px;min-height:32px;margin:0 6px 3px;min-width:0}
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-header-v447>.calendar-month-v438{margin:0;white-space:nowrap;line-height:1.2}
 #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-header-v447>.calendar-preview-note-v445{margin:0;font-size:10px;line-height:12px;text-align:right;min-width:0;overflow-wrap:normal}
+
+/* v448: clearly actionable vaccination status, stronger orange report card; no adjacent month peek. */
+.customer-design #bookingTab #bookingDogProfile :is(#bookingVaccinationStatus,.dual-dog-status-v254)>span:last-child::after{content:"↗";display:inline;margin-left:4px;font-size:.95em;font-weight:850;color:currentColor;white-space:nowrap}
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) #bookingGradebook{color:#b94b09!important}
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) #bookingGradebook svg{stroke:#d65b0c!important;color:#d65b0c!important}

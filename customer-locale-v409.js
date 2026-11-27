@@ -211,6 +211,11 @@
     if(match)return Number(match[1])===1?'Valid for 1 more day':'Valid for '+match[1]+' more days';
     match=text.match(/^Návštevy v škôlke:\s*([0-9]+)$/);
     if(match)return 'Daycare visits: '+match[1];
+    match=text.match(/^Využiť do (.+)$/);
+    if(match)return 'Use by '+match[1];
+    match=text.match(/^(Na rezerváciu zostávajú? (\d+) (?:deň|dni|dní)|Rezervujte dnes) · do nedele (.+?) do 20:00\.$/);
+    if(match)return (match[2]?(Number(match[2])===1?'1 day left to book':match[2]+' days left to book'):'Book today')+' · Sunday '+match[3]+', 8:00 PM.';
+    if(text==='Kliknite na Rezervovať miesto, vyberte deň, odošlite žiadosť a počkajte na schválenie v prípade voľného miesta.')return 'Tap Book a spot, choose a day, send a request and wait for approval if a spot is available.';
     match=text.match(/^Platnosť do (.+)$/);
     if(match)return 'Valid until '+match[1];
     match=text.match(/^Platí do (.+)$/);

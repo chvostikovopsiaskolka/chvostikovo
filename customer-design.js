@@ -169,7 +169,7 @@
     const match=counts.match(/(\d+)\s+(?:z|of)\s+(\d+)/i),small=[...source.querySelectorAll('small')].map(x=>x.textContent).filter(s=>s!=='Použité vstupy'&&s!=='Visits used').join(' · ');
     const validity=small.replace(/(\d{2})\.(\d{2})\.(\d{4})/g,(_,d,m,y)=>`${d}. ${m}. ${y.slice(-2)}`).replace(/(\d{4})/g,y=>y.slice(-2));
     const date=small.match(/(?:Platí do|Valid until|\bdo)\s+(.*)/i)?.[1];
-    const badge=date?(isEn?'Valid until ':'Platnosť do ')+date:validity.replace(/^(?:Platnosť |Validity )/,'');
+    const badge=date?(isEn?'Use by ':'Využiť do ')+date:validity.replace(/^(?:Platnosť |Validity )/,'');
     const usage=match?(isEn?`Used <strong>${Number(match[1])} of ${Number(match[2])} visits</strong>`:`Použité <strong>${Number(match[1])} z ${Number(match[2])} vstupov</strong>`):'';
     root.setAttribute('aria-label',isEn?'Pass and visits':'Permanentka a vstupy');
     const presentationKey=JSON.stringify([originalTitle,counts,small,dog.sex,isEn]);
@@ -185,41 +185,14 @@
   function calendarCapacityLevelV439(day){
     return day.bookings_open===false?'closed':Number(day.available)<=0?'full':Number(day.occupied)>=6?'limited':'free';
   }
-  function compactOverviewV437(root){
-    const model=window.customerCompactOverviewV437?.();
-    const card=root.querySelector('.design-visit-empty')||root;if(!model?.days?.length){root.querySelector('.compact-overview-v437')?.remove();return;}
-    let host=card.querySelector('.compact-overview-v437');
-    if(!host){host=document.createElement('div');host.className='compact-overview-v437';const carousel=root.querySelector('.design-overview-carousel');if(card===root&&carousel)carousel.before(host);else card.append(host);}
-    const selected=new Set(model.proposal?.dates||[]);
-    const key=JSON.stringify([model.days.map(d=>[d.date,d.occupied,d.capacity,d.available,d.bookings_open,d.selectable,d.ownStatus,d.ownCount,d.ownNames]),model.proposal]);
-    if(host.dataset.key===key)return;host.dataset.key=key;
-    host.innerHTML='';
-    const grid=document.createElement('div');grid.className='compact-overview-grid-v437';
-    for(const d of model.days){
-      const button=document.createElement('button');button.type='button';button.disabled=!d.selectable;
-      button.dataset.overviewDate=d.date;button.dataset.level=calendarCapacityLevelV439(d);button.dataset.ownStatus=d.ownStatus||'';
-      button.setAttribute('aria-pressed',String(selected.has(d.date)));
-      const title=document.createElement('strong');title.textContent=new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric'}).format(new Date(d.date+'T12:00:00'));
-      const count=document.createElement('small');count.textContent=d.bookings_open===false?'Zatvorené':Number(d.available)<=0?'Plno':d.occupied+'/'+d.capacity;
-      if(d.ownStatus)count.textContent=(d.ownStatus==='pending'?'?':'✓')+(d.dogCount>1?' '+d.ownCount+'/'+d.dogCount:'');
-      count.classList.toggle('calendar-count-hidden-v439',button.dataset.level==='free'&&!d.ownStatus);
-      button.setAttribute('aria-label',title.textContent+' · '+(d.ownStatus?(d.ownStatus==='pending'?'Čaká na schválenie: ':'Schválené: ')+d.ownNames:count.textContent));
-      button.append(title,count);button.onclick=()=>window.openBookingPickerV37?.(null,d.date);grid.append(button);
-    }
-    const letters=document.createElement('div');letters.className='calendar-weekletters-v438';letters.setAttribute('aria-hidden','true');for(const s of (document.documentElement.lang==='en'?['M','T','W','T','F']:['P','U','S','Š','P'])){const span=document.createElement('span');span.textContent=s;letters.append(span);}host.append(letters,grid);
-    if(model.proposal){
-      const reason=document.createElement('p');reason.className='compact-repeat-reason-v437';reason.textContent=model.proposal.sourceWeek==='previous'?'Predvybraté podľa minulého týždňa.':'Predvybraté podľa tohto týždňa.';host.append(reason);
-      const hint=document.createElement('small');hint.textContent='Výber môžete zmeniť. Rezerváciu odošlete sami.';host.append(hint);
-    }
-  }
   function overviewGuidanceV442(root){
     const model=window.customerOverviewBookingGuidanceV442?.();if(!model)return;
     const host=root.querySelector('.design-visit-empty')||root;
     let block=root.querySelector('.design-booking-guidance-v442');
-    if(!block){block=document.createElement('div');block.className='design-booking-guidance-v442';block.innerHTML='<div id="designReservationNotice" class="design-empty-reminder"></div><div id="designWeekDeadline"><strong>Nestihli ste rezervovať miesto do nedele?</strong><span>Kliknite na deň, odošlite žiadosť a počkajte na schválenie v prípade voľného miesta.</span></div>';}
+    if(!block){block=document.createElement('div');block.className='design-booking-guidance-v442';block.innerHTML='<div id="designReservationNotice" class="design-empty-reminder"></div><div id="designWeekDeadline"><strong>Nestihli ste rezervovať miesto do nedele?</strong><span>Kliknite na Rezervovať miesto, vyberte deň, odošlite žiadosť a počkajte na schválenie v prípade voľného miesta.</span></div>';}
     if(block.parentElement!==host){const anchor=host.querySelector(':scope > .design-empty-heading,:scope > .design-visits-title');if(anchor)anchor.after(block);else host.prepend(block);}
     const next=block.querySelector('#designReservationNotice'),missed=block.querySelector('#designWeekDeadline');
-    if(next.dataset.deadline!==model.next.deadline){next.textContent=model.next.text;next.dataset.deadline=model.next.deadline;}
+    if(next.dataset.noticeText!==model.next.text){next.textContent=model.next.text;next.dataset.noticeText=model.next.text;}next.dataset.deadline=model.next.deadline;
     next.dataset.weekFrom=model.next.from;next.dataset.weekTo=model.next.to;next.hidden=!!model.next.hidden;
     missed.dataset.weekFrom=model.from;missed.dataset.weekTo=model.to;missed.hidden=!model.missed;
     block.hidden=next.hidden&&missed.hidden;
@@ -270,7 +243,7 @@
         root.querySelector('button')?.addEventListener('click',()=>window.openBookingPickerV37?.());
       }
     }
-    compactOverviewV437(root);
+    root.querySelector('.compact-overview-v437')?.remove();
     overviewGuidanceV442(root);
     byId('designBulletinTitle')?.remove();
     const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile');if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);
