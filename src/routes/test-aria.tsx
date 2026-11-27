@@ -1,5 +1,6 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { readStoredConsent } from "@/lib/consent";
 import leadAriaHead from "@/assets/aria-assistant-head-lead.webp";
 import leadHeroPhotoOne from "@/assets/lead-hero-user-1.jpg";
 import leadHeroPhotoTwo from "@/assets/lead-hero-user-2.jpg";
@@ -133,6 +134,32 @@ export function AriaPreviewPage() {
   );
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const ariaChatRef = useRef<{ open: () => void }>(null);
+  const adChatOpened = useRef(false);
+
+  // Paid creative already points to ?aria=open. Keep its UTM/fbclid intact,
+  // and give the existing cookie choice priority (including opt-out).
+  useEffect(() => {
+    if (!isLiveLead || new URLSearchParams(window.location.search).get("aria") !== "open" || adChatOpened.current) return;
+    let frame = 0;
+    const openAfterConsent = () => {
+      if (!readStoredConsent() || adChatOpened.current) return;
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        frame = window.requestAnimationFrame(() => {
+          if (adChatOpened.current || !ariaChatRef.current) return;
+          adChatOpened.current = true;
+          ariaChatRef.current.open();
+          void trackCookielessInteraction("explore_daycare", "lead_landing_aria_chat_auto_open", "sk");
+        });
+      });
+    };
+    window.addEventListener("chvostikovo-consent-changed", openAfterConsent);
+    openAfterConsent();
+    return () => {
+      window.removeEventListener("chvostikovo-consent-changed", openAfterConsent);
+      window.cancelAnimationFrame(frame);
+    };
+  }, [isLiveLead]);
   const [puppyModalOpen, setPuppyModalOpen] = useState(false);
   const [reviewPhotoOpen, setReviewPhotoOpen] = useState<number | null>(null);
   const [leadModalSource, setLeadModalSource] = useState("lead_landing_modal");
@@ -153,11 +180,13 @@ export function AriaPreviewPage() {
     }));
   }
 
-  function openHeroAriaChat() {
+  function scrollHeroToAbout() {
+    // Retain the established HeroLearnMore source for historical reporting.
     const source = "lead_landing_hero_aria_cta";
     trackMarketingInteraction("hero_learn_more", source);
     void trackCookielessInteraction("explore_daycare", source);
-    ariaChatRef.current?.open();
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("aria-caretakers")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
   }
 
   function openLeadModal(source: string) {
@@ -554,10 +583,10 @@ export function AriaPreviewPage() {
               )}
               {isLiveLead && (
                 <div data-lead-hero-action className="mx-auto mt-4 flex w-full max-w-[294px] flex-col items-center justify-center">
-                  <button type="button" data-aria-lead-hero-cta aria-haspopup="dialog"
-                    onClick={openHeroAriaChat}
+                  <button type="button" data-aria-lead-hero-cta aria-controls="aria-caretakers"
+                    onClick={scrollHeroToAbout}
                     className="inline-flex min-h-[46px] w-full items-center justify-center whitespace-nowrap rounded-full border px-2.5 py-2 text-center font-display text-[clamp(11px,3.35vw,15px)] font-bold leading-tight transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest">
-                    Spoznajte našu škôlku
+                    Chcem zistiť viac o škôlke
                   </button>
                 </div>
               )}
