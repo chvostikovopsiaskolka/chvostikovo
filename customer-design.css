@@ -1222,3 +1222,6 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 #designNearest #designReservationNotice:not([hidden]){display:block!important;text-align:center;margin:5px 0 9px;padding:8px 10px}
 #designNearest #designWeekDeadline:not([hidden]){display:block!important;background:#fff4cf;border:1px solid #e4c772;color:#694908;text-align:center;margin:5px 0 9px;padding:8px 10px;border-radius:12px}
 #designNearest #designWeekDeadline span{font-size:11px}
+
+/* v442 approved finish: solid capacity tiles, hairline only between adjacent weeks in the same month. */
+.customer-design #bookingPickerV37 #bookingPickerDaysV37>.calendar-row-v438+.calendar-row-v438{border-top:1px solid rgba(112,91,69,.15)!important;padding-top:3px!important}
