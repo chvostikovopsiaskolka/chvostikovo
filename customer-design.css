@@ -1252,3 +1252,10 @@ html.customer-android.customer-design .bottom-nav>.lg-v3-material[data-renderer=
 #designNearest .compact-overview-v437{padding:9px 5px}
 #designNearest .compact-overview-grid-v437 button:is([aria-pressed=true],[data-own-status=approved]){background:#fff!important;color:#21834e!important;border:2px solid #21834e!important;box-shadow:none!important;opacity:1!important}
 #designNearest .compact-overview-grid-v437 button[data-own-status=pending]{background:#ffdf75!important;border:2px solid #dfb43c!important;color:#694908!important;opacity:1!important}
+
+/* v444: stronger current destination and soft raised edges, without replacing the liquid material. */
+html.customer-design:not(.design-reservations-open) .bottom-nav :is(#navBooking,#navDog,#navStaff).active,
+html.customer-design.design-reservations-open .bottom-nav #navBookAddV220:not(:disabled):not([aria-busy=true]){background:#ff7416!important;color:#fff!important;box-shadow:inset 0 1px 0 #ffffff35!important}
+html.customer-design:not(.design-reservations-open) .bottom-nav :is(#navBooking,#navDog,#navStaff).active :is(span,svg),html.customer-design.design-reservations-open .bottom-nav #navBookAddV220 :is(span,svg){color:inherit!important}
+html.customer-design :is(#designTicket.design-ticket,#designNearest.design-nearest){box-shadow:0 7px 19px rgba(89,58,40,.16),0 2px 6px rgba(89,58,40,.10),0 0 0 1px rgba(173,138,112,.19),inset 0 1px 2px rgba(255,255,255,.82)!important}
+html.customer-design #designTicket .design-ticket-usage .design-validity{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;color:#247646!important;font-weight:800!important}
