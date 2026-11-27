@@ -586,7 +586,7 @@ export function AriaPreviewPage() {
                   <button type="button" data-aria-lead-hero-cta aria-controls="aria-caretakers"
                     onClick={scrollHeroToAbout}
                     className="inline-flex min-h-[46px] w-full items-center justify-center whitespace-nowrap rounded-full border px-2.5 py-2 text-center font-display text-[clamp(11px,3.35vw,15px)] font-bold leading-tight transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest">
-                    Chcem zistiť viac o škôlke
+                    Spoznajte našu škôlku
                   </button>
                 </div>
               )}
