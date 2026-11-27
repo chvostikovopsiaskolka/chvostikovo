@@ -180,13 +180,13 @@ export function AriaPreviewPage() {
     }));
   }
 
-  function scrollHeroToAbout() {
+  function scrollHeroToPricing() {
     // Retain the established HeroLearnMore source for historical reporting.
     const source = "lead_landing_hero_aria_cta";
     trackMarketingInteraction("hero_learn_more", source);
     void trackCookielessInteraction("explore_daycare", source);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    document.getElementById("aria-caretakers")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    document.getElementById("lead-pricing")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
   }
 
   function openLeadModal(source: string) {
@@ -583,8 +583,8 @@ export function AriaPreviewPage() {
               )}
               {isLiveLead && (
                 <div data-lead-hero-action className="mx-auto mt-4 flex w-full max-w-[294px] flex-col items-center justify-center">
-                  <button type="button" data-aria-lead-hero-cta aria-controls="aria-caretakers"
-                    onClick={scrollHeroToAbout}
+                  <button type="button" data-aria-lead-hero-cta aria-controls="lead-pricing"
+                    onClick={scrollHeroToPricing}
                     className="inline-flex min-h-[46px] w-full items-center justify-center whitespace-nowrap rounded-full border px-2.5 py-2 text-center font-display text-[clamp(11px,3.35vw,15px)] font-bold leading-tight transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest">
                     Spoznajte našu škôlku
                   </button>
