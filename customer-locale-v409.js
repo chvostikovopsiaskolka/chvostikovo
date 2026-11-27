@@ -175,7 +175,7 @@
   const dayShortEn={Po:'Mon',Ut:'Tue',St:'Wed','Št':'Thu',Pi:'Fri',So:'Sat',Ne:'Sun'};
   const monthsEn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const translate = (text,element) => {
-    if(element?.matches?.('.calendar-weekletters-v438 [data-weekday-index]'))return ['M','T','W','T','F'][Number(element.dataset.weekdayIndex)]||null;
+    if(element?.matches?.('.calendar-weekletters-v438 [data-weekday-index]'))return ['Mon','Tue','Wed','Thu','Fri'][Number(element.dataset.weekdayIndex)]||null;
     if(element?.matches?.('.calendar-month-v438')){const sk=['Január','Február','Marec','Apríl','Máj','Jún','Júl','August','September','Október','November','December'],en=['January','February','March','April','May','June','July','August','September','October','November','December'];return en[sk.indexOf(text)]||null;}
     const weekRange=text.match(/^Tento týždeň · (.+)$/);if(weekRange)return 'This week · '+weekRange[1];
     const exact=DICTIONARY.get(text);if(exact)return exact;
@@ -188,7 +188,9 @@
       if(date)return weekdayEn[date[1].toLowerCase()]+', '+Number(date[2])+' '+monthsEn[Number(date[3])-1]+' '+date[4];
       if(weekdayEn[text.toLowerCase()])return weekdayEn[text.toLowerCase()];
     }
-    let availability=text.match(/^(\d+)\s+voľné$/);
+    let availability=text.match(/^Voľné: (\d+)$/);
+    if(availability)return 'Free: '+availability[1];
+    availability=text.match(/^(\d+)\s+voľné$/);
     if(availability)return availability[1]+' places left';
     availability=text.match(/^Obsadené\s+(\d+)\s+z\s+(\d+)\s+miest$/);
     if(availability)return 'Occupied: '+availability[1]+' of '+availability[2]+' places';
@@ -211,6 +213,11 @@
     if(match)return Number(match[1])===1?'Valid for 1 more day':'Valid for '+match[1]+' more days';
     match=text.match(/^Návštevy v škôlke:\s*([0-9]+)$/);
     if(match)return 'Daycare visits: '+match[1];
+    match=text.match(/^Využiť do (.+)$/);
+    if(match)return 'Use by '+match[1];
+    match=text.match(/^(Na rezerváciu zostáva(?:jú)? (\d+) (?:deň|dni|dní)|Rezervujte dnes) · do nedele (.+?) do 20:00\.$/);
+    if(match)return (match[2]?(Number(match[2])===1?'1 day left to book':match[2]+' days left to book'):'Book today')+' · Sunday '+match[3]+', 8:00 PM.';
+    if(text==='Kliknite na Rezervovať miesto, vyberte deň, odošlite žiadosť a počkajte na schválenie v prípade voľného miesta.')return 'Tap Book a spot, choose a day, send a request and wait for approval if a spot is available.';
     match=text.match(/^Platnosť do (.+)$/);
     if(match)return 'Valid until '+match[1];
     match=text.match(/^Platí do (.+)$/);

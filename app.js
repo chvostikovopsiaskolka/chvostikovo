@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v447';
-const APP_VERSION='2.0.120';
+const APP_BUILD='v448';
+const APP_VERSION='2.0.121';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -3047,7 +3047,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     return name.charAt(0).toUpperCase()+name.slice(1);
   }
   function calendarWeekLettersV438(){
-    return '<div class="calendar-weekletters-v438" aria-hidden="true">'+['P','U','S','Š','P'].map((s,i)=>'<span data-weekday-index="'+i+'">'+s+'</span>').join('')+'</div>';
+    return '<div class="calendar-weekletters-v438" aria-hidden="true">'+['Po','Ut','St','Št','Pi'].map((s,i)=>'<span data-weekday-index="'+i+'">'+s+'</span>').join('')+'</div>';
   }
 
   // Seasonal read-only opening schedule: never merge preview dates into bookable days.
@@ -3626,7 +3626,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const next=updateBookingDeadlineNoticeV127();
     const missed=!pickerWeekEndedV442(clock)&&!hasWeekBookingV337(from,to);
     const sundayAfterDeadline=new Date(clock.date+'T12:00:00Z').getUTCDay()===0&&clock.minutes>=1200;
-    return {from,to,missed,next:{...next,hidden:next.hidden||missed||sundayAfterDeadline}};
+    const remaining=Math.max(0,Math.round((Date.parse(next.deadline+'T12:00:00Z')-Date.parse(clock.date+'T12:00:00Z'))/86400000));
+    const countdown=remaining===0?'Rezervujte dnes':remaining===1?'Na rezerváciu zostáva 1 deň':remaining<=4?`Na rezerváciu zostávajú ${remaining} dni`:`Na rezerváciu zostáva ${remaining} dní`;
+    const deadlineText=countdown+' · '+next.text.slice(next.text.indexOf('do nedele'));
+    return {from,to,missed,next:{...next,text:deadlineText,hidden:next.hidden||missed||sundayAfterDeadline}};
   };
   window.customerDesignRefreshCalendarV351=()=>renderPickerV37();
   window.customerDesignCanEditTaxi=row=>allowedTaxiEditV201(row);

@@ -33,7 +33,7 @@ async function scenario(count){
   assert.equal(w.document.querySelectorAll('.design-paws .used').length,6);
   assert.equal(w.document.querySelector('.design-visit-label').textContent,'Najbližšia návšteva · ');
   assert.equal(w.document.querySelector('#designDogName > span'),null,'no redundant pencil');
-  assert.match(w.document.querySelector('.design-validity').textContent,/Platnosť do/);
+  assert.match(w.document.querySelector('.design-validity').textContent,/Využiť do/);
   assert.match(w.document.querySelector('.design-validity').textContent,/2099/,'pass expiry retains full year');
   assert(w.document.querySelector('.design-ticket-usage p'),'pass usage and validity share the row above the divider');
   assert.equal(w.document.querySelector('.design-validity').parentElement.className,'design-ticket-usage');
@@ -169,6 +169,8 @@ async function scenario(count){
   assert.equal(w.document.getElementById('designReservationNotice').hidden,true,'Monday missed-deadline notice replaces the next-week reminder');
   assert.match(w.document.getElementById('designReservationNotice').textContent,/do nedele 11\. 1\. do 20:00/);
   assert.equal(w.document.getElementById('designReservationNotice').dataset.weekFrom,'2099-01-12');
+  assert.equal(w.document.querySelectorAll('#designNearest .compact-overview-grid-v437').length,0,'no duplicate overview calendar; booking remains in the picker');
+  assert.match(w.document.getElementById('designReservationNotice').textContent,/Na rezerváciu zostáva[jú]* \d+ d/);
   assert(w.document.getElementById('designReservationNotice').closest('#designNearest'));
   const nextWeekCase=(requests,reservations,hidden,message)=>{
     run(`state.data.requests=${JSON.stringify([...requests,weekRequest])};state.data.reservations=${JSON.stringify(reservations)};state.data.booking_history=[];state.data.visits=[];renderDays();window.customerDesignPickerRender()`);
@@ -207,14 +209,14 @@ async function scenario(count){
   const lateDay=w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]');
   assert.equal(lateDay.dataset.contact,'false','Sunday planning reminder no longer blocks a normal request');
   assert.equal(lateDay.dataset.capacityLevel,'limited');
-  assert.equal(lateDay.querySelector('span').textContent,'6/8','late day shows actual occupancy');
+  assert.equal(lateDay.querySelector('span').textContent,'Voľné: 2','available places, not occupancy');
   assert(!lateDay.querySelector('.design-capacity-dot'),'capacity dot is removed');
   run("state.data.availability.days[1].capacity=11;state.data.availability.days[1].available=6;state.data.availability.days[1].occupied=5;window.customerDesignRefreshCalendarV351()");
   let threshold=w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]');
-  assert.equal(threshold.dataset.capacityLevel,'free');assert(threshold.querySelector('span').classList.contains('calendar-count-hidden-v439'));
+  assert.equal(threshold.dataset.capacityLevel,'free');assert.equal(threshold.querySelector('span').textContent,'Voľné: 6');assert(!threshold.querySelector('span').classList.contains('calendar-count-hidden-v439'));
   run("state.data.availability.days[1].available=5;state.data.availability.days[1].occupied=6;window.customerDesignRefreshCalendarV351()");
   threshold=w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]');
-  assert.equal(threshold.dataset.capacityLevel,'limited');assert.equal(threshold.querySelector('span').textContent,'6/11');assert(!threshold.querySelector('span').classList.contains('calendar-count-hidden-v439'));
+  assert.equal(threshold.dataset.capacityLevel,'limited');assert.equal(threshold.querySelector('span').textContent,'Voľné: 5');assert(!threshold.querySelector('span').classList.contains('calendar-count-hidden-v439'));
   run("state.data.availability.days[1].capacity=8;state.data.availability.days[1].available=2;state.data.availability.days[1].occupied=6;window.customerDesignRefreshCalendarV351()");
   run('globalThis.beforeDeadlineFixture=JSON.stringify(state.data)');w.__savedDeadlineApi=run('api');
   // An explicit manual single-date booking first clears the optional preselection.
@@ -279,6 +281,9 @@ async function scenario(count){
   datedReminder('2026-10-26T09:00:00Z','2026-10-26','2026-11-01');
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'Monday with no current-week booking retains existing guidance');
   assert.match(w.document.getElementById('designReservationNotice').textContent,/1\. 11\. do 20:00/);
+  assert.match(datedReminder('2026-11-27T11:00:00Z','2026-11-23','2026-11-29').textContent,/zostávajú 2 dni/);
+  assert.match(datedReminder('2026-11-28T11:00:00Z','2026-11-23','2026-11-29').textContent,/zostáva 1 deň/);
+  assert.match(datedReminder('2026-11-29T11:00:00Z','2026-11-23','2026-11-29').textContent,/Rezervujte dnes/);
   datedReminder('2026-12-31T11:00:00Z','2026-12-28','2027-01-03');
   datedReminder('2027-03-28T22:00:00Z','2027-03-29','2027-04-04');
   run(`state.data=JSON.parse(${JSON.stringify(rolloverFixture)})`);
