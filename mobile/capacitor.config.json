@@ -1,0 +1,12 @@
+{
+  "appId": "sk.chvostikovo.app",
+  "appName": "Chvostíkovo – psia škôlka",
+  "webDir": "www",
+  "android": { "allowMixedContent": false, "webContentsDebuggingEnabled": false },
+  "plugins": {
+    "SystemBars": { "insetsHandling": "native", "style": "LIGHT" },
+    "CapacitorHttp": { "enabled": false },
+    "PushNotifications": { "presentationOptions": ["badge", "sound", "alert"] },
+    "SplashScreen": { "launchAutoHide": true, "backgroundColor": "#ffffff" }
+  }
+}
