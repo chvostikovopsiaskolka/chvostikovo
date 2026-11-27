@@ -257,7 +257,7 @@ assert(!productContact.includes('trackMarketingInteraction') &&
        "Product delivery contact information must not be copied to advertising audiences");
 
 // Paid LEAD content flow: one existing liquid/crown form follows visit steps.
-// The FAQ CTA scrolls there; the primary Hero CTA scrolls to About, while the ad URL opens chat.
+// The FAQ CTA scrolls there; the primary Hero CTA scrolls to Pricing, while the ad URL opens chat.
 const paidLeadCurrent = read("src/routes/test-aria.tsx");
 const ariaGuideCurrent = read("src/components/site/AriaLeadAssistant.tsx");
 const storyCurrent = read("src/components/site/Story.tsx");
@@ -266,8 +266,8 @@ assert(paidLeadCurrent.includes('data-aria-lead-hero-cta') &&
        paidLeadCurrent.includes('const conditionsSection') &&
        paidLeadCurrent.includes('lead_landing_hero_aria_cta') &&
        paidLeadCurrent.includes('Spoznajte našu škôlku') &&
-       paidLeadCurrent.includes('onClick={scrollHeroToAbout}') &&
-       paidLeadCurrent.includes('aria-controls="aria-caretakers"') &&
+       paidLeadCurrent.includes('onClick={scrollHeroToPricing}') &&
+       paidLeadCurrent.includes('aria-controls="lead-pricing"') &&
        paidLeadCurrent.includes('trackMarketingInteraction("hero_learn_more", source)') &&
        paidLeadCurrent.includes('trackCookielessInteraction("explore_daycare", source)') &&
        paidLeadCurrent.includes('ariaChatRef.current.open()') &&
