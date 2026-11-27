@@ -44,3 +44,10 @@
 .customer-design #bookingPickerV37 .guide-picker-preview-v360 .booking-picker-week-v127{padding:6px 6px 4px}
 .customer-design #bookingPickerV37 .guide-picker-preview-v360 .booking-picker-week-label-v127{margin:6px 0 4px!important}
 .guide-picker-preview-v360 .design-selected-day{padding:4px 10px}
+
+/* v449: the inert tour uses the same month rows, capacity and selected-day styles as the picker. */
+.customer-design #bookingPickerV37 .guide-picker-preview-v360 .guide-preview-calendar{background:#ffffff80;border:1px solid #e6d9cd;border-radius:15px;padding:4px 5px!important;margin:0!important;min-width:0}
+.customer-design #bookingPickerV37 .guide-picker-preview-v360 .calendar-month-controls-v445{margin-bottom:3px}
+.customer-design #bookingPickerV37 .guide-picker-preview-v360 .calendar-month-v438{font-size:15px;margin:0 6px 3px}
+.customer-design #bookingPickerV37 .guide-picker-preview-v360 .calendar-row-v438{padding:2px 6px!important}
+.guide-calendar-step .guide-card p{margin:4px 0 7px}

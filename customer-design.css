@@ -1153,17 +1153,17 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 
 /* v438 month calendar, real dates and five working-day columns. */
 #compactDogChoicesV437>button[aria-pressed=true]{background:#ffe5ce;color:#a94c12}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-v438{font-size:17px;font-weight:850;margin:10px 6px 3px;color:#273242}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-v438:first-child{margin-top:0}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-v438{font-size:17px;font-weight:850;margin:10px 6px 3px;color:#273242}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-v438:first-child{margin-top:0}
 .calendar-weekletters-v438{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;text-align:center;color:#737b86;font-size:10px;font-weight:750;margin:0 6px 4px;line-height:1.3}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-picker-week-days-v127{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-picker-week-label-v127:empty{display:none!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37{display:flex!important;flex-direction:column;justify-content:center;align-items:center;gap:3px;min-height:48px!important;padding:5px 1px!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37>small{display:none!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37>strong{font-size:clamp(11px,3.8vw,15px)!important;text-align:center}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-later-v438{border-radius:14px;box-shadow:inset 0 0 0 1px #9b4d2530;padding:5px 6px;min-width:0}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-later-v438 .calendar-row-v438{border:0!important;box-shadow:none!important;background:transparent!important;padding:3px 0!important;margin:0!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-later-v438 .booking-picker-week-days-v127{margin:0!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-picker-week-days-v127{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-picker-week-label-v127:empty{display:none!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37{display:flex!important;flex-direction:column;justify-content:center;align-items:center;gap:3px;min-height:48px!important;padding:5px 1px!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37>small{display:none!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37>strong{font-size:clamp(11px,3.8vw,15px)!important;text-align:center}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-later-v438{border-radius:14px;box-shadow:inset 0 0 0 1px #9b4d2530;padding:5px 6px;min-width:0}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-later-v438 .calendar-row-v438{border:0!important;box-shadow:none!important;background:transparent!important;padding:3px 0!important;margin:0!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-later-v438 .booking-picker-week-days-v127{margin:0!important}
 .customer-design #bookingPickerV37 #designWeekDeadline{margin:6px 3px 8px!important;padding:6px 8px!important;text-align:center}
 .customer-design #bookingPickerV37 .design-selected-day{position:relative;grid-template-columns:minmax(0,1fr) minmax(0,.82fr)!important;gap:7px!important;padding:7px 10px!important;overflow:visible!important}
 .customer-design #bookingPickerV37 .design-taxi-disclosure{font-weight:800!important;min-height:44px!important}
@@ -1179,42 +1179,42 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 .customer-design #bookingPickerV37 .design-selected-day>.calendar-taxi-popover-v438.calendar-taxi-above-v438{top:auto;bottom:calc(100% - 3px)}
 
 /* Approved raised translucent calendar; retain existing liquid material and paw background. */
-.customer-design #bookingPickerV37 #bookingPickerDaysV37{box-shadow:inset 0 1px 0 #ffffffc9,0 5px 0 #d9c6b72b,0 12px 25px #73543a20!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-later-v438{background:#ffffff24;box-shadow:inset 0 1px 0 #ffffffb0,inset 0 0 0 1px #b58b713b,0 4px 10px #73543a12}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(:disabled)[data-capacity-level=free]{background:#e3f5e866!important;border-color:#badbc766!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar){box-shadow:inset 0 1px 0 #ffffffc9,0 5px 0 #d9c6b72b,0 12px 25px #73543a20!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-later-v438{background:#ffffff24;box-shadow:inset 0 1px 0 #ffffffb0,inset 0 0 0 1px #b58b713b,0 4px 10px #73543a12}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(:disabled)[data-capacity-level=free]{background:#e3f5e866!important;border-color:#badbc766!important}
 
 /* Preserve the tested outer inset, without adding spacing between later rows. */
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-later-v438{padding:10px 6px 7px!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-later-v438{padding:10px 6px 7px!important}
 
 /* v439: full-tile capacity colors; constant geometry, no dot, visual counts from six dogs. */
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37{
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37{
  box-sizing:border-box!important;height:48px!important;min-height:48px!important;max-height:48px!important;
 }
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled)[data-capacity-level=free]{
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled)[data-capacity-level=free]{
  background:#21834e!important;border-color:#1b7544!important;color:#fff!important;
  box-shadow:inset 0 1px 0 #ffffff35,inset 0 0 0 1px #146a3b,0 2px 5px #145a3320!important;
 }
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled)[data-capacity-level=free] :is(strong,span){color:#fff!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled)[data-capacity-level=limited]{
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled)[data-capacity-level=free] :is(strong,span){color:#fff!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled)[data-capacity-level=limited]{
  background:#ffdf75!important;border-color:#dfb43c!important;color:#694908!important;
  box-shadow:inset 0 1px 0 #ffffff80,inset 0 0 0 1px #e6b948,0 2px 5px #80601a16!important;
 }
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled)[data-capacity-level=limited] :is(strong,span){color:#694908!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37>.calendar-count-hidden-v439,.compact-overview-grid-v437 button>.calendar-count-hidden-v439{display:none!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled)[data-capacity-level=limited] :is(strong,span){color:#694908!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37>.calendar-count-hidden-v439,.compact-overview-grid-v437 button>.calendar-count-hidden-v439{display:none!important}
 .compact-overview-grid-v437 button{box-sizing:border-box;height:49px;min-height:49px;max-height:49px}
 .compact-overview-grid-v437 button[data-level=free]:not([aria-pressed=true]){background:#21834e;color:#fff;border-color:#1b7544}
 .compact-overview-grid-v437 button[data-level=limited]:not([aria-pressed=true]){background:#ffdf75;color:#694908;border-color:#dfb43c}
 
 /* v440: each week has its own liquid boundary and aligned weekday legend. */
-.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,#bookingPickerDaysV37 .calendar-month-pane-v445)>.calendar-row-v438{margin:0 0 8px!important;padding:10px 6px!important;background:#ffffff24!important;box-shadow:inset 0 1px 0 #ffffffb0,inset 0 0 0 1px #b58b713b,0 4px 10px #73543a12!important;border-radius:15px!important}
-.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,#bookingPickerDaysV37 .calendar-month-pane-v445)>.calendar-row-v438:last-of-type{margin-bottom:0!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .calendar-weekletters-v438{margin:0 0 5px!important;gap:5px!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-picker-week-days-v127{margin:0!important}
+.customer-design #bookingPickerV37 :is(:is(#bookingPickerDaysV37,.guide-preview-calendar),:is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-pane-v445)>.calendar-row-v438{margin:0 0 8px!important;padding:10px 6px!important;background:#ffffff24!important;box-shadow:inset 0 1px 0 #ffffffb0,inset 0 0 0 1px #b58b713b,0 4px 10px #73543a12!important;border-radius:15px!important}
+.customer-design #bookingPickerV37 :is(:is(#bookingPickerDaysV37,.guide-preview-calendar),:is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-pane-v445)>.calendar-row-v438:last-of-type{margin-bottom:0!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .calendar-weekletters-v438{margin:0 0 5px!important;gap:5px!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-picker-week-days-v127{margin:0!important}
 
 /* v442: one compact calendar surface; month headings, real week rows and existing notices. */
-.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,#bookingPickerDaysV37 .calendar-month-pane-v445)>.calendar-row-v438{margin:0 0 7px!important;padding:2px 6px!important;background:transparent!important;box-shadow:none!important;border:0!important;border-radius:0!important}
-.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,#bookingPickerDaysV37 .calendar-month-pane-v445)>.calendar-row-v438:last-of-type{margin-bottom:0!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-month-v438:not(:first-child){margin-top:14px}
+.customer-design #bookingPickerV37 :is(:is(#bookingPickerDaysV37,.guide-preview-calendar),:is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-pane-v445)>.calendar-row-v438{margin:0 0 7px!important;padding:2px 6px!important;background:transparent!important;box-shadow:none!important;border:0!important;border-radius:0!important}
+.customer-design #bookingPickerV37 :is(:is(#bookingPickerDaysV37,.guide-preview-calendar),:is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-pane-v445)>.calendar-row-v438:last-of-type{margin-bottom:0!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-v438:not(:first-child){margin-top:14px}
 .customer-design #bookingPickerV37 #designWeekDeadline{background:#fff4cf!important;border-color:#e4c772!important;color:#694908!important}
 
 /* v442: deadline guidance only in My reservations, not in the booking picker. */
@@ -1224,7 +1224,7 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 #designNearest #designWeekDeadline span{font-size:11px}
 
 /* v442 approved finish: solid capacity tiles, hairline only between adjacent weeks in the same month. */
-.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,#bookingPickerDaysV37 .calendar-month-pane-v445)>.calendar-row-v438+.calendar-row-v438{border-top:1px solid rgba(112,91,69,.15)!important;padding-top:3px!important}
+.customer-design #bookingPickerV37 :is(:is(#bookingPickerDaysV37,.guide-preview-calendar),:is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-pane-v445)>.calendar-row-v438+.calendar-row-v438{border-top:1px solid rgba(112,91,69,.15)!important;padding-top:3px!important}
 
 /* v442: compact rounded-rectangle dock. Real backdrop blur; no wallpaper copy or noise in the dock. */
 .customer-design .bottom-nav.lg-v3-host{border-radius:19px!important;padding:3px!important;gap:2px!important;width:min(460px,calc(100% - 16px))!important;max-width:calc(100% - 16px)!important;box-sizing:border-box!important;overflow:visible!important}
@@ -1245,10 +1245,10 @@ html.customer-android.customer-design .bottom-nav>.lg-v3-material[data-renderer=
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){html.customer-android.customer-design .bottom-nav>.lg-v3-material[data-renderer="fallback"]{background:#fff!important}}
 
 /* v443: selection is distinct from availability and already-submitted requests. */
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37.selected:not(.booked),.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37.booked[data-own-status=approved]{background:#fff!important;color:#21834e!important;border:2px solid #21834e!important;box-shadow:none!important;opacity:1!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37.selected:not(.booked) :is(small,strong,span),.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37.booked[data-own-status=approved] :is(small,strong,span){color:#21834e!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37.booked[data-own-status=pending]{background:#ffdf75!important;color:#694908!important;border:2px solid #dfb43c!important;opacity:1!important}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37.booked[data-own-status=pending] :is(small,strong,span){color:#694908!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37.selected:not(.booked),.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37.booked[data-own-status=approved]{background:#fff!important;color:#21834e!important;border:2px solid #21834e!important;box-shadow:none!important;opacity:1!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37.selected:not(.booked) :is(small,strong,span),.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37.booked[data-own-status=approved] :is(small,strong,span){color:#21834e!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37.booked[data-own-status=pending]{background:#ffdf75!important;color:#694908!important;border:2px solid #dfb43c!important;opacity:1!important}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37.booked[data-own-status=pending] :is(small,strong,span){color:#694908!important}
 #designNearest .compact-overview-v437{padding:9px 5px}
 #designNearest .compact-overview-grid-v437 button:is([aria-pressed=true],[data-own-status=approved]){background:#fff!important;color:#21834e!important;border:2px solid #21834e!important;box-shadow:none!important;opacity:1!important}
 #designNearest .compact-overview-grid-v437 button[data-own-status=pending]{background:#ffdf75!important;border:2px solid #dfb43c!important;color:#694908!important;opacity:1!important}
@@ -1261,23 +1261,23 @@ html.customer-design :is(#designTicket.design-ticket,#designNearest.design-neare
 html.customer-design #designTicket .design-ticket-usage .design-validity{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;color:#247646!important;font-weight:800!important}
 
 /* v445 month rail: the next month peeks into view; keep the outer liquid surface. */
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-controls-v445{display:block;min-width:0;margin:0 0 8px;color:#737b86;font-size:11px;text-align:center;line-height:1.4}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-rail-v445{position:relative;display:flex;align-items:flex-start;gap:8px;max-width:100%;min-width:0;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:5px}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445{flex:0 0 100%;min-width:0;box-sizing:border-box;scroll-snap-align:start}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445:last-child{flex-basis:100%}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-pane-v445>.calendar-month-v438{margin-top:0}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-controls-v445{display:block;min-width:0;margin:0 0 8px;color:#737b86;font-size:11px;text-align:center;line-height:1.4}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-rail-v445{position:relative;display:flex;align-items:flex-start;gap:8px;max-width:100%;min-width:0;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:5px}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-pane-v445{flex:0 0 100%;min-width:0;box-sizing:border-box;scroll-snap-align:start}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-pane-v445:last-child{flex-basis:100%}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-pane-v445>.calendar-month-v438{margin-top:0}
 /* January preview: identical week geometry, neutral read-only dates. */
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-opening-preview-v445{background:transparent;border:0;padding:0}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-preview-note-v445{font-size:11px;color:#737b86;line-height:1.4;margin:0 6px 6px}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-opening-day-v445{box-sizing:border-box;width:100%;height:48px;min-height:48px;max-height:48px;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;text-align:center;border:1px solid #d5dae2;border-radius:13px;background:#edf0f3;color:#8b95a4;padding:5px 1px;box-shadow:inset 0 0 0 1px #64708426,0 2px 5px #342b3b08}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-opening-day-v445 strong{font-size:clamp(11px,3.8vw,15px);line-height:1.1;font-weight:800;white-space:nowrap}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-opening-day-v445 span{font-size:9px;line-height:1.1;max-width:100%;overflow-wrap:anywhere}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-opening-day-v445[data-opening=closed]{background:#e8ebef;border-color:#cdd3dc}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-opening-preview-v445{background:transparent;border:0;padding:0}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-preview-note-v445{font-size:11px;color:#737b86;line-height:1.4;margin:0 6px 6px}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-opening-day-v445{box-sizing:border-box;width:100%;height:48px;min-height:48px;max-height:48px;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;text-align:center;border:1px solid #d5dae2;border-radius:13px;background:#edf0f3;color:#8b95a4;padding:5px 1px;box-shadow:inset 0 0 0 1px #64708426,0 2px 5px #342b3b08}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-opening-day-v445 strong{font-size:clamp(11px,3.8vw,15px);line-height:1.1;font-weight:800;white-space:nowrap}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-opening-day-v445 span{font-size:9px;line-height:1.1;max-width:100%;overflow-wrap:anywhere}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-opening-day-v445[data-opening=closed]{background:#e8ebef;border-color:#cdd3dc}
 
 /* v447: reserve identical header space in every carousel pane; no extra January row. */
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-header-v447{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;box-sizing:border-box;height:32px;min-height:32px;margin:0 6px 3px;min-width:0}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-header-v447>.calendar-month-v438{margin:0;white-space:nowrap;line-height:1.2}
-#bookingPickerV37 #bookingPickerDaysV37 .calendar-month-header-v447>.calendar-preview-note-v445{margin:0;font-size:10px;line-height:12px;text-align:right;min-width:0;overflow-wrap:normal}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-header-v447{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;box-sizing:border-box;height:32px;min-height:32px;margin:0 6px 3px;min-width:0}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-header-v447>.calendar-month-v438{margin:0;white-space:nowrap;line-height:1.2}
+#bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-month-header-v447>.calendar-preview-note-v445{margin:0;font-size:10px;line-height:12px;text-align:right;min-width:0;overflow-wrap:normal}
 
 /* v448: clearly actionable vaccination status, stronger orange report card; no adjacent month peek. */
 .customer-design #bookingTab #bookingDogProfile :is(#bookingVaccinationStatus,.dual-dog-status-v254)>span:last-child::after{content:"↗";display:inline;margin-left:4px;font-size:.95em;font-weight:850;color:currentColor;white-space:nowrap}
@@ -1287,4 +1287,4 @@ html.customer-design #designTicket .design-ticket-usage .design-validity{backgro
 /* v448: readable expiry and real remaining capacity, not occupancy. Keep 48px day geometry. */
 html.customer-design #designTicket .design-ticket-usage .design-validity{font-size:12px!important;line-height:1.3;max-width:49%;overflow-wrap:normal}
 @media(max-width:350px){html.customer-design #designTicket .design-ticket-usage .design-validity{font-size:11px!important}}
-.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37[data-capacity-level=free]>span,.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37[data-capacity-level=limited]>span{font-size:9px!important;line-height:1.1;white-space:nowrap;max-width:100%}
+.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37[data-capacity-level=free]>span,.customer-design #bookingPickerV37 :is(#bookingPickerDaysV37,.guide-preview-calendar) .calendar-row-v438 .booking-day-v37[data-capacity-level=limited]>span{font-size:9px!important;line-height:1.1;white-space:nowrap;max-width:100%}
