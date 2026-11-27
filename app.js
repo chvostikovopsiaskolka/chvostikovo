@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v445';
-const APP_VERSION='2.0.118';
+const APP_BUILD='v446';
+const APP_VERSION='2.0.119';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -3076,28 +3076,40 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(preview.length){
       const pane=document.createElement('section');pane.className='calendar-month-pane-v445 calendar-opening-preview-v445';pane.dataset.month='2027-01';
       const title=document.createElement('h3');title.className='calendar-month-v438';title.textContent=en?'January 2027':'Január 2027';pane.append(title);
-      const note=document.createElement('p');note.className='calendar-preview-note-v445';note.textContent=en?'Opening hours preview · Booking opens later. Holiday exceptions may change.':'Náhľad prevádzky · Rezervácie neskôr. Sviatočný režim sa môže upraviť.';pane.append(note);
-      const grid=document.createElement('div');grid.className='calendar-opening-grid-v445';
-      for(const letter of en?['M','T','W','T','F']:['P','U','S','Š','P']){const el=document.createElement('span');el.className='calendar-opening-letter-v445';el.textContent=letter;grid.append(el)}
-      for(let i=1;i<new Date(preview[0].date+'T12:00:00Z').getUTCDay();i++){const blank=document.createElement('span');blank.setAttribute('aria-hidden','true');grid.append(blank)}
-      const labels=en?{closed:'Closed',open:'Open',usual:'Usual hours',unknown:'Unconfirmed'}:{closed:'Zatvorené',open:'Otvorené',usual:'Bežný režim',unknown:'Nepotvrdené'};
-      for(const row of preview){const tile=document.createElement('div');tile.className='calendar-opening-day-v445';tile.dataset.previewDate=row.date;tile.dataset.opening=row.opening;const day=document.createElement('strong');day.textContent=Number(row.date.slice(8))+'.';const label=document.createElement('small');label.textContent=labels[row.opening];tile.append(day,label);grid.append(tile)}
-      pane.append(grid);sections.push(pane);
+      const note=document.createElement('p');note.className='calendar-preview-note-v445';note.textContent=en?'Booking opens later.':'Rezervácie budú sprístupnené neskôr.';pane.append(note);
+      // Reuse the same week structure and weekday alignment as December.
+      // Preview dates deliberately have no data-date, booking button or selection handler.
+      const weeks=calendarRowsV438(preview,'2027-01-01');
+      for(const week of weeks){
+        const row=document.createElement('div');row.className='booking-picker-week-v127 calendar-row-v438';
+        const body=document.createElement('div');body.className='booking-picker-future-body-v235';body.innerHTML=calendarWeekLettersV438();
+        const grid=document.createElement('div');grid.className='booking-picker-week-days-v127';
+        const blank=()=>{const el=document.createElement('div');el.className='calendar-empty-v438';el.setAttribute('aria-hidden','true');grid.append(el)};
+        const first=(new Date(week.days[0].date+'T12:00:00Z').getUTCDay()+6)%7;
+        for(let i=0;i<first;i++)blank();
+        for(const day of week.days){
+          const tile=document.createElement('div');tile.className='calendar-opening-day-v445';tile.dataset.previewDate=day.date;tile.dataset.opening=day.opening;
+          const date=document.createElement('strong');date.textContent=Number(day.date.slice(8))+'.'+Number(day.date.slice(5,7))+'.';tile.append(date);
+          if(day.opening==='closed'||day.opening==='unknown'){const label=document.createElement('span');label.textContent=day.opening==='closed'?(en?'Closed':'Zatvorené'):(en?'Unconfirmed':'Nepotvrdené');tile.append(label)}
+          grid.append(tile);
+        }
+        for(let i=first+week.days.length;i<5;i++)blank();
+        body.append(grid);row.append(body);pane.append(row);
+      }
+      sections.push(pane);
     }
     if(!sections.length)return;
     if(sections.length===1){root.append(...sections[0].children);calendarMonthSelectionV445=sections[0].dataset.month;return}
     const controls=document.createElement('div');controls.className='calendar-month-controls-v445';
     const hint=document.createElement('span');hint.textContent=en?'Swipe for the next month':'Posuňte doľava pre ďalší mesiac';
-    const prev=document.createElement('button'),next=document.createElement('button');
-    for(const [button,label,symbol] of [[prev,en?'Previous month':'Predchádzajúci mesiac','‹'],[next,en?'Next month':'Ďalší mesiac','›']]){button.type='button';button.setAttribute('aria-label',label);button.textContent=symbol}
-    controls.append(hint,prev,next);
+    controls.append(hint);
     const rail=document.createElement('div');rail.className='calendar-month-rail-v445';rail.setAttribute('role','region');rail.setAttribute('aria-label',en?'Calendar months':'Mesiace kalendára');rail.tabIndex=0;
     rail.append(...sections);root.append(controls,rail);
     const offset=i=>sections[i].offsetLeft-sections[0].offsetLeft;
     const index=()=>sections.reduce((best,p,i)=>Math.abs(offset(i)-rail.scrollLeft)<Math.abs(offset(best)-rail.scrollLeft)?i:best,0);
-    const sync=()=>{const i=index();calendarMonthSelectionV445=sections[i].dataset.month;prev.disabled=i===0;next.disabled=i===sections.length-1};
+    const sync=()=>{calendarMonthSelectionV445=sections[index()].dataset.month};
     const go=i=>{const target=Math.max(0,Math.min(sections.length-1,i));rail.scrollLeft=offset(target);sync()};
-    prev.onclick=()=>go(index()-1);next.onclick=()=>go(index()+1);rail.addEventListener('scroll',sync,{passive:true});
+    rail.addEventListener('scroll',sync,{passive:true});
     const oldIndex=sections.findIndex(p=>p.dataset.month===calendarMonthSelectionV445);
     go(oldIndex<0?0:oldIndex);
   }
