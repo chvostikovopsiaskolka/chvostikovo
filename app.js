@@ -2405,7 +2405,9 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
   async function acceptance(dogId,version,force=false){
     if(!state?.session||!dogId||!version)return null;
+    const account=state.session.user?.id;
     if(customerSessionNeedsRefreshV357()||sessionRefreshInFlight)await ensureCustomerSessionV357();
+    if(state.session?.user?.id!==account)return null;
     const key=String(state.session.user?.id||'')+'|'+String(dogId)+'|'+String(version);
     if(acceptanceCache.has(key)&&!force)return acceptanceCache.get(key);
     if(acceptancePromises.has(key)&&!force)return acceptancePromises.get(key);
@@ -2473,6 +2475,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const stats=document.getElementById('dogStats');
     const dogId=Number(state?.selectedDogId||0);
     if(!stats||!state?.session||!dogId){document.getElementById('customerLegalStatusCard')?.remove();return}
+    const account=state.session.user?.id;
     // The privacy document is local: make it available while active terms load.
     let card=document.getElementById('customerLegalStatusCard');
     if(!card){
@@ -2483,12 +2486,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       card.querySelector('button').onclick=()=>document.getElementById('privacyInfoBtn')?.click();
     }
     const doc=await activeDoc(force);
-    if(seq!==renderSeq)return;
+    if(seq!==renderSeq||state.session?.user?.id!==account)return;
     let accepted=null;
     const acceptanceKey=String(state.session.user?.id||'')+'|'+dogId+'|'+String(doc?.version||'');
     const pendingAcceptance=doc&&!acceptanceCache.has(acceptanceKey);
     if(doc&&!pendingAcceptance)accepted=await acceptance(dogId,doc.version,force);
-    if(seq!==renderSeq)return;
+    if(seq!==renderSeq||state.session?.user?.id!==account)return;
     const privacyAt=state.data?.profile?.privacy_notice_acknowledged_at||null;
     card=document.getElementById('customerLegalStatusCard');
     if(!card){card=document.createElement('div');card.id='customerLegalStatusCard';card.className='card customer-legal-card'}
