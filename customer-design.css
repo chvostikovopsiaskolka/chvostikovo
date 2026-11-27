@@ -1283,3 +1283,8 @@ html.customer-design #designTicket .design-ticket-usage .design-validity{backgro
 .customer-design #bookingTab #bookingDogProfile :is(#bookingVaccinationStatus,.dual-dog-status-v254)>span:last-child::after{content:"↗";display:inline;margin-left:4px;font-size:.95em;font-weight:850;color:currentColor;white-space:nowrap}
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) #bookingGradebook{color:#b94b09!important}
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) #bookingGradebook svg{stroke:#d65b0c!important;color:#d65b0c!important}
+
+/* v448: readable expiry and real remaining capacity, not occupancy. Keep 48px day geometry. */
+html.customer-design #designTicket .design-ticket-usage .design-validity{font-size:12px!important;line-height:1.3;max-width:49%;overflow-wrap:normal}
+@media(max-width:350px){html.customer-design #designTicket .design-ticket-usage .design-validity{font-size:11px!important}}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37[data-capacity-level=free]>span,.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37[data-capacity-level=limited]>span{font-size:9px!important;line-height:1.1;white-space:nowrap;max-width:100%}

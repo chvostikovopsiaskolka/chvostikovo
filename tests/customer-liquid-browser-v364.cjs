@@ -156,11 +156,12 @@ async function assertPawsTransmit(page,selector,background){
 
   await page.evaluate(()=>{state.data.availability.days=state.data.availability.days.filter(d=>d.date<='2026-12-31');window.__calendarTestNowV442='2026-11-26T09:00:00.000Z';window.customerDesignRefreshCalendarV351();});
   await page.evaluate(()=>{for(const [date,occupied] of [['2026-12-07',0],['2026-12-08',5],['2026-12-09',6],['2026-12-10',10],['2026-12-11',11]]){const d=state.data.availability.days.find(x=>x.date===date);Object.assign(d,{occupied,capacity:11,available:11-occupied});}window.customerDesignRefreshCalendarV351();});
-  const tiles=await page.locator('[data-week-from="2026-12-07"] .booking-day-v37').evaluateAll(nodes=>nodes.map(el=>({h:el.getBoundingClientRect().height,level:el.dataset.capacityLevel,bg:getComputedStyle(el).backgroundColor,fg:getComputedStyle(el.querySelector('strong')).color,count:getComputedStyle(el.querySelector(':scope > span')).display,dot:!!el.querySelector('.design-capacity-dot')})));
+  const tiles=await page.locator('[data-week-from="2026-12-07"] .booking-day-v37').evaluateAll(nodes=>nodes.map(el=>({h:el.getBoundingClientRect().height,level:el.dataset.capacityLevel,bg:getComputedStyle(el).backgroundColor,fg:getComputedStyle(el.querySelector('strong')).color,count:getComputedStyle(el.querySelector(':scope > span')).display,label:el.querySelector(':scope > span').textContent,fit:el.querySelector(':scope > span').scrollWidth<=el.querySelector(':scope > span').clientWidth+1,dot:!!el.querySelector('.design-capacity-dot')})));
   assert.equal(tiles.length,5);assert(tiles.every(t=>Math.abs(t.h-tiles[0].h)<1&&!t.dot),'identical tile heights and no dots');
-  for(const t of tiles.slice(0,2)){assert.equal(t.level,'free');assert.equal(t.bg,'rgb(33, 131, 78)');assert.equal(t.fg,'rgb(255, 255, 255)');assert.equal(t.count,'none');}
+  for(const t of tiles.slice(0,2)){assert.equal(t.level,'free');assert.equal(t.bg,'rgb(33, 131, 78)');assert.equal(t.fg,'rgb(255, 255, 255)');assert.notEqual(t.count,'none');assert(t.fit);}
   for(const t of tiles.slice(2,4)){assert.equal(t.level,'limited');assert.equal(t.bg,'rgb(255, 223, 117)');assert.notEqual(t.count,'none');}
   assert.equal(tiles[4].level,'full');assert.notEqual(tiles[4].count,'none');
+  assert.deepEqual(tiles.slice(0,4).map(t=>t.label),['Voľné: 11','Voľné: 6','Voľné: 5','Voľné: 1']);
   const dec=page.locator('.booking-day-v37[data-date="2026-12-02"]');if(!await dec.evaluate(el=>el.classList.contains('selected')))await dec.click();
   const selectedStyle=await dec.evaluate(el=>({bg:getComputedStyle(el).backgroundColor,border:getComputedStyle(el).borderTopWidth,color:getComputedStyle(el.querySelector('strong')).color}));assert.deepEqual(selectedStyle,{bg:'rgb(255, 255, 255)',border:'2px',color:'rgb(33, 131, 78)'});
   const taxiToggle=page.locator('#bookingPickerTaxiByDayV91 [data-taxi-toggle="2026-12-02"]');await taxiToggle.scrollIntoViewIfNeeded();

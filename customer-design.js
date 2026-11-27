@@ -294,9 +294,10 @@
     picker.querySelectorAll('.booking-day-v37').forEach(button=>{const day=state.data?.availability?.days?.find(d=>d.date===button.dataset.date);if(!day)return;button.dataset.capacityLevel=day.bookings_open===false?'closed':button.classList.contains('booked')?'reserved':calendarCapacityLevelV439(day);button.title='Obsadené '+Number(day.occupied||0)+' z '+Number(day.capacity||0)+' miest';button.setAttribute('aria-label',new Intl.DateTimeFormat(document.documentElement.lang==='en'?'en':'sk-SK',{weekday:'long',day:'numeric',month:'numeric'}).format(new Date(day.date+'T12:00:00'))+' · '+(button.querySelector(':scope > span')?.textContent||'')+' · '+button.title);
       const span=button.querySelector(':scope > span');if(span){
         const showCapacity=!button.disabled&&!button.classList.contains('booked')&&button.dataset.full!=='true'&&button.dataset.capacityLevel!=='closed';
-        if(showCapacity)span.textContent=Number(day.occupied||0)+'/'+Number(day.capacity||0);
+        if(showCapacity)span.textContent='Voľné: '+Math.max(0,Number(day.available)||0);
         span.querySelector('.design-capacity-dot')?.remove();
-        span.classList.toggle('calendar-count-hidden-v439',showCapacity&&button.dataset.capacityLevel==='free');
+        span.classList.remove('calendar-count-hidden-v439');
+        if(showCapacity)button.setAttribute('aria-label',new Intl.DateTimeFormat(document.documentElement.lang==='en'?'en':'sk-SK',{weekday:'long',day:'numeric',month:'numeric'}).format(new Date(day.date+'T12:00:00'))+' · '+(document.documentElement.lang==='en'?'Free: ':'Voľné: ')+Math.max(0,Number(day.available)||0));
       }
     });
     // Keep repeated-days suggestions ahead of the calendar, without any reservations strip.

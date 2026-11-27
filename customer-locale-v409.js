@@ -188,7 +188,9 @@
       if(date)return weekdayEn[date[1].toLowerCase()]+', '+Number(date[2])+' '+monthsEn[Number(date[3])-1]+' '+date[4];
       if(weekdayEn[text.toLowerCase()])return weekdayEn[text.toLowerCase()];
     }
-    let availability=text.match(/^(\d+)\s+voľné$/);
+    let availability=text.match(/^Voľné: (\d+)$/);
+    if(availability)return 'Free: '+availability[1];
+    availability=text.match(/^(\d+)\s+voľné$/);
     if(availability)return availability[1]+' places left';
     availability=text.match(/^Obsadené\s+(\d+)\s+z\s+(\d+)\s+miest$/);
     if(availability)return 'Occupied: '+availability[1]+' of '+availability[2]+' places';
