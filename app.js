@@ -3047,7 +3047,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     return name.charAt(0).toUpperCase()+name.slice(1);
   }
   function calendarWeekLettersV438(){
-    return '<div class="calendar-weekletters-v438" aria-hidden="true">'+['P','U','S','Š','P'].map((s,i)=>'<span data-weekday-index="'+i+'">'+s+'</span>').join('')+'</div>';
+    return '<div class="calendar-weekletters-v438" aria-hidden="true">'+['Po','Ut','St','Št','Pi'].map((s,i)=>'<span data-weekday-index="'+i+'">'+s+'</span>').join('')+'</div>';
   }
 
   // Seasonal read-only opening schedule: never merge preview dates into bookable days.
