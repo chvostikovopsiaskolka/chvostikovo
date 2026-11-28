@@ -7,7 +7,7 @@ import { HomeFaqContactForm, LongForm } from "./Forms";
 import { LeadStepForm } from "./LeadStepForm";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
-import { GALLERY, REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE, INQUIRY_TITLE, INQUIRY_SUBTITLE, VISIT_INQUIRY_TITLE } from "@/content/site";
+import { GALLERY, REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE, MAP_LINK, DAYCARE_LOCATION_QUESTION, INQUIRY_TITLE, INQUIRY_SUBTITLE, VISIT_INQUIRY_TITLE } from "@/content/site";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "@/components/site/AriaPreviewText";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FirstVisitPhoto } from "./FirstVisitPhoto";
@@ -345,6 +345,7 @@ export function FaqList({ items, source, homeLayout = false, campaign = false, l
           {open === i && (
             <div className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed text-forest/80 sm:px-6 sm:pb-6">
               <FaqAnswer question={f.q} answer={f.a} />
+              {f.q === DAYCARE_LOCATION_QUESTION && <a href={MAP_LINK} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex min-h-11 items-center font-semibold text-coral-dark underline underline-offset-2">Otvoriť v Google Maps</a>}
               {campaign && f.href && <a href={f.href} className={"mt-4 inline-flex min-h-11 items-center justify-center text-center font-semibold " + (f.id === "puppies" ? "btn-coral w-full px-4 py-3" : "text-coral-dark underline underline-offset-2")}>{f.linkLabel}</a>}
               {homeLayout && (f.q === "Prijímate aj šteniatka?" || language === "en" && f.trackingId === 6) && (
                 <a href="#aria-puppy-check" onClick={() => void trackCookielessInteraction("explore_daycare", "home_requirements_puppy_checker", language)} className="btn-coral mt-4 flex w-fit min-h-11 items-center justify-center px-5 py-3 text-center text-sm font-bold text-white">{language === "en" ? "Check puppy readiness" : "Overiť pripravenosť šteniatka"}</a>
