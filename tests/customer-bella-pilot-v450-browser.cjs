@@ -41,10 +41,28 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
    assert.equal(await onePlace.locator('.bella-capacity-v450').count(),0,'pair needs two places');
  }
  assert(Math.abs(parseFloat(await page.locator('.booking-day-v37[data-date="2026-11-30"] .bella-capacity-v450>i').evaluate(el=>el.style.width))-200/11)<.01);
+ // Announcements may already be rendered in legacy mode before the preview account is resolved.
+ await page.evaluate(()=>{window.__noticeFixture=[{id:61,active:true,title:'Otváracie dni počas sviatkov 🟢🔴',body:'Fixture',overview_text:'Krátky popis.',valid_from:'2020-01-02',show_in_overview:true},{id:62,active:true,title:'Ďalší oznam',body:'Fixture',valid_from:'2020-01-01',show_in_overview:true}];return loadAnnouncements(true);});
+ assert.equal(await page.locator('#customerNoticeOverviewV376').getAttribute('data-pilot-v453'),'false');
  await page.evaluate(()=>{window.closeBookingPickerV305();state.session.user.id='synthetic-overview-owner';renderAll();});
  await meter.waitFor({state:'visible'});
  await page.waitForFunction(()=>document.documentElement.classList.contains('overview-pilot-active-v457'));
  assert.equal(await count(),0,'overview-only account has no Bella');
+ const previewNotice=page.locator('#customerNoticeOverviewV376');
+ const previewFirst=previewNotice.locator('[data-announcement-id="61"]');
+ await page.waitForFunction(()=>document.getElementById('customerNoticeOverviewV376')?.dataset.pilotV453==='true');
+ assert.equal(await previewNotice.locator('.customer-notice-megaphone-v454').textContent(),'📣');
+ assert.equal(await previewNotice.locator('.customer-notice-controls-v381').count(),0);
+ assert.equal(await previewFirst.locator('.customer-notice-excerpt-v363').textContent(),'Krátky popis.');
+ assert.equal(await previewFirst.locator('.customer-notice-head-emoji-v454').textContent(),'🟢🔴');
+ assert(await previewFirst.evaluate(el=>{const p=el.querySelector('.customer-notice-thumb-v363').getBoundingClientRect(),t=el.querySelector('.customer-notice-head-v363').getBoundingClientRect();return Math.abs(p.width-p.height)<1&&p.right<=t.left;}),'approved photo on left without Bella');
+ await previewNotice.locator(':scope > .lg-v3-material').waitFor({state:'attached'});
+ assert.equal(await previewNotice.evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
+ assert.match(await page.locator('#designTicket .design-validity').textContent(),/^Využite do .*23\.\s*12/);
+ // Simulate stale legacy content with unchanged data; recovery must rebuild the approved layout.
+ await page.evaluate(()=>{const h=document.getElementById('customerNoticeOverviewV376');h.querySelector('.customer-notice-megaphone-v454').remove();window.dispatchEvent(new Event('pageshow'));});
+ assert.equal(await previewNotice.locator('.customer-notice-megaphone-v454').textContent(),'📣');
+ await page.evaluate(()=>{window.__noticeFixture=[];return loadAnnouncements(true);});
  assert.equal(await page.evaluate(()=>window.customerBellaPilotEnabledV453()),false);
  assert.equal(await page.locator('#designNearest .design-booking-guidance-v442').isVisible(),true,'original guidance restored');
  assert.match(await page.locator('#designNearest #designReservationNotice').textContent(),/1 deň.*20:00/);

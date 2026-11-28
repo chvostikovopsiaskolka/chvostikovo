@@ -183,7 +183,7 @@
     const match=counts.match(/(\d+)\s+(?:z|of)\s+(\d+)/i),small=[...source.querySelectorAll('small')].map(x=>x.textContent).filter(s=>s!=='Použité vstupy'&&s!=='Visits used').join(' · ');
     const validity=small.replace(/(\d{2})\.(\d{2})\.(\d{4})/g,(_,d,m,y)=>`${d}. ${m}. ${y.slice(-2)}`).replace(/(\d{4})/g,y=>y.slice(-2));
     const date=small.match(/(?:Platí do|Valid until|\bdo)\s+(.*)/i)?.[1];
-    const badge=date?(isEn?'Use by ':'Využiť do ')+date:validity.replace(/^(?:Platnosť |Validity )/,'');
+    const badge=date?(isEn?'Use by ':overviewEnabledV457()?'Využite do ':'Využiť do ')+date:validity.replace(/^(?:Platnosť |Validity )/,'');
     const usage=match?(isEn?`Used <strong>${Number(match[1])} of ${Number(match[2])} visits</strong>`:`Použité <strong>${Number(match[1])} z ${Number(match[2])} vstupov</strong>`):'';
     root.setAttribute('aria-label',isEn?'Pass and visits':'Permanentka a vstupy');
     const progress=match&&date?passValidityV452(source):null;
@@ -276,10 +276,18 @@
       const hash=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
       const assistant=!!BELLA_ASSISTANT_ACCOUNT_SHA256_V457&&hash===BELLA_ASSISTANT_ACCOUNT_SHA256_V457;
       if(hash!==BELLA_PILOT_ACCOUNT_SHA256_V450&&!assistant)return;
-      bellaAllowedV450=id;bellaAssistantAllowedV457=assistant;ticket();window.customerRefreshNoticeOverviewV376?.();renderBellaV450();renderNotifications();
+      bellaAllowedV450=id;bellaAssistantAllowedV457=assistant;ticket();renderBellaV450();window.customerRefreshNoticeOverviewV376?.();bellaMiddleV454();renderNotifications();
       if(!byId('bookingPickerV37')?.classList.contains('hidden'))window.customerDesignPickerRender?.();
-    }).catch(()=>{});
+    }).catch(()=>{if(epoch===bellaEpochV450&&id===bellaAccountV450())bellaCheckedV450='';});
   }
+  // Recover the verified overview presentation on return from background independently of assistant mounting.
+  function restoreOverviewPresentationV458(){
+    if(!bellaReadyV450())return;
+    checkBellaV450();
+    if(overviewEnabledV457()){ticket();renderBellaV450();window.customerRefreshNoticeOverviewV376?.();bellaMiddleV454();}
+  }
+  window.addEventListener('pageshow',restoreOverviewPresentationV458);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')restoreOverviewPresentationV458();});
   function bellaCopyV450(){
     const model=window.customerOverviewBookingGuidanceV442?.();if(!model?.next)return null;
     const en=document.documentElement.lang==='en',tr=(sk,english)=>en?english:sk;
