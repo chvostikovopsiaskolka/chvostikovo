@@ -96,7 +96,7 @@ export function Gallery({ language = "sk", homeMosaic = false }: { language?: "s
           </div>
         </div>
 
-        {homeMosaic && !isEnglish && <div data-daycare-location-copy className="mt-4 max-w-2xl text-sm leading-relaxed text-forest/80 sm:text-base"><FaqAnswer question={DAYCARE_LOCATION_QUESTION} answer={DAYCARE_LOCATION_ANSWER} compact /></div>}
+        {homeMosaic && !isEnglish && <div data-daycare-location-copy className="mt-4 max-w-2xl text-sm leading-relaxed text-forest/80 sm:text-base lg:max-w-none"><FaqAnswer question={DAYCARE_LOCATION_QUESTION} answer={DAYCARE_LOCATION_ANSWER} compact /></div>}
         {homeMosaic ? (
           <div data-home-spaces-mosaic className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
             {photos.map((photo, i) => (
