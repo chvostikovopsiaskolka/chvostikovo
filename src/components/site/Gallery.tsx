@@ -59,6 +59,7 @@ export function Gallery({ language = "sk", homeMosaic = false }: { language?: "s
   const track = useRef<HTMLDivElement>(null);
   const isEnglish = language === "en";
   const hygiene = isEnglish ? HYGIENE_EN : HYGIENE_SK;
+  const localHomeMosaic = homeMosaic && !isEnglish;
   const photos = GALLERY.map(photo => ({ ...photo, src: homeMosaic ? highQualityMosaicSrc(photo.src) : photo.src }));
 
   function slide(dir: -1 | 1) {
@@ -71,18 +72,18 @@ export function Gallery({ language = "sk", homeMosaic = false }: { language?: "s
     <section id={isEnglish ? "spaces" : "priestory"} className="relative scroll-mt-24 overflow-hidden pt-8 pb-14 sm:pt-14 sm:pb-20">
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
+        <div data-home-spaces-intro={localHomeMosaic || undefined} className={localHomeMosaic ? "flex flex-col gap-3" : "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"}>
+          <div className={localHomeMosaic ? "contents" : undefined}>
             <h2 className="section-title text-3xl sm:text-4xl">
               {isEnglish ? "Where will your dog spend the day?" : "Kde bude váš psík počas dňa?"}
             </h2>
-            <p className="mt-3 max-w-2xl text-forest/80">
+            <p data-home-spaces-description={localHomeMosaic || undefined} className={localHomeMosaic ? "order-2 w-full text-base leading-relaxed text-forest/80" : "mt-3 max-w-2xl text-forest/80"}>
               {isEnglish
                 ? "At Chvostíkovo your dog has heated indoor rooms and a secure outdoor run of approximately 80 m² for movement, play and rest."
                 : "V Chvostíkove má váš psík k dispozícii vykurované vnútorné miestnosti a bezpečný vonkajší výbeh s rozlohou približne 80 m² na hry, šantenie a oddych."}
             </p>
           </div>
-          <div className="flex flex-nowrap items-center gap-1.5 self-start whitespace-nowrap sm:justify-end sm:gap-2">
+          <div data-home-location-chips={localHomeMosaic || undefined} className={localHomeMosaic ? "order-1 flex flex-wrap items-center gap-1.5 self-start sm:gap-2" : "flex flex-nowrap items-center gap-1.5 self-start whitespace-nowrap sm:justify-end sm:gap-2"}>
             <a
               href={MAP_LINK}
               target="_blank"
@@ -97,10 +98,10 @@ export function Gallery({ language = "sk", homeMosaic = false }: { language?: "s
           </div>
         </div>
 
-        {homeMosaic && !isEnglish && <div data-daycare-location-copy className="mt-4 max-w-2xl text-sm leading-relaxed text-forest/80 sm:text-base lg:max-w-none"><FaqAnswer question={DAYCARE_LOCATION_QUESTION} answer={DAYCARE_LOCATION_WEB_COPY} compact /></div>}
-        {homeMosaic && !isEnglish && <DaycareArrivalMap className="mt-4 sm:mt-6" />}
+        {localHomeMosaic && <div data-daycare-location-copy className="mt-3 w-full text-base leading-relaxed text-forest/80"><FaqAnswer question={DAYCARE_LOCATION_QUESTION} answer={DAYCARE_LOCATION_WEB_COPY} compact /></div>}
         {homeMosaic ? (
-          <div data-home-spaces-mosaic className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
+          <div data-home-spaces-mosaic className={(localHomeMosaic ? "mt-4 sm:mt-6" : "mt-8") + " grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4"}>
+            {localHomeMosaic && <DaycareArrivalMap className="col-span-2 mb-5 lg:order-last lg:col-span-1 lg:mb-0 lg:aspect-[5/4]" />}
             {photos.map((photo, i) => (
               <Fragment key={photo.src}>
                 <button data-home-space-photo type="button" onClick={() => setActive(i)}
