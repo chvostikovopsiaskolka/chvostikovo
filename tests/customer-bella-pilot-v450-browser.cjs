@@ -27,7 +27,17 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  assert.equal(await meter.count(),0,'ordinary account has no private pass meter');
  assert.equal(await count(),0,'ordinary account has no Bella');
  await page.evaluate(()=>{window.openBookingPickerV37();window.customerDesignRefreshCalendarV351()});
- assert.equal(await page.locator('.bella-capacity-v450').count(),3,'ordinary account has the same public strips');
+ assert.equal(await page.locator('.bella-capacity-v450').count(),dogs===2?2:3,'public strips only on days with enough places for selected dogs');
+ const onePlace=page.locator('.booking-day-v37[data-date="2026-12-02"]');
+ if(dogs===2){
+   assert.equal(await page.locator('#bookingPickerDogV37').inputValue(),'both');
+   assert.equal(await onePlace.getAttribute('data-full'),'true');
+   assert.equal(await onePlace.locator('.bella-capacity-v450').count(),0);
+   await page.locator('[data-compact-dog="1"]').click();
+   assert.equal(await onePlace.locator('.bella-capacity-v450').count(),1,'one remaining place is available for one dog');
+   await page.locator('[data-compact-dog="both"]').click();
+   assert.equal(await onePlace.locator('.bella-capacity-v450').count(),0,'pair needs two places');
+ }
  assert(Math.abs(parseFloat(await page.locator('.booking-day-v37[data-date="2026-11-30"] .bella-capacity-v450>i').evaluate(el=>el.style.width))-200/11)<.01);
  await page.evaluate(()=>{window.closeBookingPickerV305();state.session.user.id='synthetic-bella-owner';renderAll();});
  await page.locator('#customerBellaPilotV450').waitFor({state:'visible'});
@@ -78,7 +88,11 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  assert.equal(await meter.count(),0,'switch removes private meter immediately');
  assert.equal(await page.locator('#designTicket .design-paws').evaluate(el=>getComputedStyle(el).borderTopStyle),'dashed');
  await page.evaluate(()=>{window.openBookingPickerV37();window.customerDesignRefreshCalendarV351()});
- assert.equal(await page.locator('.bella-capacity-v450').count(),2,'unreserved public bars survive account switch');
+ assert.equal(await page.locator('.bella-capacity-v450').count(),dogs===2?1:2,'unreserved public bars survive account switch');
+ if(dogs===2){
+   assert.equal(await page.locator('.booking-day-v37[data-date="2026-12-02"] .bella-capacity-v450').count(),0,'pair cannot reserve one remaining place');
+   await page.locator('[data-compact-dog="1"]').click();
+ }
  assert.equal(await page.locator('.booking-day-v37[data-date="2026-11-30"] .bella-capacity-v450').count(),0,'already reserved day does not display capacity bar');
  for(const [date,occupied] of [['2026-12-01',7],['2026-12-02',10]]){
    const bar=page.locator('.booking-day-v37[data-date="'+date+'"] .bella-capacity-v450>i');
