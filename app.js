@@ -1,8 +1,8 @@
 /* Bulletin format v1: bounded data, never interpret stored HTML. */
 (function(root){
 'use strict';
-const allowed=new Set(['b','i','u','p','div','h2','h3','ul','ol','li','br','span']);
-const blocks=new Set(['p','div','h2','h3','ul','ol','li']);
+const allowed=new Set(['b','i','u','p','div','h1','h2','h3','ul','ol','li','br','span']);
+const blocks=new Set(['p','div','h1','h2','h3','ul','ol','li']);
 const alignment=new Set(['left','center','right','justify']);
 function validate(nodes){
  let count=0,chars=0;
@@ -67,7 +67,7 @@ function collect(editor){
   if(tag!=='b'&&(weight==='bold'||weight==='bolder'||Number(weight)>=600))children=[{tag:'b',children}];
   if(tag!=='i'&&node.style?.fontStyle==='italic')children=[{tag:'i',children}];
   if(tag!=='u'&&/underline/.test(node.style?.textDecorationLine||node.style?.textDecoration||''))children=[{tag:'u',children}];
-  const align=node.style?.textAlign||node.getAttribute('align');
+  const align=(node.style?.textAlign||node.getAttribute('align')||'').replace(/^-webkit-/,'');
   if(tag==='span')return children;
   const result={tag,children};
   if(blocks.has(tag)&&alignment.has(align))result.align=align;

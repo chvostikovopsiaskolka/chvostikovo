@@ -91,7 +91,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
    await page.locator('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();
    // Rich body is an optional bounded tree, not HTML. Keep the existing teaser and read receipt.
    await page.evaluate(()=>{
-     const row=window.__noticeFixture[0];row.body='Tučné a kurzíva\n• Bod';row.body_format={v:1,plain:row.body,nodes:[{tag:'p',align:'center',children:[{tag:'b',children:['Tučné']},' a ',{tag:'i',children:['kurzíva']}]},{tag:'ul',children:[{tag:'li',children:['Bod']}]}]};
+     const row=window.__noticeFixture[0];row.body='Tučné a kurzíva\n• Bod';row.body_format={v:1,plain:row.body,nodes:[{tag:'h1',align:'center',children:[{tag:'b',children:['Tučné']},' a ',{tag:'i',children:['kurzíva']}]},{tag:'ul',children:[{tag:'li',children:['Bod']}]}]};
      return loadAnnouncements(true)
    });
    await expect(featured.locator('.customer-notice-excerpt-v363')).toHaveText('Short teaser.');
@@ -99,13 +99,13 @@ const fixture=require('./liquid-v3-fixture.cjs');
    const rich=page.locator('#customerBulletinArticleV229 .customer-bulletin-article-v229');
    await expect(rich.locator('b')).toHaveText('Tučné');
    await expect(rich.locator('i')).toHaveText('kurzíva');
-   await expect(rich.locator('p')).toHaveCSS('text-align','center');
+   await expect(rich.locator('h1')).toHaveCSS('text-align','center');
    await expect(rich.locator('li')).toHaveText('Bod');
    await page.locator('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();
    // Only formatting changed, so the existing overview card must open the new tree.
    await page.evaluate(()=>{window.__noticeFixture[0].body_format.nodes[0].align='right';return loadAnnouncements(true)});
    await featured.click();
-   await expect(rich.locator('p')).toHaveCSS('text-align','right');
+   await expect(rich.locator('h1')).toHaveCSS('text-align','right');
    await page.locator('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();
    // Unsupported elements and stale plain snapshots must fall back to text, never raw HTML.
    await page.evaluate(()=>{const row=window.__noticeFixture[0];row.body_format.nodes=[{tag:'img',children:[]}];return loadAnnouncements(true)});
