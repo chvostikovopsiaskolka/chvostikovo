@@ -220,12 +220,15 @@
   }
   // v450: visual-only, fail-closed account pilot. No account email or raw UUID in the bundle.
   const BELLA_PILOT_ACCOUNT_SHA256_V450='288c196a3d8f47da8e96737e2c1753be2db7b1864c406c95e312c7687e0dcd66';
-  let bellaCheckedV450='',bellaAllowedV450='',bellaEpochV450=0;
+  let bellaCheckedV450='',bellaAllowedV450='',bellaEpochV450=0,bellaSizeObserverV453=null;
   const bellaAccountV450=()=>String(state.session?.user?.id||'');
   const bellaReadyV450=()=>!!bellaAccountV450()&&!!state.session?.access_token&&state.data?.profile?.status==='active'&&!!state.data?.dogs?.length;
   const bellaEnabledV450=()=>bellaReadyV450()&&bellaAllowedV450===bellaAccountV450();
+  window.customerBellaPilotEnabledV453=bellaEnabledV450;
   function clearBellaUiV450(){
     document.documentElement.classList.remove('bella-pilot-active-v450');
+    bellaSizeObserverV453?.disconnect();bellaSizeObserverV453=null;
+    byId('bookingTab')?.style.removeProperty('--bella-height-v453');
     byId('customerBellaPilotV450')?.remove();
     const ticketRoot=byId('designTicket');
     if(ticketRoot?.classList.contains('design-pass-validity-v452')){ticketRoot.classList.remove('design-pass-validity-v452');delete ticketRoot.dataset.validityLevel;delete ticketRoot.dataset.presentationKey;ticketRoot.querySelector('.design-pass-meter-v452')?.remove();}
@@ -244,7 +247,7 @@
       if(epoch!==bellaEpochV450||id!==bellaAccountV450()||!bellaReadyV450())return;
       const hash=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
       if(hash!==BELLA_PILOT_ACCOUNT_SHA256_V450)return;
-      bellaAllowedV450=id;ticket();renderBellaV450();
+      bellaAllowedV450=id;ticket();window.customerRefreshNoticeOverviewV376?.();renderBellaV450();
       if(!byId('bookingPickerV37')?.classList.contains('hidden'))window.customerDesignPickerRender?.();
     }).catch(()=>{});
   }
@@ -252,7 +255,7 @@
     const model=window.customerOverviewBookingGuidanceV442?.();if(!model?.next)return null;
     const en=document.documentElement.lang==='en',tr=(sk,english)=>en?english:sk;
     const notice=window.customerBellaPriorityNoticeV450?.();
-    if(notice&&Number.isFinite(notice.id)&&notice.id>0)return {text:tr('Haf! Máme pre vás nový oznam: ','Woof! We have a new announcement: ')+notice.title,action:tr('Otvoriť oznam','Open announcement'),notice:notice.id};
+    if(notice&&Number.isFinite(notice.id)&&notice.id>0)return {text:tr('Haf! Máme pre vás nový oznam. ','Woof! We have a new announcement. ')+notice.title,action:tr('Otvoriť oznam','Open announcement'),notice:notice.id};
     const next=model.next,bookings=futureItems().filter(r=>r.reservation_date>=next.from&&r.reservation_date<=next.to&&['pending','approved'].includes(r.status));
     const dogIds=new Set(bookings.map(r=>Number(r.dog_id))),names=(state.data.dogs||[]).filter(d=>dogIds.has(Number(d.id))).map(d=>String(d.name||'')).filter(Boolean);
     const bookAction=tr('Rezervovať miesto','Book a place');
@@ -272,12 +275,12 @@
   }
   function renderBellaV450(){
     if(!bellaEnabledV450()){clearBellaUiV450();return;}
-    const anchor=byId('designNearest');if(!anchor){clearBellaUiV450();return;}
+    const anchor=byId('designNearest'),overview=byId('bookingTab');if(!anchor||!overview){clearBellaUiV450();return;}
     const copy=bellaCopyV450();if(!copy){clearBellaUiV450();return;}
     let host=byId('customerBellaPilotV450');
     if(!host){
       host=document.createElement('section');host.id='customerBellaPilotV450';host.className='bella-pilot-v450';host.setAttribute('translate','no');host.setAttribute('aria-label','Bella');
-      const photo=document.createElement('img');photo.src='/bella-pilot-v450.webp';photo.alt='';photo.decoding='async';photo.width=96;photo.height=112;
+      const photo=document.createElement('img');photo.src='/bella-pilot-v453.webp';photo.alt='';photo.decoding='async';photo.width=58;photo.height=60;
       const bubble=document.createElement('div');bubble.className='bella-bubble-v450';
       const name=document.createElement('strong');name.textContent='Bella';const message=document.createElement('p');message.className='bella-message-v450';
       const action=document.createElement('button');action.type='button';action.className='bella-action-v450';action.onclick=()=>{
@@ -291,7 +294,12 @@
     if(msg.textContent!==copy.text)msg.textContent=copy.text;
     if(action.textContent!==(copy.action||''))action.textContent=copy.action||'';
     action.hidden=!copy.action;action.dataset.notice=copy.notice?String(copy.notice):'';
-    if(anchor.nextElementSibling!==host)anchor.after(host);
+    host.dataset.notice=String(!!copy.notice);
+    if(host.parentElement!==overview)overview.append(host);
+    if(!bellaSizeObserverV453&&typeof ResizeObserver==='function'){
+      bellaSizeObserverV453=new ResizeObserver(()=>{if(!bellaEnabledV450()||!host.isConnected)return;const height=host.getBoundingClientRect().height;if(height>0)overview.style.setProperty('--bella-height-v453',Math.ceil(height)+'px');});
+      bellaSizeObserverV453.observe(host);
+    }
     document.documentElement.classList.add('bella-pilot-active-v450');
   }
   window.customerBellaRefreshV450=()=>{if(bellaEnabledV450())renderBellaV450();};
