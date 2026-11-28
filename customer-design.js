@@ -274,7 +274,8 @@
     const model=window.customerOverviewBookingGuidanceV442?.();if(!model?.next)return null;
     const en=document.documentElement.lang==='en',tr=(sk,english)=>en?english:sk;
     const messages=window.customerBellaNotificationsV454?.()||[];
-    const alert=messages.find(n=>n.type!=='poll_invitation');
+    const alerts=messages.filter(n=>n.type!=='poll_invitation');
+    const alert=alerts.find(n=>/cancel|clos|reject/i.test(n.type))||alerts[0];
     if(alert){const body=[alert.title,alert.body].filter(Boolean).join(' · ');return {text:tr('Haf! ','Woof! ')+body,action:alert.type==='pass_expiry'?tr('Vybrať termín','Choose a date'):tr('Rozumiem','Got it'),notification:alert.id};}
     const notice=window.customerBellaPriorityNoticeV450?.();
     if(notice&&Number.isFinite(notice.id)&&notice.id>0)return {text:tr('Haf! Máme pre vás nový oznam. ','Woof! We have a new announcement. ')+notice.title,action:tr('Otvoriť oznam','Open announcement'),notice:notice.id};
