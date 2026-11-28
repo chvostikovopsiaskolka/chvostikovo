@@ -1799,7 +1799,8 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .lead-brand-live [data-aria-hero-heading-spacer] { display: none; }
   .lead-brand-live [data-lead-hero-grid] h1 { grid-area: title; margin: 0; font-size: clamp(2rem, 4.5svh, 3rem); }
   .lead-brand-live [data-lead-title-flow] { display: block; opacity: 1; }
-  .lead-brand-live [data-lead-title-flow] > span { color: #b82e7f; }
+  .lead-brand-live [data-lead-hero-grid] h1 [data-lead-title-flow] { color: var(--preview-logo-orange, #a95400); }
+  .lead-brand-live [data-lead-hero-grid] h1 [data-lead-title-flow] > .text-coral-dark { color: #b82e7f; }
   .lead-brand-live [data-lead-title-display] { display: none; }
   .lead-brand-live [data-aria-service-group] { grid-area: service; margin: 0; }
   .lead-brand-live [data-aria-service-badge] { font-size: .875rem; text-align: center; }
