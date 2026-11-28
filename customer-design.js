@@ -156,6 +156,20 @@
     [...body.children].forEach(row=>{if(!wanted.has(row.dataset.rosterKey))row.remove();});
     rows.forEach((d,i)=>{const key=String(d.dog_id||d.key||d.name);let row=[...body.children].find(row=>row.dataset.rosterKey===key);if(!row){row=document.createElement('div');row.className='design-roster-row';row.dataset.rosterKey=key;row.append(photoNode(d,'design-friend-photo'),document.createElement('strong'));}else{const version=String(d.photo_updated_at||d.photo_path||d.photo_url?.split('?')[0]||'');const oldPhoto=row.querySelector('.design-friend-photo');if(oldPhoto?.dataset.photoVersion!==version)oldPhoto?.replaceWith(photoNode(d,'design-friend-photo'));}row.querySelector('strong').textContent=d.name||'Prihlásený škôlkar';if(body.children[i]!==row)body.insertBefore(row,body.children[i]||null);});
   }
+  // Calendar days in Bratislava; inclusive validity, independent of visits and DST.
+  function passValidityV452(source){
+    if(!bellaEnabledV450())return null;
+    const day=value=>{
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(value||''))return NaN;
+      const date=new Date(value+'T00:00:00Z');
+      return Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===value?date.getTime()/86400000:NaN;
+    };
+    const start=day(source.dataset.validityStartV452),end=day(source.dataset.validityEndV452),today=day(bratislavaToday());
+    if(![start,end,today].every(Number.isFinite)||end<start||end<today)return null;
+    const total=end-start+1,remaining=Math.min(total,Math.max(0,end-today+1));
+    const elapsedPercent=end===start?(today>=start?100:0):Math.max(0,Math.min(100,(today-start)/(end-start)*100));
+    return {remaining,elapsedPercent,level:remaining<=3?'red':remaining/total<.25?'yellow':'green'};
+  }
   function ticket() {
     const source=byId('passSummary'),dog=selectedDog(); if(!source||!dog)return;
     let root=byId('designTicket');
@@ -172,11 +186,18 @@
     const badge=date?(isEn?'Use by ':'Využiť do ')+date:validity.replace(/^(?:Platnosť |Validity )/,'');
     const usage=match?(isEn?`Used <strong>${Number(match[1])} of ${Number(match[2])} visits</strong>`:`Použité <strong>${Number(match[1])} z ${Number(match[2])} vstupov</strong>`):'';
     root.setAttribute('aria-label',isEn?'Pass and visits':'Permanentka a vstupy');
-    const presentationKey=JSON.stringify([originalTitle,counts,small,dog.sex,isEn]);
+    const progress=match&&date?passValidityV452(source):null;
+    root.classList.toggle('design-pass-validity-v452',!!progress);
+    if(progress)root.dataset.validityLevel=progress.level;else delete root.dataset.validityLevel;
+    const presentationKey=JSON.stringify([originalTitle,counts,small,dog.sex,isEn,progress]);
     if(root.dataset.presentationKey===presentationKey)return;
     root.dataset.presentationKey=presentationKey;
     const material=root.querySelector(':scope > .lg-v3-material');
     root.innerHTML=`<div class="design-ticket-head"><h2 aria-label="${esc(originalTitle)}">${icon("ticket")}<span>${esc(originalTitle)}</span></h2></div><div class="design-ticket-usage">${match?`<p>${usage}</p>`:`<p class="design-single-entry"><strong>${esc(counts==='Jednorazový'?'Jednorazový vstup':counts)}</strong></p>`}${badge?`<span class="design-validity" title="${esc(small)}">${esc(badge)}</span>`:''}</div>${match?`<div class="design-paws" aria-hidden="true">${Array.from({length:Number(match[2])},(_,i)=>`<span class="${i<Number(match[1])?'used':''}">${icon('pass-paw')}</span>`).join('')}</div>`:''}`;
+    if(progress){
+      const meter=document.createElement('div');meter.className='design-pass-meter-v452';meter.setAttribute('role','progressbar');meter.setAttribute('aria-label',isEn?'Pass validity elapsed':'Uplynutá platnosť permanentky');meter.setAttribute('aria-valuemin','0');meter.setAttribute('aria-valuemax','100');meter.setAttribute('aria-valuenow',String(Math.round(progress.elapsedPercent)));meter.setAttribute('aria-valuetext',isEn?`${progress.remaining} days remaining, including today`:`Zostávajúce dni vrátane dneška: ${progress.remaining}`);
+      const fill=document.createElement('span');fill.style.width=progress.elapsedPercent+'%';meter.dataset.complete=String(progress.elapsedPercent===100);meter.append(fill);root.querySelector('.design-paws')?.before(meter);
+    }
     if(material)root.prepend(material);
   }
   // A locale switch doesn't change the account data; repaint just its pass presentation.
@@ -206,7 +227,9 @@
   function clearBellaUiV450(){
     document.documentElement.classList.remove('bella-pilot-active-v450');
     byId('customerBellaPilotV450')?.remove();
-    document.querySelectorAll('.bella-capacity-v450').forEach(el=>el.remove());
+    const ticketRoot=byId('designTicket');
+    if(ticketRoot?.classList.contains('design-pass-validity-v452')){ticketRoot.classList.remove('design-pass-validity-v452');delete ticketRoot.dataset.validityLevel;delete ticketRoot.dataset.presentationKey;ticketRoot.querySelector('.design-pass-meter-v452')?.remove();}
+    if(!bellaReadyV450())document.querySelectorAll('.bella-capacity-v450').forEach(el=>el.remove());
   }
   window.customerBellaPilotClearV450=()=>{++bellaEpochV450;bellaCheckedV450='';bellaAllowedV450='';clearBellaUiV450();};
   function checkBellaV450(){
@@ -221,7 +244,7 @@
       if(epoch!==bellaEpochV450||id!==bellaAccountV450()||!bellaReadyV450())return;
       const hash=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
       if(hash!==BELLA_PILOT_ACCOUNT_SHA256_V450)return;
-      bellaAllowedV450=id;renderBellaV450();
+      bellaAllowedV450=id;ticket();renderBellaV450();
       if(!byId('bookingPickerV37')?.classList.contains('hidden'))window.customerDesignPickerRender?.();
     }).catch(()=>{});
   }
@@ -277,7 +300,7 @@
   function bellaCapacityV450(button,day,showCapacity){
     let bar=button.querySelector('.bella-capacity-v450');
     const capacity=Number(day.capacity),occupied=Number(day.occupied);
-    if(!bellaEnabledV450()||!showCapacity||!['free','limited'].includes(button.dataset.capacityLevel)||!Number.isFinite(capacity)||capacity<=0||!Number.isFinite(occupied)||occupied<0){bar?.remove();return;}
+    if(!bellaReadyV450()||!showCapacity||!['free','limited'].includes(button.dataset.capacityLevel)||day.capacity==null||day.occupied==null||!Number.isFinite(capacity)||capacity<=0||!Number.isFinite(occupied)||occupied<0){bar?.remove();return;}
     if(!bar){bar=document.createElement('i');bar.className='bella-capacity-v450';bar.setAttribute('aria-hidden','true');bar.append(document.createElement('i'));button.append(bar);}
     bar.firstElementChild.style.width=(Math.min(1,occupied/capacity)*100)+'%';
   }

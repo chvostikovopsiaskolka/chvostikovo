@@ -21,13 +21,49 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
   await page.goto('https://inbox.fixture/');await page.waitForTimeout(400);
   await page.evaluate(dogs=>{queueCustomerSync=()=>{};window.runCustomerOnboardingV75=()=>{};state.session={user:{id:'synthetic-browser'},access_token:'fixture',expires_at:Date.parse('2100-01-01T00:00:00Z')/1000};state.selectedDogId=1;state.data={profile:{status:'active',intro_guide_eligible:false,privacy_notice_acknowledged_at:'2026-01-01',push_prompt_answered_at:'2026-01-01'},dogs:Array.from({length:dogs},(_,i)=>({id:i+1,name:i?'Iris':'Bella',sex:i?'male':'female',default_entry_type:'single',photo_path:'fixture/dog',photo_url:i?null:'https://inbox.fixture/storage/fixture-dog.png',share_name_photo_at:'2026-01-01'})),messages:[],conversation_id:7,vaccinations:Array.from({length:dogs},(_,i)=>['rabies','infectious','kennel_cough'].map(vaccination_type=>({dog_id:i+1,vaccination_type,valid_until:'2099-12-31'}))).flat(),vaccination_proofs:Array.from({length:dogs},(_,i)=>({id:i+1,dog_id:i+1,storage_path:'fixture'})),dog_onboarding:Array.from({length:dogs},(_,i)=>({dog_id:i+1,details_prompt_answered_at:'2026-01-01'})),passes:[],requests:[],reservations:[],visits:[],pass_requests:[],monthly_totals:[],notifications:[],availability:{days:[]}};showApp();renderAll();loading(false);window.__customerOnboardingCompleteV75=true;return loadAnnouncements(true);},dogs);
 
- await page.evaluate(()=>{window.__calendarTestNowV442='2026-11-28T08:00:00.000Z';state.data.availability.days=Array.from({length:5},(_,i)=>({date:['2026-11-30','2026-12-01','2026-12-02','2026-12-03','2026-12-04'][i],capacity:11,occupied:[2,7,10,11,0][i],available:[9,4,1,0,11][i],bookings_open:i!==4}));renderAll();});
+ await page.evaluate(()=>{window.__calendarTestNowV442='2026-11-28T08:00:00.000Z';state.data.availability.days=Array.from({length:5},(_,i)=>({date:['2026-11-30','2026-12-01','2026-12-02','2026-12-03','2026-12-04'][i],capacity:11,occupied:[2,7,10,11,0][i],available:[9,4,1,0,11][i],bookings_open:i!==4}));state.data.passes=[{id:81,dog_id:1,status:'active',used_entries:3,total_entries:10,valid_from:'2026-11-03',valid_until:'2026-12-23'}];renderAll();});
  const count=()=>page.locator('#customerBellaPilotV450').count();
+ const meter=page.locator('#designTicket .design-pass-meter-v452');
+ assert.equal(await meter.count(),0,'ordinary account has no private pass meter');
  assert.equal(await count(),0,'ordinary account has no Bella');
  await page.evaluate(()=>{window.openBookingPickerV37();window.customerDesignRefreshCalendarV351()});
- assert.equal(await page.locator('.bella-capacity-v450').count(),0,'ordinary account has no bars');
+ assert.equal(await page.locator('.bella-capacity-v450').count(),dogs===2?2:3,'public strips only on days with enough places for selected dogs');
+ const onePlace=page.locator('.booking-day-v37[data-date="2026-12-02"]');
+ if(dogs===2){
+   assert.equal(await page.locator('#bookingPickerDogV37').inputValue(),'both');
+   assert.equal(await onePlace.getAttribute('data-full'),'true');
+   assert.equal(await onePlace.locator('.bella-capacity-v450').count(),0);
+   await page.locator('[data-compact-dog="1"]').click();
+   assert.equal(await onePlace.locator('.bella-capacity-v450').count(),1,'one remaining place is available for one dog');
+   await page.locator('[data-compact-dog="both"]').click();
+   assert.equal(await onePlace.locator('.bella-capacity-v450').count(),0,'pair needs two places');
+ }
+ assert(Math.abs(parseFloat(await page.locator('.booking-day-v37[data-date="2026-11-30"] .bella-capacity-v450>i').evaluate(el=>el.style.width))-200/11)<.01);
  await page.evaluate(()=>{window.closeBookingPickerV305();state.session.user.id='synthetic-bella-owner';renderAll();});
  await page.locator('#customerBellaPilotV450').waitFor({state:'visible'});
+ await meter.waitFor({state:'visible'});
+ assert.equal(await meter.getAttribute('aria-valuenow'),'50');
+ assert.equal(await meter.locator('span').evaluate(el=>el.style.width),'50%');
+ const alignment=await meter.evaluate(el=>({right:el.getBoundingClientRect().right,dateRight:el.closest('#designTicket').querySelector('.design-validity').getBoundingClientRect().right,direction:getComputedStyle(el).direction}));
+ assert(Math.abs(alignment.right-alignment.dateRight)<2,'track ends below the date');
+ assert.equal(alignment.direction,'ltr');
+ assert.equal(await page.locator('#designTicket').getAttribute('data-validity-level'),'green');
+ assert.equal(await page.locator('#designTicket .design-paws').evaluate(el=>getComputedStyle(el).borderTopWidth),'0px');
+ assert.equal(await page.locator('#designTicket .design-paws .used').count(),3);
+ assert.match(await page.locator('#designTicket .design-validity').textContent(),/23\.\s*12/);
+ assert(await meter.evaluate(el=>el.scrollWidth<=el.clientWidth+1));
+ await page.evaluate(()=>{state.data.passes[0].valid_until='2026-12-03';renderAll();});
+ assert.equal(await page.locator('#designTicket').getAttribute('data-validity-level'),'yellow');
+ assert(Number(await meter.getAttribute('aria-valuenow'))>75,'elapsed fill grows toward date');
+ await page.evaluate(()=>{state.data.passes[0].valid_until='2026-11-30';renderAll();});
+ assert.equal(await page.locator('#designTicket').getAttribute('data-validity-level'),'red');
+ assert(Number(await meter.getAttribute('aria-valuenow'))>90);
+ await page.evaluate(()=>{state.data.passes[0].valid_until='2026-11-28';renderAll();});
+ assert.equal(await meter.getAttribute('aria-valuenow'),'100');
+ assert.equal(await meter.getAttribute('data-complete'),'true');
+ await page.evaluate(()=>{state.data.passes[0].no_expiry=true;renderAll();});
+ assert.equal(await meter.count(),0,'unlimited pass has no time meter');
+ await page.evaluate(()=>{state.data.passes=[];renderAll();});
  assert.equal(await page.locator('#customerBellaPilotV450 img').evaluate(img=>img.complete&&img.naturalWidth>0),true);
  assert.match(await page.locator('.bella-message-v450').textContent(),/Haf!/);
  assert.equal(await page.locator('#customerBellaPilotV450').evaluate(el=>el.previousElementSibling.id),'designNearest');
@@ -45,13 +81,28 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  assert.match(await page.locator('.bella-message-v450').textContent(),/Bella/);
  await page.evaluate(()=>{window.__noticeFixture=[{id:71,active:true,title:'Synthetic promoted announcement',body:'Fixture',valid_from:'2020-01-01',show_in_overview:true}];return loadAnnouncements(true)});
  assert.match(await page.locator('.bella-message-v450').textContent(),/Synthetic promoted announcement/);
+ await page.evaluate(()=>{state.data.passes=[{id:82,dog_id:1,status:'active',used_entries:3,total_entries:10,valid_from:'2026-11-03',valid_until:'2026-12-23'}];renderAll();});
+ await meter.waitFor({state:'visible'});
  await page.evaluate(()=>{state.session.user.id='synthetic-browser';renderAll();});
  assert.equal(await count(),0,'switch removes pilot immediately');
+ assert.equal(await meter.count(),0,'switch removes private meter immediately');
+ assert.equal(await page.locator('#designTicket .design-paws').evaluate(el=>getComputedStyle(el).borderTopStyle),'dashed');
  await page.evaluate(()=>{window.openBookingPickerV37();window.customerDesignRefreshCalendarV351()});
- assert.equal(await page.locator('.bella-capacity-v450').count(),0);
+ assert.equal(await page.locator('.bella-capacity-v450').count(),dogs===2?1:2,'unreserved public bars survive account switch');
+ if(dogs===2){
+   assert.equal(await page.locator('.booking-day-v37[data-date="2026-12-02"] .bella-capacity-v450').count(),0,'pair cannot reserve one remaining place');
+   await page.locator('[data-compact-dog="1"]').click();
+ }
+ assert.equal(await page.locator('.booking-day-v37[data-date="2026-11-30"] .bella-capacity-v450').count(),0,'already reserved day does not display capacity bar');
+ for(const [date,occupied] of [['2026-12-01',7],['2026-12-02',10]]){
+   const bar=page.locator('.booking-day-v37[data-date="'+date+'"] .bella-capacity-v450>i');
+   assert.equal(await bar.count(),1);
+   assert(Math.abs(parseFloat(await bar.evaluate(el=>el.style.width))-occupied/11*100)<.01,'public occupancy ratio after switch');
+ }
  await page.evaluate(()=>{window.closeBookingPickerV305();state.session.user.id='synthetic-bella-owner';renderAll();clearSession();});
  await page.waitForTimeout(100);
  assert.equal(await count(),0,'late digest must not remount after logout');
+ assert.equal(await meter.count(),0,'logout cannot retain or remount private meter');
  assert.equal(await page.locator('.bella-capacity-v450').count(),0);
  assert.deepEqual(errors,[]);
  console.log('PASS isolated Bella, occupancy, ordinary account, switch/logout',engine.name(),dogs,width);
