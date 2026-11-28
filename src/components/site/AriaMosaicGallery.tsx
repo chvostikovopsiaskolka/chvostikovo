@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Car, MapPin } from "lucide-react";
-import { GALLERY, MAP_LINK, DAYCARE_LOCATION_ANSWER } from "@/content/site";
+import { GALLERY, MAP_LINK, DAYCARE_LOCATION_ANSWER, DAYCARE_LOCATION_QUESTION } from "@/content/site";
+import { FaqAnswer } from "./ContextFaq";
 import { PhotoLightbox } from "./PhotoLightbox";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
@@ -46,7 +47,7 @@ export function AriaMosaicGallery({ paidLead = false }: { paidLead?: boolean }) 
         <h2 id="aria-mosaic-heading" className="section-title mt-2 text-center text-[clamp(22px,5.2vw,38px)]">{paidLead ? "Kde bude váš psík počas dňa?" : "Takto vyzerá Chvostíkovo"}</h2>
         {paidLead && (
           <div data-daycare-location-copy className="mx-auto mt-3 max-w-2xl space-y-2 text-center text-sm leading-relaxed text-forest/80 sm:text-base">
-            {DAYCARE_LOCATION_ANSWER.split("\n\n").map(paragraph => <p key={paragraph}>{paragraph}</p>)}
+            <FaqAnswer question={DAYCARE_LOCATION_QUESTION} answer={DAYCARE_LOCATION_ANSWER} compact />
           </div>
         )}
         <div data-aria-location-chips className="mx-auto mt-4 grid max-w-md grid-cols-2 gap-2 sm:hidden">
