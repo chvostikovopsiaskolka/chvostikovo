@@ -4,8 +4,9 @@ const engine=process.env.V3_ENGINE==='webkit'?webkit:chromium;
 const pilot='synthetic-bella-owner',ordinary='synthetic-browser';
 const hash=createHash('sha256').update(pilot).digest('hex');
 const design=fs.readFileSync('customer-design.js','utf8');
-assert.match(design,/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{64}'/);
-const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{64}'/,"BELLA_PILOT_ACCOUNT_SHA256_V450='"+hash+"'");
+assert.match(design,/BELLA_PILOT_ACCOUNT_SHA256_V450=null/);
+const previewHash=createHash('sha256').update('synthetic-live-preview').digest('hex');
+const syntheticDesign=design.replace('BELLA_PILOT_ACCOUNT_SHA256_V450=null',"BELLA_PILOT_ACCOUNT_SHA256_V450='"+hash+"'").replace(/OVERVIEW_PREVIEW_ACCOUNT_SHA256_V456='[a-f0-9]{64}'/,"OVERVIEW_PREVIEW_ACCOUNT_SHA256_V456='"+previewHash+"'");
 (async()=>{
  let browser;try{
  browser=await engine.launch(engine===webkit?{headless:true}:{headless:true,args:['--no-sandbox']});
@@ -50,10 +51,10 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  assert.equal(alignment.direction,'ltr');
  const assertConnected=async()=>{
    const geometry=await meter.evaluate(el=>{const badge=el.closest('#designTicket').querySelector('.design-validity'),b=badge.getBoundingClientRect(),m=el.getBoundingClientRect(),style=getComputedStyle(badge);return {gap:m.top-b.bottom,right:m.right-b.right,bg:style.backgroundColor,border:style.borderTopWidth,track:getComputedStyle(el).borderTopWidth,bottomRight:style.borderBottomRightRadius,overflow:b.right>m.right+1};});
-   assert(geometry.gap>=1&&geometry.gap<=4,'date badge and track separated by a small gap');
+   assert(Math.abs(geometry.gap)<1,'date badge and track touch without a gap');
    assert(Math.abs(geometry.right)<2,'date badge aligns with track end');
    assert.equal(geometry.border,'1px');assert.equal(geometry.track,'1px');
-   assert.equal(geometry.bottomRight,'3px');assert.equal(geometry.overflow,false);
+   assert.equal(geometry.bottomRight,'0px');assert.equal(geometry.overflow,false);
  };
  await assertConnected();
  assert.equal(await page.locator('#designTicket').getAttribute('data-validity-level'),'green');
@@ -77,7 +78,9 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  assert.equal(await meter.count(),0,'unlimited pass has no time meter');
  await page.evaluate(()=>{state.data.passes=[];renderAll();});
  assert.equal(await page.locator('#customerBellaPilotV450 img').evaluate(img=>img.complete&&img.naturalWidth===120&&img.naturalHeight===126),true,'new isolated head asset loads');
- assert.match(await page.locator('.bella-message-v450').textContent(),/Haf!.*1 deň/);
+ assert.match(await page.locator('.bella-message-v450').textContent(),/1 deň.*Haf!$/);
+ assert.equal(await page.locator('.bella-portrait-v456 .bella-name-v456').textContent(),'Bella');
+ assert.equal(await page.locator('.bella-action-v450').evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
  assert.equal(await page.locator('.bella-message-v450 strong').first().textContent(),'už len 1 deň');
  assert.match(await page.locator('.bella-message-v450 strong').allTextContents().then(x=>x.join(' ')),/29\.\s*11\..*20:00/);
  const assistant=page.locator('#customerBellaPilotV450');
@@ -126,7 +129,7 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  await notice.locator(':scope > .lg-v3-material').waitFor({state:'attached'});
  assert.equal(await notice.evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
  const rects=await first.evaluate(el=>{const box=s=>el.querySelector(s).getBoundingClientRect();const photo=box('.customer-notice-thumb-v363'),title=box('.customer-notice-head-v363'),cta=box('.customer-notice-action-v363'),content=box('.customer-notice-content-v363');return {square:Math.abs(photo.width-photo.height),left:photo.right<=title.left,top:Math.abs(photo.top-title.top),ctaRight:Math.abs(cta.right-content.right),bottom:Math.abs(photo.bottom-cta.bottom)}});
- assert(rects.square<1&&rects.left&&rects.top<8&&rects.ctaRight<2&&rects.bottom<8,'photo left, title top, CTA bottom right');
+ assert(rects.square<1&&rects.left&&rects.top<8&&rects.ctaRight>=2&&rects.ctaRight<8&&rects.bottom<8,'photo left, title top, CTA bottom right');
  assert(await track.evaluate(el=>{const second=el.children[1].getBoundingClientRect(),box=el.getBoundingClientRect();return second.left<box.right-2&&second.right>box.right}),'next notice peeks into carousel');
  const longTitle=page.locator('#customerNoticeOverviewV376 [data-announcement-id="72"] .customer-notice-head-v363 strong');
  assert.equal(await longTitle.locator('.customer-notice-head-text-v454').evaluate(el=>getComputedStyle(el).webkitLineClamp),'2');
@@ -137,6 +140,13 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  assert.equal(await page.locator('#customerNoticeOverviewV376').getAttribute('data-pilot-v453'),'true');
  await page.evaluate(()=>{state.data.passes=[{id:82,dog_id:1,status:'active',used_entries:3,total_entries:10,valid_from:'2026-11-03',valid_until:'2026-12-23'}];renderAll();});
  await meter.waitFor({state:'visible'});
+ await page.evaluate(()=>{state.session.user.id='synthetic-live-preview';renderAll();});
+ await page.waitForFunction(()=>window.customerOverviewPreviewEnabledV456?.()===true);
+ await meter.waitFor({state:'visible'});
+ assert.equal(await count(),0,'live preview account has no Bella');
+ assert.equal(await page.locator('#bellaOverviewScrollV454').count(),1,'live preview preserves middle scrolling');
+ assert.equal(await page.locator('#customerNoticeOverviewV376').getAttribute('data-pilot-v453'),'true');
+ assert.equal(await page.locator('#navBookAddV220').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
  await page.evaluate(()=>{state.session.user.id='synthetic-browser';renderAll();});
  assert.equal(await count(),0,'switch removes pilot immediately');
  assert.equal(await page.locator('#bellaOverviewScrollV454').count(),0,'ordinary account has no private scroll container');
