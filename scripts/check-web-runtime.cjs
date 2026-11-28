@@ -416,21 +416,18 @@ async function assertPaidReturnNavigation(browser,engine) {
   }finally{await context.close();}
 }
 
-// Lazy images only fetch when close to the visible viewport. Scroll before decoding,
- // and bound the page-side promise so a missing image cannot hang the entire browser suite.
+// Exercise a real lazy-loaded image only after the existing first-fold checks.
 async function assertArrivalImage(map) {
-  const img = map.locator('img');
+  const img=map.locator('img');
   await img.scrollIntoViewIfNeeded({timeout:10000});
-  return img.evaluate(async image => {
-    let timer;
-    try {
-      await Promise.race([
-        image.decode(),
-        new Promise((_, reject) => {timer = setTimeout(() => reject(new Error('Arrival image decode timeout: ' + image.currentSrc + ', complete=' + image.complete)), 10000);}),
-      ]);
-      return image.naturalWidth===1536 && image.naturalHeight===1024;
-    } finally { clearTimeout(timer); }
-  }, undefined, {timeout:12000});
+  // A lazy image may temporarily report complete before a source is selected.
+  // Wait for actual pixels rather than calling decode() during that race.
+  await map.page().waitForFunction(el=>el.complete&&el.naturalWidth>0,
+    await img.elementHandle({timeout:5000}),{timeout:10000}).catch(async error=>{
+      const state=await img.evaluate(el=>({src:el.getAttribute('src'),currentSrc:el.currentSrc,complete:el.complete,width:el.naturalWidth,height:el.naturalHeight,rect:el.getBoundingClientRect().toJSON()}));
+      throw new Error('Arrival image did not load: '+JSON.stringify(state),{cause:error});
+    });
+  return img.evaluate(el=>el.naturalWidth===1536&&el.naturalHeight===1024);
 }
 
 async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=null}={}) {
@@ -462,7 +459,7 @@ async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=n
     structure.carousel!==1||!structure.checker||!structure.faqLast||!structure.health||!structure.inquiryHeadings||!structure.inquirySubtitles||structure.mapLinks.length<2||structure.mapLinks.some(link=>link!==expected.MAP_LINK)||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
   const arrival=page.locator('#aria-mosaic [data-daycare-arrival-map]');
-  if(await arrival.getAttribute('href')!==expected.MAP_LINK||!await assertArrivalImage(arrival))throw new Error('Campaign arrival map asset/link');
+  if(await arrival.getAttribute('href')!==expected.MAP_LINK)throw new Error('Campaign arrival map link');
   const locationBlock=page.locator('#aria-mosaic [data-daycare-location-copy]');
   const locationCopy=await locationBlock.innerText();
   const boldLocations=await locationBlock.locator('strong').allTextContents();
@@ -539,7 +536,10 @@ async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=n
   if(visualOnly){
     await page.setViewportSize({width:390,height:844});
     await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
-    await assertPaidAriaChat(page,{visualOnly:true});return;
+    await assertPaidAriaChat(page,{visualOnly:true});
+    if(!await assertArrivalImage(arrival))throw new Error('Campaign arrival map dimensions');
+    await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+    return;
   }
   const inquiry=page.locator('[data-lead-faq-cta]');
   await centerFixtureControl(inquiry);await inquiry.hover();
@@ -577,7 +577,9 @@ async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=n
   await form.getByRole('button',{name:'Späť',exact:true}).click();
   await form.getByRole('button',{name:'Pokračovať',exact:true}).waitFor({state:'visible'});
   await assertPaidAriaChat(page);
+  if(!await assertArrivalImage(arrival))throw new Error('Campaign arrival map dimensions');
   await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+  await page.waitForFunction(()=>scrollY<5,null,{timeout:5000});
 }
 
 // APP-01 static regression for the slider fill direction in both engines.
@@ -3664,9 +3666,6 @@ async function assertPublicContent(browser,engine){
               const locationText=await locationCard.innerText();
               const homeLocation=page.locator('#priestory [data-daycare-location-copy]');
               if(!await homeLocation.locator('p').nth(1).evaluate(p=>p.textContent.includes('autoumyvárke.\nPriamo')&&getComputedStyle(p).whiteSpace==='pre-line'))throw new Error('HOME parking line break');
-              await page.setViewportSize({width:1440,height:900});
-              if(!await homeLocation.evaluate(e=>Math.abs(e.getBoundingClientRect().width-(e.parentElement.clientWidth-32))<2))throw new Error('HOME desktop location full width');
-              await page.setViewportSize({width:390,height:844});
               if(await homeLocation.locator('p').count()!==3||JSON.stringify(await homeLocation.locator('strong').allTextContents())!==JSON.stringify(await locationCard.locator('strong').allTextContents()))throw new Error('HOME location section and FAQ emphasis differs');
               if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationText.includes(value))||await locationCard.locator('a').getAttribute('href')!==readPublicContent().MAP_LINK)throw new Error('Homepage location FAQ differs');
               const puppyFaq=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
@@ -4565,6 +4564,7 @@ async function assertPublicContent(browser,engine){
             if (await whyArticle.count() !== 1) throw new Error('Suitability article missing beside homepage benefits');
             if(await productPage.locator('#preco button, #preco a[href^="tel:"]').count()) throw new Error('Why must not duplicate application or phone CTA');
             if(!await productPage.locator('#psie-priatelstva').getByRole('button',{name:'Zobraziť celú prihlášku',exact:true}).isVisible() || !await productPage.locator('#psie-priatelstva p strong').getByText('pravidelne',{exact:true}).count()) throw new Error('Friendship application CTA and emphasized regular-visits explanation missing');
+            if(width===1440&&!await productPage.locator('#priestory [data-daycare-location-copy]').evaluate(e=>Math.abs(e.getBoundingClientRect().width-(e.parentElement.clientWidth-32))<2))throw new Error('HOME desktop location full width');
             const homeArrival=productPage.locator('[data-home-spaces-mosaic] [data-daycare-arrival-map]');
              if(await homeArrival.getAttribute('href')!==readPublicContent().MAP_LINK||!await assertArrivalImage(homeArrival)||!await homeArrival.evaluate(el=>{const style=getComputedStyle(el),b=el.getBoundingClientRect(),parent=el.parentElement;const photo=parent.querySelector('[data-home-space-photo]').getBoundingClientRect();return (style.gridColumnEnd===(innerWidth>=1024?'span 1':'span 2')||style.gridColumnStart===(innerWidth>=1024?'span 1':'span 2'))&&Math.abs(b.width-(innerWidth>=1024?photo.width:parent.clientWidth))<2&&el===parent.lastElementChild;}))throw new Error('HOME arrival map responsive grid/link/asset');
              const mosaicShape=await productPage.locator('[data-home-spaces-mosaic]').evaluate(el=>({
