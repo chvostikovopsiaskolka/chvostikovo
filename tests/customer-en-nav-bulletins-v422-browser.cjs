@@ -49,6 +49,28 @@ const fixture=require('./liquid-v3-fixture.cjs');
    await page.waitForFunction(()=>document.querySelector('#navBooking')?.textContent?.includes('Prehľad'));
    assert.match(await page.locator('#bookingPickerTaxiByDayV91').innerText(),/Tam aj späť/);
    await page.locator('#bookingPickerCloseV37').click();
+   // Feature: separate optional teaser, no article body fallback in the overview.
+   await page.evaluate(()=>{
+     window.__noticeFixture=[
+       {id:12346,active:true,title:'Oznam s upútavkou',body:'Plný obsah A',overview_text:'Krátka samostatná upútavka',valid_from:'2026-01-01',valid_until:null,show_in_overview:true,created_at:'2026-01-02',image_path:null},
+       {id:12347,active:true,title:'Starší oznam',body:'Plný obsah B',overview_text:null,valid_from:'2026-01-01',valid_until:null,show_in_overview:true,created_at:'2026-01-01',image_path:null}];
+     window.__noticeReads=[];return loadAnnouncements(true);
+   });
+   const first=page.locator('#customerNoticeOverviewV376 [data-announcement-id="12346"]');
+   const old=page.locator('#customerNoticeOverviewV376 [data-announcement-id="12347"]');
+   await expect(first).toContainText('Krátka samostatná upútavka');
+   await expect(first).not.toContainText('Plný obsah A');
+   await expect(old).toContainText('Starší oznam');
+   assert.equal(await old.locator('.customer-notice-excerpt-v363').count(),0);
+   await expect(old).not.toContainText('Plný obsah B');
+   // An update only to the teaser must invalidate the overview render key.
+   await page.evaluate(()=>{window.__noticeFixture[0].overview_text='Nová upútavka';return loadAnnouncements(true)});
+   await expect(first).toContainText('Nová upútavka');
+   await first.click();
+   await expect(page.locator('#customerBulletinArticleV229')).toContainText('Plný obsah A');
+   await expect(page.locator('#customerBulletinArticleV229')).not.toContainText('Nová upútavka');
+   await page.locator('#customerBulletinArticleV229 button').first().click();
+
    await page.evaluate(()=>{
      window.__noticeFixture=[{id:12345,active:true,title:'Súkromný titul oznamu',body:'Zostáva v slovenčine',
        valid_from:'2026-01-01',valid_until:null,show_in_overview:false,created_at:'2026-01-01',image_path:null}];
