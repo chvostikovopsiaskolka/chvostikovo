@@ -1405,3 +1405,26 @@ html.customer-design #customerNoticeOverviewV376[data-pilot-v453=true].lg-v3-hos
 #customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-action-v363{font-size:10.5px;padding:4px 5px;margin:0}
 #customerNoticeOverviewV376[data-pilot-v453=true] .customer-bulletin-new-v229{order:-1;font-size:9px}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){html.customer-design #customerNoticeOverviewV376[data-pilot-v453=true]{background:#fff!important}}
+
+/* v456: approved scope is the existing authenticated Bella pilot only. */
+html.bella-pilot-active-v450.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage{margin-bottom:0}
+html.bella-pilot-active-v450.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage .design-validity{border-bottom:0!important;border-radius:8px 8px 0 0!important}
+html.bella-pilot-active-v450.customer-design #designTicket .design-pass-meter-v452{position:relative;z-index:1;border-radius:6px 0 6px 6px}
+html.bella-pilot-active-v450.customer-design #customerNoticeOverviewV376[data-pilot-v453=true]{padding:9px 10px 7px;box-shadow:0 3px 12px rgba(89,58,40,.08)}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-header-v382{padding:0 4px 4px}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-title-v381{gap:5px;font-size:16px;line-height:1.3}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-megaphone-v454{width:21px;justify-content:center;flex:none}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-carousel-v376{padding:4px 5px 8px}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-panel-v383>.lg-v3-material{box-shadow:0 2px 6px rgba(113,59,32,.08),0 0 5px rgba(113,59,32,.045)}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-footer-v453{padding:0 3px 3px 0}
+@media(min-height:541px){html.bella-pilot-active-v450 #bellaOverviewScrollV454{margin-inline:-10px;padding-inline:10px;padding-bottom:13px}}
+html.bella-pilot-active-v450 #customerBellaPilotV450{align-items:center}
+#customerBellaPilotV450 .bella-identity-v456{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;gap:0;transform:translateY(-3px)}
+#customerBellaPilotV450 .bella-identity-v456>img{display:block;width:100%;height:clamp(43px,14vw,54px);object-fit:contain;object-position:center bottom;filter:saturate(.88) hue-rotate(-6deg) drop-shadow(0 2px 3px #40331e26)}
+#customerBellaPilotV450 .bella-name-v456{color:#a8480b;font-size:11px;font-weight:850;line-height:1.15;text-align:center}
+html.bella-pilot-active-v450.customer-design #customerBellaPilotV450 .bella-bubble-v450{padding:6px 8px 5px;display:flex;flex-direction:column;align-items:stretch;gap:3px}
+#customerBellaPilotV450 .bella-message-v450{display:block;font-size:11.5px;line-height:1.3}
+#customerBellaPilotV450 .bella-action-v450{position:relative;align-self:flex-end;min-height:36px;margin:0 0 0 auto;padding:5px 10px;font-size:11.5px;line-height:1.2}
+#customerBellaPilotV450 .bella-action-v450:not([hidden])::after{content:'';position:absolute;inset:-4px 0;pointer-events:auto}
+#customerBellaPilotV450 .bella-action-v450[data-booking=true]{background:#c64c08;color:#fff;border:1px solid #c64c08;border-radius:9px;box-shadow:0 2px 5px #a7471524}
+html.customer-design.bella-pilot-active-v450 .bottom-nav #navBookAddV220:not(:disabled):not([aria-busy=true]){background:#fff!important;border:1px solid #ef8b37!important;color:#bd4d09!important;box-shadow:none!important}

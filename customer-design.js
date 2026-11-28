@@ -323,7 +323,9 @@
       host=document.createElement('section');host.id='customerBellaPilotV450';host.className='bella-pilot-v450';host.setAttribute('translate','no');host.setAttribute('aria-label','Bella');
       const photo=document.createElement('img');photo.src='/bella-pilot-v453.webp';photo.alt='';photo.decoding='async';photo.width=58;photo.height=60;
       const bubble=document.createElement('div');bubble.className='bella-bubble-v450';
-      const name=document.createElement('strong');name.textContent='Bella';const message=document.createElement('p');message.className='bella-message-v450';
+      const identity=document.createElement('div');identity.className='bella-identity-v456';
+      const name=document.createElement('strong');name.className='bella-name-v456';name.textContent='Bella';identity.append(photo,name);
+      const message=document.createElement('p');message.className='bella-message-v450';
       const action=document.createElement('button');action.type='button';action.className='bella-action-v450';action.onclick=()=>{
         if(!bellaEnabledV450())return;
         if(action.dataset.notification)window.customerBellaActNotificationV454?.(Number(action.dataset.notification));
@@ -331,12 +333,15 @@
         else if(action.dataset.notice)void window.openCustomerAnnouncementV363?.(Number(action.dataset.notice));
         else window.openBookingPickerV37?.();
       };
-      bubble.append(name,document.createTextNode(' '),message,action);host.append(photo,bubble);
+      bubble.append(message,action);host.append(identity,bubble);
     }
     const msg=host.querySelector('.bella-message-v450'),action=host.querySelector('.bella-action-v450');
-    bellaEmphasizeV455(msg,copy);
+    const raw=String(copy.text||'');const greeting=raw.match(/^(Haf!|Woof!)\s*/);
+    const body=greeting?raw.slice(greeting[0].length).trimEnd():raw;
+    const text=greeting?body+(/[.!?…]$/u.test(body)?' ':'. ')+greeting[1]:body;
+    bellaEmphasizeV455(msg,{...copy,text});
     if(action.textContent!==(copy.action||''))action.textContent=copy.action||'';
-    action.hidden=!copy.action;action.dataset.notice=copy.notice?String(copy.notice):'';
+    action.hidden=!copy.action;action.dataset.booking=String(!!copy.action&&!copy.notification&&!copy.poll&&!copy.notice);action.dataset.notice=copy.notice?String(copy.notice):'';
     action.dataset.notification=copy.notification?String(copy.notification):'';action.dataset.poll=String(!!copy.poll);
     host.dataset.notice=String(!!copy.notice);
     if(host.parentElement!==overview)overview.append(host);
