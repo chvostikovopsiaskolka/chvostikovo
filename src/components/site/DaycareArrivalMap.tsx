@@ -11,7 +11,7 @@ export function DaycareArrivalMap({ className = "", onOpen }: { className?: stri
       <img src={arrivalMap} width={1536} height={1024} loading="lazy" decoding="async"
         alt="Orientačná ilustrovaná mapa príjazdu po Poľskej od Rastislavovej, zastávka Poľská (12, 54), parkovisko pri škôlke"
         className="block h-auto w-full object-contain lg:h-full" />
-      <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-forest">Orientačná mapa</span>
+      <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-forest">Otvoriť v Google Maps</span>
     </a>
   );
 }

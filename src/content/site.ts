@@ -9,6 +9,8 @@ export const MAP_LINK = "https://maps.app.goo.gl/xRzZ8fC3fT8MCzeM7?g_st=ic";
 // Canonical practical location copy shared by Aria, HOME FAQ and paid gallery.
 export const DAYCARE_LOCATION_QUESTION = "Kde sa škôlka nachádza?";
 export const DAYCARE_LOCATION_ANSWER = "Nájdete nás v Košiciach na Poľskej 6, medzi Starou nemocnicou a Verejným cintorínom.\n\nOdbočuje sa z ulice Rastislavova pri autoumyvárke.\nPriamo pri škôlke máme bezplatné parkovisko.\n\nAk prichádzate MHD, najbližšia je zastávka Poľská, kam premávajú autobusy 12 a 54.";
+// Gallery chips and illustration already show parking; keep the full location answer for FAQ and Aria.
+export const DAYCARE_LOCATION_WEB_COPY = DAYCARE_LOCATION_ANSWER.replace("\nPriamo pri škôlke máme bezplatné parkovisko.", "");
 export const INQUIRY_TITLE = "Chcete sa informovať o škôlke?";
 export const INQUIRY_SUBTITLE = "Vyplňte krátky nezáväzný formulár. Ozveme sa vám.";
 export const VISIT_INQUIRY_TITLE = "Máte záujem o návštevu?";
