@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Car, MapPin } from "lucide-react";
 import { GALLERY, MAP_LINK, DAYCARE_LOCATION_ANSWER } from "@/content/site";
+import { DaycareArrivalMap } from "./DaycareArrivalMap";
 import { PhotoLightbox } from "./PhotoLightbox";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
@@ -63,6 +64,7 @@ export function AriaMosaicGallery({ paidLead = false }: { paidLead?: boolean }) 
           <div className="grid gap-2.5 sm:gap-4">{left.map((photo, i) => tile(photo, i * 2, i))}</div>
           <div className="grid gap-2.5 pt-5 sm:gap-4 sm:pt-9">{right.map((photo, i) => tile(photo, i * 2 + 1, i))}</div>
         </div>
+        {paidLead && <DaycareArrivalMap className="mt-4 sm:mt-6" onOpen={() => void trackCookielessInteraction("nav_click", "lead_aria_location_poljska6", "sk")} />}
       </div>
       <PhotoLightbox photos={photos} active={selected} onChange={setSelected}
         onClose={() => setSelected(null)} />
