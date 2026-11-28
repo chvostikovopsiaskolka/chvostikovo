@@ -138,7 +138,7 @@ function ContactDetails({ language }: { language: "sk" | "en" }) {
 
 const footerMapRadius = "rounded-[max(0px,calc(var(--footer-card-radius)_-_var(--footer-card-padding)))]";
 
-function FunctionalMap({ language }: { language: "sk" | "en" }) {
+export function FunctionalMap({ language, compact = false }: { language: "sk" | "en"; compact?: boolean }) {
   const [allowed, setAllowed] = useState(false);
   const isEnglish = language === "en";
 
@@ -153,6 +153,7 @@ function FunctionalMap({ language }: { language: "sk" | "en" }) {
   }, []);
 
   if (!allowed) {
+    if (compact) return null;
     return (
       <div data-footer-map className={`flex h-60 flex-col items-center justify-center bg-secondary/60 px-6 text-center shadow-card ${footerMapRadius}`}>
         <MapPin className="size-8 text-coral" />
@@ -178,12 +179,12 @@ function FunctionalMap({ language }: { language: "sk" | "en" }) {
   }
 
   return (
-    <div data-footer-map className={`overflow-hidden shadow-card ${footerMapRadius}`}>
+    <div data-footer-map={!compact || undefined} data-aria-map-frame={compact || undefined} className={compact ? "overflow-hidden rounded-xl" : `overflow-hidden shadow-card ${footerMapRadius}`}>
       <iframe
         title={isEnglish ? "Map – Chvostíkovo, Poľská 6, Košice" : "Mapa – Chvostíkovo, Poľská 6, Košice"}
         src="https://www.google.com/maps?gl=sk&hl=sk&output=embed&q=Chvost%C3%ADkovo+psia+%C5%A1k%C3%B4lka%2C+Po%C4%BEsk%C3%A1+6%2C+040+01+Ko%C5%A1ice&z=16"
         loading="lazy"
-        className="h-60 w-full border-0 [clip-path:inset(0_round_max(0px,calc(var(--footer-card-radius)_-_var(--footer-card-padding))))]"
+        className={compact ? "h-40 w-full border-0" : "h-60 w-full border-0 [clip-path:inset(0_round_max(0px,calc(var(--footer-card-radius)_-_var(--footer-card-padding))))]"}
       />
     </div>
   );
