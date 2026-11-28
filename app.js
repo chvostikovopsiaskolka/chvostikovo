@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v450';
-const APP_VERSION='2.0.123';
+const APP_BUILD='v451';
+const APP_VERSION='2.0.124';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -4775,7 +4775,7 @@ function installVaccinationViewerZoomV244(modal){
   window.__customerBulletinV229=true;
   const $=id=>document.getElementById(id);
   const rowsState={items:[],read:new Set(),at:0,loading:null,session:null,error:false};
-  const select='id,active,title,body,valid_from,valid_until,created_at,paper_style,image_path,cta_enabled,cta_title,cta_body,cta_button_label,cta_url,show_in_overview';
+  const select='id,active,title,body,valid_from,valid_until,created_at,paper_style,image_path,cta_enabled,cta_title,cta_body,cta_button_label,cta_url,show_in_overview,overview_text';
   const photoCacheV358=new Map();
   let articleEpochV358=0;
   function preparePhotoV358(url){
@@ -4916,7 +4916,10 @@ function installVaccinationViewerZoomV244(modal){
     const content=el('span','customer-notice-content-v363');
     const head=el('span','customer-notice-head-v363');head.append(el('strong','',row.title||'Oznam'));
     if(!row.preview&&!rowsState.read.has(Number(row.id)))head.append(el('span','customer-bulletin-new-v229','Nové'));
-    content.append(head,el('span','customer-notice-excerpt-v363',row.body||''),el('span','customer-notice-action-v363','Otvoriť oznam ›'));
+    content.append(head);
+    const excerpt=fromHistory?String(row.body||''):String(row.overview_text||'').trim();
+    if(excerpt)content.append(el('span','customer-notice-excerpt-v363',excerpt));
+    content.append(el('span','customer-notice-action-v363','Otvoriť oznam ›'));
     const panel=el('span','customer-notice-panel-v383');panel.append(content,thumb);b.append(panel);b.addEventListener('click',()=>openArticle(row,fromHistory));return b;
   }
   function drawOverview(){
@@ -4924,12 +4927,12 @@ function installVaccinationViewerZoomV244(modal){
     const preview=new URLSearchParams(location.search).get('notice-carousel-preview')==='1';
     const selected=loggedIn()?rows().filter(row=>row.show_in_overview===true&&current(row)):[];
     if(preview&&loggedIn()){
-      if(!selected.length)selected.push({id:'preview-first',preview:true,title:'Oznam zo škôlky',body:'Takto bude vyzerať vybraný oznam pod vašimi rezerváciami.'});
-      selected.push({id:'preview-extra',preview:true,title:'Skúšobný oznam',body:'Druhý oznam na ukážku karuselu. Potiahnite karty do strán alebo použite šípky. Tento oznam sa zákazníkom nepublikuje.'});
+      if(!selected.length)selected.push({id:'preview-first',preview:true,title:'Oznam zo škôlky',overview_text:'Takto bude vyzerať vybraný oznam pod vašimi rezerváciami.',body:'Takto bude vyzerať vybraný oznam pod vašimi rezerváciami.'});
+      selected.push({id:'preview-extra',preview:true,title:'Skúšobný oznam',overview_text:'Druhý oznam na ukážku karuselu.',body:'Druhý oznam na ukážku karuselu. Potiahnite karty do strán alebo použite šípky. Tento oznam sa zákazníkom nepublikuje.'});
     }
     if(!anchor||!selected.length){host?.remove();return;}
     if(!host){host=el('section','customer-notice-overview-v376');host.id='customerNoticeOverviewV376';host.setAttribute('aria-label','Oznamy škôlky');anchor.after(host);}
-    const key=JSON.stringify(selected.map(row=>[row.id,row.title,row.body,row.image_path,rowsState.read.has(Number(row.id))]));
+    const key=JSON.stringify(selected.map(row=>[row.id,row.title,row.body,row.overview_text,row.image_path,rowsState.read.has(Number(row.id))]));
     if(host.dataset.contentKey===key)return;
     const oldTrack=host.querySelector('.customer-notice-carousel-v376');
     const oldIndex=oldTrack?Math.round(oldTrack.scrollLeft/Math.max(1,(oldTrack.firstElementChild?.offsetWidth||0)+12)):0;
