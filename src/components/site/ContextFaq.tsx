@@ -45,12 +45,12 @@ function withHighlights(text: string, words: string[]): ReactNode[] {
 
 /** Shared readable FAQ answer, on the homepage and the complete FAQ page. */
 export function FaqAnswer({ question, answer, compact = false }: { question: string; answer: string; compact?: boolean }) {
-  const paragraphs = answer.replace(/\u00a0/g, " ").split(/\n+/).map((paragraph) => paragraph.trim()).filter(Boolean);
+  const paragraphs = answer.replace(/\u00a0/g, " ").split(question === DAYCARE_LOCATION_QUESTION ? /\n{2,}/ : /\n+/).map((paragraph) => paragraph.trim()).filter(Boolean);
   const highlights = HIGHLIGHTS[question] ?? [];
   return (
     <div className={compact ? "space-y-2" : "space-y-3"}>
       {paragraphs.map((paragraph, index) => (
-        <p key={index}>{withHighlights(paragraph, highlights)}</p>
+        <p key={index} className={question === DAYCARE_LOCATION_QUESTION ? "whitespace-pre-line" : undefined}>{withHighlights(paragraph, highlights)}</p>
       ))}
     </div>
   );
