@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState } from "react";
 import { Car, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { FaqAnswer } from "./ContextFaq";
+import { DaycareArrivalMap } from "./DaycareArrivalMap";
 import { PhotoLightbox } from "./PhotoLightbox";
 import { GALLERY, MAP_LINK, DAYCARE_LOCATION_ANSWER, DAYCARE_LOCATION_QUESTION } from "@/content/site";
 import { highQualityMosaicSrc } from "./AriaMosaicGallery";
@@ -119,6 +120,7 @@ export function Gallery({ language = "sk", homeMosaic = false }: { language?: "s
                 ); })()}
               </Fragment>
             ))}
+            {!isEnglish && <DaycareArrivalMap className="col-span-2 lg:col-span-1 lg:aspect-[5/4]" />}
           </div>
         ) : (
         <div className="relative left-1/2 mt-8 w-[calc(100vw-24px)] -translate-x-1/2 sm:w-[calc(100vw-48px)]">
