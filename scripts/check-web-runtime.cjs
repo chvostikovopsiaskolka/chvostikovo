@@ -444,6 +444,8 @@ async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=n
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==2||structure.benefits!==3||structure.requirements!==4||
     structure.carousel!==1||!structure.checker||!structure.faqLast||!structure.health||!structure.inquiryHeadings||!structure.inquirySubtitles||structure.mapLinks.length<2||structure.mapLinks.some(link=>link!==expected.MAP_LINK)||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
+  const arrival=page.locator('#aria-mosaic [data-daycare-arrival-map]');
+  if(await arrival.getAttribute('href')!==expected.MAP_LINK||!await arrival.locator('img').evaluate(async img=>{await img.decode();return img.naturalWidth===1536&&img.naturalHeight===1024}))throw new Error('Campaign arrival map asset/link');
   const locationCopy=await page.locator('#aria-mosaic [data-daycare-location-copy]').innerText();
   if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationCopy.includes(value)))throw new Error('Campaign location copy missing practical directions');
   for(const [width,height] of [[320,720],[360,780],[375,667],[390,740],[430,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
@@ -2282,7 +2284,7 @@ async function assertPublicContent(browser,engine){
                   const locationMap=chat.locator('[data-aria-location-map]');
                   await locationMap.waitFor({state:'visible'});
                   const locationReply=await chat.locator('[data-aria-chat-turn="aria"]').last().innerText();
-                  if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationReply.includes(value))||await locationMap.locator('iframe').count()||await locationMap.locator('a').getAttribute('href')!==readPublicContent().MAP_LINK)throw new Error('Location answer or canonical map link');
+                  if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationReply.includes(value))||await locationMap.locator('iframe').count()||await locationMap.locator('a').getAttribute('href')!==readPublicContent().MAP_LINK||!await locationMap.locator('img').evaluate(async img=>{await img.decode();return img.naturalWidth===1536&&img.naturalHeight===1024}))throw new Error('Location answer or canonical map link');
                   await otherCta.click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
                   const other=chat.locator('[data-aria-chat-other]');
@@ -4533,7 +4535,9 @@ async function assertPublicContent(browser,engine){
             if (await whyArticle.count() !== 1) throw new Error('Suitability article missing beside homepage benefits');
             if(await productPage.locator('#preco button, #preco a[href^="tel:"]').count()) throw new Error('Why must not duplicate application or phone CTA');
             if(!await productPage.locator('#psie-priatelstva').getByRole('button',{name:'Zobraziť celú prihlášku',exact:true}).isVisible() || !await productPage.locator('#psie-priatelstva p strong').getByText('pravidelne',{exact:true}).count()) throw new Error('Friendship application CTA and emphasized regular-visits explanation missing');
-            const mosaicShape=await productPage.locator('[data-home-spaces-mosaic]').evaluate(el=>({
+            const homeArrival=productPage.locator('[data-home-spaces-mosaic] [data-daycare-arrival-map]');
+             if(await homeArrival.getAttribute('href')!==readPublicContent().MAP_LINK||!await homeArrival.locator('img').evaluate(async img=>{await img.decode();return img.naturalWidth===1536&&img.naturalHeight===1024})||!await homeArrival.evaluate(el=>{const style=getComputedStyle(el);return style.gridColumnEnd===(innerWidth>=1024?'span 1':'span 2')||style.gridColumnStart===(innerWidth>=1024?'span 1':'span 2')}))throw new Error('HOME arrival map responsive grid/link/asset');
+             const mosaicShape=await productPage.locator('[data-home-spaces-mosaic]').evaluate(el=>({
               columns:getComputedStyle(el).gridTemplateColumns.split(' ').length,count:el.querySelectorAll('[data-home-space-photo]').length,
               paired:innerWidth>=1024||[...el.querySelectorAll('[data-home-mosaic-hygiene]')].every((card,i)=>{const photos=[...el.querySelectorAll('[data-home-space-photo]')].map(p=>p.getBoundingClientRect());const r=card.getBoundingClientRect();return Math.abs(photos[i*2].top-photos[i*2+1].top)<2 && r.top>=photos[i*2].bottom && r.top-photos[i*2].bottom<24 && (i===2||photos[i*2+2].top>=r.bottom && photos[i*2+2].top-r.bottom<24);}),quality:[...el.querySelectorAll('button img')].every(img=>img.getAttribute('src').includes('/w_1600,h_1600,al_c,q_92,enc_auto/')&&img.getAttribute('srcset').includes('900w'))
             }));
