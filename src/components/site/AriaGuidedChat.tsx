@@ -3,7 +3,6 @@ import { ChvostikovoPaw } from "./ChvostikovoPaw";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "./AriaPreviewText";
 import { PHONE, PHONE_PRETTY, PRICING, MAP_LINK, DAYCARE_LOCATION_QUESTION, DAYCARE_LOCATION_ANSWER } from "@/content/site";
-import { FunctionalMap } from "./Contact";
 import { ShortForm, HomeFaqContactForm } from "./Forms";
 import { LeadStepForm } from "./LeadStepForm";
 import { AriaPuppyChecker } from "./AriaPuppyChecker";
@@ -411,7 +410,6 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                   ) : renderChatText(message.text)}
                   {!isTyping && message.questionId === "location" && (
                     <div data-aria-location-map className="mt-3 space-y-2 whitespace-normal">
-                      <FunctionalMap language="sk" compact />
                       <a href={MAP_LINK} target="_blank" rel="noopener noreferrer" onClick={() => track("location_map_open")} className="flex min-h-11 items-center justify-center rounded-xl border border-[#9e336f]/30 px-2 text-center text-xs font-bold text-[#9e336f]">📍 Otvoriť v Google Maps</a>
                     </div>
                   )}
