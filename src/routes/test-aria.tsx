@@ -553,8 +553,17 @@ export function AriaPreviewPage() {
               {/* Screenshot hierarchy: H1, four schoolmates, badge, liquid copy, reviews. */}
               <div aria-hidden="true" data-aria-hero-heading-spacer className={isLiveLead ? "h-1 sm:h-5" : "h-[14px] sm:h-5"} />
               <h1 className={(isLiveLead ? "mt-3 translate-y-0 " : "mt-3 ") + "text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]"}>
-                Miesto, ktoré si váš
-                <span className="block text-coral-dark">psík zamiluje</span>
+                {isLiveLead ? <>
+                  <span data-lead-title-flow className="contents">Miesto, ktoré si váš
+                    <span className="block text-coral-dark">psík zamiluje</span>
+                  </span>
+                  <span data-lead-title-display aria-hidden="true" className="hidden">
+                    <span className="block">Miesto, ktoré si váš</span>
+                    <span className="block text-coral-dark">psík zamiluje</span>
+                  </span>
+                </> : <>Miesto, ktoré si váš
+                  <span className="block text-coral-dark">psík zamiluje</span>
+                </>}
               </h1>
 
               <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-4 w-fit max-w-full sm:mt-5" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
