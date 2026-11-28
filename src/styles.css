@@ -1801,7 +1801,7 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   /* Keep the original heading flow box (and therefore the approved desktop fold).
      Only paint the two-line version in that exact reserved space. */
   .lead-brand-live [data-lead-title-flow] { display: block; opacity: 0; }
-  .lead-brand-live [data-lead-title-display] { display: block; position: absolute; inset: 0; font-size: min(1em, 2.6875rem); line-height: 1.05; }
+  .lead-brand-live [data-lead-title-display] { display: block; position: absolute; inset: 0; font-size: min(1em, clamp(2rem, calc(2vw + .8rem), 2.375rem)); line-height: 1.05; }
   .lead-brand-live [data-lead-title-display] > span:first-child { white-space: nowrap; }
   .lead-brand-live [data-aria-service-group] { grid-area: service; align-self: end; margin: 0; }
   .lead-brand-live [data-aria-service-badge] { font-size: 0.875rem; text-align: left; }
