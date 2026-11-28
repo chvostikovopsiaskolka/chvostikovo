@@ -93,7 +93,7 @@
  }
  function placePollV454(){
   const root=$('customerPollMenuV432');if(!root)return;
-  const target=window.customerBellaPilotEnabledV453?.()===true?$('bellaOverviewScrollV454'):null;
+  const target=window.customerOverviewPilotEnabledV457?.()===true?$('bellaOverviewScrollV454'):null;
   if(target){if(root.parentElement!==target)target.append(root);const badge=$('customerPollNavBadgeV432');if(badge)badge.hidden=true;}
   else if(root.parentElement!==$('menuTab')){$('menuTab')?.querySelector('.customer-social-v223')?.before(root);if(root.parentElement!==$('menuTab'))$('menuTab')?.append(root);}
  }
@@ -232,7 +232,7 @@
  }
  addCustomerHook('afterBootstrap',sync);
  addCustomerHook('afterRenderDog',()=>{if(allowed===account())render();else void sync()});
- addCustomerHook('afterSwitchTab',tab=>{if(allowed===account()){render();if((tab==='menu'||tab==='booking'&&window.customerBellaPilotEnabledV453?.()===true)&&!sending)void refresh(allowed,true)}});
+ addCustomerHook('afterSwitchTab',tab=>{if(allowed===account()){render();if((tab==='menu'||tab==='booking'&&window.customerOverviewPilotEnabledV457?.()===true)&&!sending)void refresh(allowed,true)}});
  document.addEventListener('click',event=>{
   if(event.target.closest?.('[data-customer-locale]')&&allowed===account())
    requestAnimationFrame(render);

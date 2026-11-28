@@ -158,7 +158,7 @@
   }
   // Calendar days in Bratislava; inclusive validity, independent of visits and DST.
   function passValidityV452(source){
-    if(!bellaEnabledV450())return null;
+    if(!overviewEnabledV457())return null;
     const day=value=>{
       if(!/^\d{4}-\d{2}-\d{2}$/.test(value||''))return NaN;
       const date=new Date(value+'T00:00:00Z');
@@ -220,13 +220,17 @@
   }
   // v450: visual-only, fail-closed account pilot. No account email or raw UUID in the bundle.
   const BELLA_PILOT_ACCOUNT_SHA256_V450='288c196a3d8f47da8e96737e2c1753be2db7b1864c406c95e312c7687e0dcd66';
-  let bellaCheckedV450='',bellaAllowedV450='',bellaEpochV450=0,bellaSizeObserverV453=null;
+  // The current account retains the approved overview preview; no assistant account is assigned yet.
+  const BELLA_ASSISTANT_ACCOUNT_SHA256_V457='';
+  let bellaCheckedV450='',bellaAllowedV450='',bellaAssistantAllowedV457=false,bellaEpochV450=0,bellaSizeObserverV453=null;
   const bellaAccountV450=()=>String(state.session?.user?.id||'');
   const bellaReadyV450=()=>!!bellaAccountV450()&&!!state.session?.access_token&&state.data?.profile?.status==='active'&&!!state.data?.dogs?.length;
-  const bellaEnabledV450=()=>bellaReadyV450()&&bellaAllowedV450===bellaAccountV450();
+  const overviewEnabledV457=()=>bellaReadyV450()&&bellaAllowedV450===bellaAccountV450();
+  const bellaEnabledV450=()=>overviewEnabledV457()&&bellaAssistantAllowedV457;
+  window.customerOverviewPilotEnabledV457=overviewEnabledV457;
   window.customerBellaPilotEnabledV453=bellaEnabledV450;
   function bellaMiddleV454(){
-    const overview=byId('bookingTab'),profile=byId('bookingDogProfile');if(!overview||!profile||!bellaEnabledV450())return;
+    const overview=byId('bookingTab'),profile=byId('bookingDogProfile');if(!overview||!profile||!overviewEnabledV457())return;
     let scroll=byId('bellaOverviewScrollV454'),created=false;
     if(!scroll){scroll=document.createElement('div');scroll.id='bellaOverviewScrollV454';scroll.setAttribute('role','region');scroll.setAttribute('aria-label','Prehľad');scroll.tabIndex=0;profile.after(scroll);created=true;}
     let previous=null;
@@ -243,17 +247,22 @@
     window.customerPollRestoreMenuV454?.();
     while(scroll.firstChild)scroll.before(scroll.firstChild);scroll.remove();
   }
-  function clearBellaUiV450(){
+  function hideBellaAssistantV457(){
     document.documentElement.classList.remove('bella-pilot-active-v450');
     bellaSizeObserverV453?.disconnect();bellaSizeObserverV453=null;
-    byId('bookingTab')?.style.removeProperty('--bella-height-v453');
     byId('customerBellaPilotV450')?.remove();
+    byId('bookingTab')?.style.setProperty('--bella-height-v453','0px');
+  }
+  function clearBellaUiV450(){
+    hideBellaAssistantV457();
+    document.documentElement.classList.remove('overview-pilot-active-v457');
+    byId('bookingTab')?.style.removeProperty('--bella-height-v453');
     restoreBellaMiddleV454();
     const ticketRoot=byId('designTicket');
     if(ticketRoot?.classList.contains('design-pass-validity-v452')){ticketRoot.classList.remove('design-pass-validity-v452');delete ticketRoot.dataset.validityLevel;delete ticketRoot.dataset.presentationKey;ticketRoot.querySelector('.design-pass-meter-v452')?.remove();}
     if(!bellaReadyV450())document.querySelectorAll('.bella-capacity-v450').forEach(el=>el.remove());
   }
-  window.customerBellaPilotClearV450=()=>{++bellaEpochV450;bellaCheckedV450='';bellaAllowedV450='';clearBellaUiV450();};
+  window.customerBellaPilotClearV450=()=>{++bellaEpochV450;bellaCheckedV450='';bellaAllowedV450='';bellaAssistantAllowedV457=false;clearBellaUiV450();};
   function checkBellaV450(){
     const id=bellaAccountV450();
     if(!bellaReadyV450()){if(bellaCheckedV450||bellaAllowedV450)window.customerBellaPilotClearV450();return;}
@@ -265,8 +274,9 @@
     void crypto.subtle.digest('SHA-256',new TextEncoder().encode(id)).then(bytes=>{
       if(epoch!==bellaEpochV450||id!==bellaAccountV450()||!bellaReadyV450())return;
       const hash=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
-      if(hash!==BELLA_PILOT_ACCOUNT_SHA256_V450)return;
-      bellaAllowedV450=id;ticket();window.customerRefreshNoticeOverviewV376?.();renderBellaV450();renderNotifications();
+      const assistant=!!BELLA_ASSISTANT_ACCOUNT_SHA256_V457&&hash===BELLA_ASSISTANT_ACCOUNT_SHA256_V457;
+      if(hash!==BELLA_PILOT_ACCOUNT_SHA256_V450&&!assistant)return;
+      bellaAllowedV450=id;bellaAssistantAllowedV457=assistant;ticket();window.customerRefreshNoticeOverviewV376?.();renderBellaV450();renderNotifications();
       if(!byId('bookingPickerV37')?.classList.contains('hidden'))window.customerDesignPickerRender?.();
     }).catch(()=>{});
   }
@@ -314,12 +324,15 @@
     fragment.append(document.createTextNode(value.slice(pos)));node.replaceChildren(fragment);node.dataset.copyKeyV455=key;
   }
   function renderBellaV450(){
-    if(!bellaEnabledV450()){clearBellaUiV450();return;}
+    if(!overviewEnabledV457()){clearBellaUiV450();return;}
     const anchor=byId('designNearest'),overview=byId('bookingTab');if(!anchor||!overview){clearBellaUiV450();return;}
+    document.documentElement.classList.add('overview-pilot-active-v457');
     bellaMiddleV454();
-    const copy=bellaCopyV450();if(!copy){clearBellaUiV450();return;}
+    if(!bellaEnabledV450()){hideBellaAssistantV457();return;}
+    const copy=bellaCopyV450();if(!copy){hideBellaAssistantV457();return;}
     let host=byId('customerBellaPilotV450');
     if(!host){
+      overview.style.setProperty('--bella-height-v453','118px');
       host=document.createElement('section');host.id='customerBellaPilotV450';host.className='bella-pilot-v450';host.setAttribute('translate','no');host.setAttribute('aria-label','Bella');
       const photo=document.createElement('img');photo.src='/bella-pilot-v453.webp';photo.alt='';photo.decoding='async';photo.width=58;photo.height=60;
       const bubble=document.createElement('div');bubble.className='bella-bubble-v450';
@@ -351,7 +364,7 @@
     }
     document.documentElement.classList.add('bella-pilot-active-v450');
   }
-  window.customerBellaRefreshV450=()=>{if(bellaEnabledV450())renderBellaV450();};
+  window.customerBellaRefreshV450=()=>{if(overviewEnabledV457())renderBellaV450();};
   // Keep the text in the chosen language even when no customer data changes.
   new MutationObserver(()=>{if(bellaEnabledV450())renderBellaV450();}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
   function bellaCapacityV450(button,day,showCapacity){
@@ -411,9 +424,9 @@
     root.querySelector('.compact-overview-v437')?.remove();
     overviewGuidanceV442(root);
     byId('designBulletinTitle')?.remove();
-    const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile'),scroll=byId('bellaOverviewScrollV454');if(inbox&&scroll&&bellaEnabledV450()){if(scroll.firstElementChild!==inbox)scroll.prepend(inbox);}else if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);
+    const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile'),scroll=byId('bellaOverviewScrollV454');if(inbox&&scroll&&overviewEnabledV457()){if(scroll.firstElementChild!==inbox)scroll.prepend(inbox);}else if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);
     window.customerRefreshNoticeOverviewV376?.();
-    if(bellaEnabledV450())renderBellaV450();
+    if(overviewEnabledV457())renderBellaV450();
   }
   function layout() {
     document.documentElement.classList.toggle('customer-liquid-v364',!!state.session&&!!state.data);

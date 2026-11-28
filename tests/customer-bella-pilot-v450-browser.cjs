@@ -1,11 +1,12 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{createHash}=require('node:crypto');
 const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwright');
 const engine=process.env.V3_ENGINE==='webkit'?webkit:chromium;
-const pilot='synthetic-bella-owner',ordinary='synthetic-browser';
+const pilot='synthetic-bella-owner',preview='synthetic-overview-owner',ordinary='synthetic-browser';
 const hash=createHash('sha256').update(pilot).digest('hex');
 const design=fs.readFileSync('customer-design.js','utf8');
 assert.match(design,/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{64}'/);
-const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{64}'/,"BELLA_PILOT_ACCOUNT_SHA256_V450='"+hash+"'");
+assert.match(design,/BELLA_ASSISTANT_ACCOUNT_SHA256_V457=''/,'no assistant account assigned in production');
+const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{64}'/,"BELLA_PILOT_ACCOUNT_SHA256_V450='"+createHash('sha256').update(preview).digest('hex')+"'").replace("BELLA_ASSISTANT_ACCOUNT_SHA256_V457=''","BELLA_ASSISTANT_ACCOUNT_SHA256_V457='"+hash+"'");
 (async()=>{
  let browser;try{
  browser=await engine.launch(engine===webkit?{headless:true}:{headless:true,args:['--no-sandbox']});
@@ -40,7 +41,24 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
    assert.equal(await onePlace.locator('.bella-capacity-v450').count(),0,'pair needs two places');
  }
  assert(Math.abs(parseFloat(await page.locator('.booking-day-v37[data-date="2026-11-30"] .bella-capacity-v450>i').evaluate(el=>el.style.width))-200/11)<.01);
- await page.evaluate(()=>{window.closeBookingPickerV305();state.session.user.id='synthetic-bella-owner';renderAll();});
+ await page.evaluate(()=>{window.closeBookingPickerV305();state.session.user.id='synthetic-overview-owner';renderAll();});
+ await meter.waitFor({state:'visible'});
+ await page.waitForFunction(()=>document.documentElement.classList.contains('overview-pilot-active-v457'));
+ assert.equal(await count(),0,'overview-only account has no Bella');
+ assert.equal(await page.evaluate(()=>window.customerBellaPilotEnabledV453()),false);
+ assert.equal(await page.locator('#designNearest .design-booking-guidance-v442').isVisible(),true,'original guidance restored');
+ assert.match(await page.locator('#designNearest #designReservationNotice').textContent(),/1 deň.*20:00/);
+ const middle=page.locator('#bellaOverviewScrollV454');
+ assert.equal(await middle.evaluate(el=>getComputedStyle(el).overflowY),'auto');
+ const profileTop=await page.locator('#bookingDogProfile').evaluate(el=>el.getBoundingClientRect().top);
+ await page.evaluate(()=>{const s=document.createElement('div');s.id='previewFixtureSpacer';s.style.height='900px';const sc=document.getElementById('bellaOverviewScrollV454');sc.append(s);sc.scrollTop=200;});
+ await page.waitForFunction(()=>document.getElementById('bellaOverviewScrollV454').scrollTop>100);
+ assert.equal(await page.locator('#bookingDogProfile').evaluate(el=>el.getBoundingClientRect().top),profileTop,'profile fixed without assistant');
+ await page.evaluate(()=>{document.getElementById('previewFixtureSpacer').remove();document.getElementById('bellaOverviewScrollV454').scrollTop=0;window.openBookingPickerV37();});
+ assert.equal(await page.locator('#navBookAddV220').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 116, 22)','active booking dock filled');
+ await page.evaluate(()=>window.closeBookingPickerV305());
+ assert.equal(await page.locator('#navBookAddV220').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)','inactive booking dock outlined');
+ await page.evaluate(()=>{state.session.user.id='synthetic-bella-owner';renderAll();});
  await page.locator('#customerBellaPilotV450').waitFor({state:'visible'});
  await meter.waitFor({state:'visible'});
  assert.equal(await meter.getAttribute('aria-valuenow'),'50');

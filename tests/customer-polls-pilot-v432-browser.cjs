@@ -78,12 +78,12 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
    assert.match(await bubble.textContent(),/Škôlkarsky kalendár/);
    assert.equal(await bubble.locator('h2').evaluate(el=>getComputedStyle(el).color),'rgb(17, 17, 17)');
    assert.equal(await page.locator('#customerPollOverviewV432').count(),0);
-   await page.evaluate(()=>{window.customerBellaPilotEnabledV453=()=>true;const s=document.createElement('div');s.id='bellaOverviewScrollV454';s.style.cssText='height:140px;overflow:auto';const spacer=document.createElement('div');spacer.style.height='300px';s.append(spacer);document.getElementById('bookingTab').append(s);window.__pollNode=document.getElementById('customerPollMenuV432');window.customerPollRefreshLayoutV454();});
+   await page.evaluate(()=>{window.customerBellaPilotEnabledV453=()=>true;window.customerOverviewPilotEnabledV457=()=>true;const s=document.createElement('div');s.id='bellaOverviewScrollV454';s.style.cssText='height:140px;overflow:auto';const spacer=document.createElement('div');spacer.style.height='300px';s.append(spacer);document.getElementById('bookingTab').append(s);window.__pollNode=document.getElementById('customerPollMenuV432');window.customerPollRefreshLayoutV454();});
    assert.equal(await bubble.evaluate(el=>el===window.__pollNode&&el.parentElement.id==='bellaOverviewScrollV454'),true);
    assert.equal(await page.evaluate(()=>window.customerPollPriorityV454()?.id),'poll-test');
    await page.evaluate(()=>window.customerPollOpenOverviewV454());
    await page.waitForFunction(()=>document.getElementById('bellaOverviewScrollV454').scrollTop>200);
-   await page.evaluate(()=>{window.customerBellaPilotEnabledV453=()=>false;window.customerPollRestoreMenuV454();document.getElementById('bellaOverviewScrollV454').remove();window.scrollTo(0,0);});
+   await page.evaluate(()=>{window.customerBellaPilotEnabledV453=()=>false;window.customerOverviewPilotEnabledV457=()=>false;window.customerPollRestoreMenuV454();document.getElementById('bellaOverviewScrollV454').remove();window.scrollTo(0,0);});
    assert.equal(await bubble.evaluate(el=>el===window.__pollNode&&el.parentElement.id==='menuTab'),true);
    assert.equal(await page.locator('#customerMenuPrimaryV432>.customer-menu-group').count(),4);
    assert.equal(await page.locator('#customerPollMenuV432').evaluate(el=>Boolean(document.querySelector('#customerMenuPrimaryV432').compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING)),true,
