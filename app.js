@@ -4933,14 +4933,17 @@ function installVaccinationViewerZoomV244(modal){
       thumb.innerHTML='<svg aria-hidden="true"><use href="#ci-paw"/></svg>';
     }
     const content=el('span','customer-notice-content-v363');
-    const head=el('span','customer-notice-head-v363');head.append(el('strong','',row.title||'Oznam'));
-    if(!row.preview&&!rowsState.read.has(Number(row.id)))head.append(el('span','customer-bulletin-new-v229','Nové'));
+    const head=el('span','customer-notice-head-v363'),headline=el('strong','',row.title||'Oznam');head.append(headline);
+    const unread=!row.preview&&!rowsState.read.has(Number(row.id));
+    if(fromHistory&&unread)head.append(el('span','customer-bulletin-new-v229','Nové'));
+    if(!fromHistory)headline.title=String(row.title||'Oznam');
     // The full article remains unchanged; Overview only displays authored plain-text teaser.
     const excerpt=fromHistory?row.body||'':String(row.overview_text||'').trim();
-    content.append(head);
+    if(fromHistory)content.append(head);
     if(excerpt)content.append(el('span','customer-notice-excerpt-v363',excerpt));
-    content.append(el('span','customer-notice-action-v363','Otvoriť oznam ›'));
-    const panel=el('span','customer-notice-panel-v383');panel.append(content,thumb);b.append(panel);b.addEventListener('click',()=>openArticle(row,fromHistory));return b;
+    const action=el('span','customer-notice-action-v363','Otvoriť oznam ›');
+    if(fromHistory)content.append(action);else{const footer=el('span','customer-notice-footer-v453');footer.append(action);if(unread)footer.append(el('span','customer-bulletin-new-v229','Nové'));content.append(footer);}
+    const panel=el('span','customer-notice-panel-v383');if(!fromHistory)panel.append(head);panel.append(content,thumb);b.append(panel);b.addEventListener('click',()=>openArticle(row,fromHistory));return b;
   }
   function drawOverview(){
     const anchor=$('designNearest');let host=$('customerNoticeOverviewV376');

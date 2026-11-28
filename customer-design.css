@@ -1291,13 +1291,13 @@ html.customer-design #designTicket .design-ticket-usage .design-validity{font-si
 
 /* v450: account-only Bella preview and the same continuous occupied/total bar as admin. */
 html.bella-pilot-active-v450 #designNearest .design-booking-guidance-v442{display:none!important}
-html.bella-pilot-active-v450 #customerBellaPilotV450{display:grid;grid-template-columns:clamp(72px,23vw,96px) minmax(0,1fr);align-items:end;gap:8px;max-width:100%;margin:12px 0 16px;padding:0 3px;box-sizing:border-box}
-#customerBellaPilotV450>img{width:100%;height:auto;max-height:122px;object-fit:contain;align-self:end;filter:drop-shadow(0 3px 4px #65492d26)}
-#customerBellaPilotV450 .bella-bubble-v450{position:relative;min-width:0;background:#fff9f3;border:1px solid #efd6c5;border-radius:20px;padding:12px 14px;box-shadow:0 5px 15px #73543a19;color:#273242;overflow-wrap:anywhere}
-#customerBellaPilotV450 .bella-bubble-v450::before{content:"";position:absolute;left:-6px;bottom:22px;width:10px;height:10px;background:#fff9f3;border-left:1px solid #efd6c5;border-bottom:1px solid #efd6c5;transform:rotate(45deg)}
+html.bella-pilot-active-v450 #customerBellaPilotV450{position:fixed;z-index:90;left:0;right:0;bottom:calc(max(8px,env(safe-area-inset-bottom)) + 68px);display:grid;grid-template-columns:clamp(45px,15vw,58px) minmax(0,1fr);align-items:end;gap:8px;width:min(440px,calc(100% - 24px));margin:0 auto;padding:0;box-sizing:border-box;pointer-events:none}
+#customerBellaPilotV450>img{width:100%;height:clamp(48px,16vw,60px);object-fit:cover;object-position:center top;align-self:end;filter:brightness(1.16) contrast(1.04) drop-shadow(0 2px 3px #40331e26)}
+#customerBellaPilotV450 .bella-bubble-v450{position:relative;min-width:0;background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(255,255,255,.85));border:1px solid #ef8b37;border-radius:18px;padding:8px 11px;box-shadow:0 5px 15px #73543a19,inset 0 1px 2px #fff;-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);color:#247646;overflow-wrap:anywhere}
+#customerBellaPilotV450 .bella-bubble-v450::before{content:"";position:absolute;left:-6px;bottom:17px;width:10px;height:10px;background:#fff;border-left:1px solid #ef8b37;border-bottom:1px solid #ef8b37;transform:rotate(45deg)}
 #customerBellaPilotV450 .bella-bubble-v450>strong{display:block;color:#a8480b;font-size:13px;font-weight:850;margin-bottom:3px}
-#customerBellaPilotV450 .bella-message-v450{font-size:13px;line-height:1.45;margin:0}
-#customerBellaPilotV450 .bella-action-v450{display:block;min-height:44px;background:transparent;border:0;padding:4px 0 0;color:#a8480b;font-size:12px;font-weight:800;text-align:left;cursor:pointer}
+#customerBellaPilotV450 .bella-message-v450{font-size:12px;line-height:1.4;margin:0;color:#247646}
+#customerBellaPilotV450 .bella-action-v450{display:block;min-height:44px;background:transparent;border:0;padding:3px 0 0;color:#247646;font-size:12px;font-weight:800;text-align:left;cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:transparent}
 #customerBellaPilotV450 .bella-action-v450[hidden]{display:none!important}
 html.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37:has(.bella-capacity-v450){gap:2px!important;padding:3px 1px!important}
 html.customer-design #bookingPickerDaysV37 .bella-capacity-v450{display:block;flex:0 0 4px;width:70%;height:4px;max-width:48px;overflow:hidden;border-radius:5px;background:#135a36;pointer-events:none}
@@ -1324,3 +1324,15 @@ html.customer-design #designTicket .design-pass-meter-v452{position:relative;dis
 html.customer-design #designTicket .design-pass-meter-v452>span{display:block;height:100%;border-radius:inherit;background:var(--pass-time-color)}
 /* v453: the expiry badge touches the track directly; no separate hook. */
 html.customer-design #designTicket.design-pass-validity-v452:has(.design-pass-meter-v452[data-complete=true]) .design-validity{background:var(--pass-time-color)!important;color:#fff!important}
+
+/* v453: private fixed assistant, reserve only its measured height, never cover modal/dock. */
+html.bella-pilot-active-v450.customer-design #bookingTab:not(.hidden):has(#customerBellaPilotV450){padding-bottom:calc(var(--bella-height-v453,118px) + 10px)!important}
+html:is(.design-reservations-open,.booking-picker-open-v37,.design-modal-open,.customer-modal-open,.customer-bulletin-open-v229,.dog-details-open,.dog-choice-open-v276,.dog-visits-open-v99,.settings-open-v36,.support-chat-open-v52) #customerBellaPilotV450,#bookingTab[inert] #customerBellaPilotV450{visibility:hidden!important;pointer-events:none!important}
+html:is(.design-reservations-open,.booking-picker-open-v37,.design-modal-open,.customer-modal-open,.customer-bulletin-open-v229,.dog-details-open,.dog-choice-open-v276,.dog-visits-open-v99,.settings-open-v36,.support-chat-open-v52) #customerBellaPilotV450 button,#bookingTab[inert] #customerBellaPilotV450 button{pointer-events:none!important}
+@media(max-height:420px) and (orientation:landscape){html.bella-pilot-active-v450 #customerBellaPilotV450{display:none!important}html.bella-pilot-active-v450.customer-design #bookingTab:not(.hidden):has(#customerBellaPilotV450){padding-bottom:0!important}}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){#customerBellaPilotV450 .bella-bubble-v450{background:white;-webkit-backdrop-filter:none;backdrop-filter:none}}
+/* v453: full-width headline in Overview only; full original title remains in accessible name/detail. */
+#customerNoticeOverviewV376 .customer-notice-panel-v383{row-gap:7px}
+#customerNoticeOverviewV376 .customer-notice-head-v363{grid-column:1/-1;min-width:0}
+#customerNoticeOverviewV376 .customer-notice-head-v363 strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;font-size:clamp(11px,3.5vw,14px);line-height:1.35}
+#customerNoticeOverviewV376 .customer-notice-footer-v453{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
