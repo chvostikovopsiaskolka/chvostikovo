@@ -197,9 +197,94 @@
     missed.dataset.weekFrom=model.from;missed.dataset.weekTo=model.to;missed.hidden=!model.missed;
     block.hidden=next.hidden&&missed.hidden;
   }
+  // v450: visual-only, fail-closed account pilot. No account email or raw UUID in the bundle.
+  const BELLA_PILOT_ACCOUNT_SHA256_V450='288c196a3d8f47da8e96737e2c1753be2db7b1864c406c95e312c7687e0dcd66';
+  let bellaCheckedV450='',bellaAllowedV450='',bellaEpochV450=0;
+  const bellaAccountV450=()=>String(state.session?.user?.id||'');
+  const bellaReadyV450=()=>!!bellaAccountV450()&&!!state.session?.access_token&&state.data?.profile?.status==='active'&&!!state.data?.dogs?.length;
+  const bellaEnabledV450=()=>bellaReadyV450()&&bellaAllowedV450===bellaAccountV450();
+  function clearBellaUiV450(){
+    document.documentElement.classList.remove('bella-pilot-active-v450');
+    byId('customerBellaPilotV450')?.remove();
+    document.querySelectorAll('.bella-capacity-v450').forEach(el=>el.remove());
+  }
+  window.customerBellaPilotClearV450=()=>{++bellaEpochV450;bellaCheckedV450='';bellaAllowedV450='';clearBellaUiV450();};
+  function checkBellaV450(){
+    const id=bellaAccountV450();
+    if(!bellaReadyV450()){if(bellaCheckedV450||bellaAllowedV450)window.customerBellaPilotClearV450();return;}
+    if(id===bellaCheckedV450)return;
+    window.customerBellaPilotClearV450();bellaCheckedV450=id;
+    const epoch=bellaEpochV450;
+    // A real authenticated session is needed; browsers without WebCrypto simply see the normal UI.
+    if(!globalThis.crypto?.subtle||typeof TextEncoder!=='function')return;
+    void crypto.subtle.digest('SHA-256',new TextEncoder().encode(id)).then(bytes=>{
+      if(epoch!==bellaEpochV450||id!==bellaAccountV450()||!bellaReadyV450())return;
+      const hash=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
+      if(hash!==BELLA_PILOT_ACCOUNT_SHA256_V450)return;
+      bellaAllowedV450=id;renderBellaV450();
+      if(!byId('bookingPickerV37')?.classList.contains('hidden'))window.customerDesignPickerRender?.();
+    }).catch(()=>{});
+  }
+  function bellaCopyV450(){
+    const model=window.customerOverviewBookingGuidanceV442?.();if(!model?.next)return null;
+    const en=document.documentElement.lang==='en',tr=(sk,english)=>en?english:sk;
+    const notice=window.customerBellaPriorityNoticeV450?.();
+    if(notice&&Number.isFinite(notice.id)&&notice.id>0)return {text:tr('Haf! Máme pre vás nový oznam: ','Woof! We have a new announcement: ')+notice.title,action:tr('Otvoriť oznam','Open announcement'),notice:notice.id};
+    const next=model.next,bookings=futureItems().filter(r=>r.reservation_date>=next.from&&r.reservation_date<=next.to&&['pending','approved'].includes(r.status));
+    const dogIds=new Set(bookings.map(r=>Number(r.dog_id))),names=(state.data.dogs||[]).filter(d=>dogIds.has(Number(d.id))).map(d=>String(d.name||'')).filter(Boolean);
+    const bookAction=tr('Rezervovať miesto','Book a place');
+    if(model.missed)return {text:tr('Haf! Nestihli ste rezervovať miesto do nedele? Ak je ešte voľné miesto, vyberte deň a odošlite žiadosť.','Woof! Missed the Sunday deadline? If there is still a free place, choose a date and send a request.'),action:bookAction};
+    if(bookings.length&&names.length){
+      const joined=new Intl.ListFormat(en?'en':'sk',{style:'long',type:'conjunction'}).format(names);
+      const pending=bookings.some(r=>r.status==='pending');
+      return {text:pending?tr('Haf! Ďakujeme za rezerváciu. Žiadosť pre '+joined+' čaká na schválenie.','Woof! Thanks for booking. A request for '+joined+' is awaiting approval.'):tr('Haf! Ďakujeme za rezerváciu. Tešíme sa na návštevu: '+joined+'!','Woof! Thanks for booking. We look forward to seeing '+joined+'!')};
+    }
+    const clock=overviewClock();
+    if(clock.date===next.deadline&&clock.minutes>=1200)return {text:tr('Haf! Riadna uzávierka na budúci týždeň už skončila. Ak je ešte voľné miesto, pošlite žiadosť.','Woof! The regular deadline for next week has passed. If a place is available, send a request.'),action:bookAction};
+    if(!next.hidden){
+      const date=new Intl.DateTimeFormat(en?'en-GB':'sk-SK',{day:'numeric',month:'numeric',timeZone:'UTC'}).format(new Date(next.deadline+'T12:00:00Z'));
+      return {text:tr('Haf! Nezabudnite rezervovať miesto na ďalší týždeň do nedele '+date+' do 20:00.','Woof! Remember to book next week by Sunday '+date+' at 8 PM.'),action:bookAction};
+    }
+    return {text:tr('Haf! Tešíme sa na ďalšie dni v Chvostíkove.','Woof! We look forward to more days at Chvostíkovo.')};
+  }
+  function renderBellaV450(){
+    if(!bellaEnabledV450()){clearBellaUiV450();return;}
+    const anchor=byId('designNearest');if(!anchor){clearBellaUiV450();return;}
+    const copy=bellaCopyV450();if(!copy){clearBellaUiV450();return;}
+    let host=byId('customerBellaPilotV450');
+    if(!host){
+      host=document.createElement('section');host.id='customerBellaPilotV450';host.className='bella-pilot-v450';host.setAttribute('translate','no');host.setAttribute('aria-label','Bella');
+      const photo=document.createElement('img');photo.src='/bella-pilot-v450.webp';photo.alt='';photo.decoding='async';photo.width=96;photo.height=112;
+      const bubble=document.createElement('div');bubble.className='bella-bubble-v450';
+      const name=document.createElement('strong');name.textContent='Bella';const message=document.createElement('p');message.className='bella-message-v450';
+      const action=document.createElement('button');action.type='button';action.className='bella-action-v450';action.onclick=()=>{
+        if(!bellaEnabledV450())return;
+        if(action.dataset.notice)void window.openCustomerAnnouncementV363?.(Number(action.dataset.notice));
+        else window.openBookingPickerV37?.();
+      };
+      bubble.append(name,message,action);host.append(photo,bubble);
+    }
+    const msg=host.querySelector('.bella-message-v450'),action=host.querySelector('.bella-action-v450');
+    if(msg.textContent!==copy.text)msg.textContent=copy.text;
+    if(action.textContent!==(copy.action||''))action.textContent=copy.action||'';
+    action.hidden=!copy.action;action.dataset.notice=copy.notice?String(copy.notice):'';
+    if(anchor.nextElementSibling!==host)anchor.after(host);
+    document.documentElement.classList.add('bella-pilot-active-v450');
+  }
+  window.customerBellaRefreshV450=()=>{if(bellaEnabledV450())renderBellaV450();};
+  // Keep the text in the chosen language even when no customer data changes.
+  new MutationObserver(()=>{if(bellaEnabledV450())renderBellaV450();}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+  function bellaCapacityV450(button,day,showCapacity){
+    let bar=button.querySelector('.bella-capacity-v450');
+    const capacity=Number(day.capacity),occupied=Number(day.occupied);
+    if(!bellaEnabledV450()||!showCapacity||!['free','limited'].includes(button.dataset.capacityLevel)||!Number.isFinite(capacity)||capacity<=0||!Number.isFinite(occupied)||occupied<0){bar?.remove();return;}
+    if(!bar){bar=document.createElement('i');bar.className='bella-capacity-v450';bar.setAttribute('aria-hidden','true');bar.append(document.createElement('i'));button.append(bar);}
+    bar.firstElementChild.style.width=(Math.min(1,occupied/capacity)*100)+'%';
+  }
   function nearest() {
-    if(!state.data)return;
-    if(!selectedDog()){byId('designNearest')?.remove();byId('designTicket')?.remove();byId('designBulletinTitle')?.remove();return;}
+    checkBellaV450();
+    if(!state.data){clearBellaUiV450();return;}
+    if(!selectedDog()){clearBellaUiV450();byId('designNearest')?.remove();byId('designTicket')?.remove();byId('designBulletinTitle')?.remove();return;}
     ticket();
     const anchor=byId('designTicket')||byId('customerInboxV363');if(!anchor)return;
     let root=byId('designNearest');
@@ -248,6 +333,7 @@
     byId('designBulletinTitle')?.remove();
     const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile');if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);
     window.customerRefreshNoticeOverviewV376?.();
+    if(bellaEnabledV450())renderBellaV450();
   }
   function layout() {
     document.documentElement.classList.toggle('customer-liquid-v364',!!state.session&&!!state.data);
@@ -273,6 +359,7 @@
   const originalDays=customerRenderers.days;
   customerRenderers.days=(...args)=>{const out=originalDays?.(...args);reservationPresentationV360(byId('weekDays'));nearest();if(!byId('bookingPickerV37')?.classList.contains('hidden'))window.customerDesignPickerRender?.();return out;};
   window.customerDesignPickerRender=()=>{
+    checkBellaV450();
     const picker=byId('bookingPickerV37'),card=picker?.querySelector('.booking-picker-card-v37');if(!card)return;
     // Resume/bootstrap can advance availability while this page remains open.
     const calendar=byId('bookingPickerDaysV37');if(!calendar)return;
@@ -297,6 +384,7 @@
         if(showCapacity)span.textContent='Voľné: '+Math.max(0,Number(day.available)||0);
         span.querySelector('.design-capacity-dot')?.remove();
         span.classList.remove('calendar-count-hidden-v439');
+        bellaCapacityV450(button,day,showCapacity);
         if(showCapacity)button.setAttribute('aria-label',new Intl.DateTimeFormat(document.documentElement.lang==='en'?'en':'sk-SK',{weekday:'long',day:'numeric',month:'numeric'}).format(new Date(day.date+'T12:00:00'))+' · '+(document.documentElement.lang==='en'?'Free: ':'Voľné: ')+Math.max(0,Number(day.available)||0));
       }
     });
