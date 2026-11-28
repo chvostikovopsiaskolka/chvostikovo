@@ -6,6 +6,9 @@ export const PHONE = "+421951069395";
 export const PHONE_PRETTY = "+421 951 069 395";
 export const EMAIL = "chvostikovo.psiaskolka@gmail.com";
 export const MAP_LINK = "https://maps.app.goo.gl/xRzZ8fC3fT8MCzeM7?g_st=ic";
+// Canonical practical location copy shared by Aria, HOME FAQ and paid gallery.
+export const DAYCARE_LOCATION_QUESTION = "Kde sa škôlka nachádza?";
+export const DAYCARE_LOCATION_ANSWER = "Nájdete nás v Košiciach, medzi Starou nemocnicou a Verejným cintorínom na Poľskej 6.\n\nOdbočuje sa z ulice Rastislavova, pri autoumyvárke.\n\nPriamo pri priestoroch škôlky máme bezplatné parkovisko.\n\nAk idete MHD, najbližšia je zastávka Poľská, kam chodia autobusy 12 a 54. Odtiaľ je to už len krátka cesta ku nám.";
 export const INQUIRY_TITLE = "Chcete sa informovať o škôlke?";
 export const INQUIRY_SUBTITLE = "Vyplňte krátky nezáväzný formulár. Ozveme sa vám.";
 export const VISIT_INQUIRY_TITLE = "Máte záujem o návštevu?";
