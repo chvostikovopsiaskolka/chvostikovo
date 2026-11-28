@@ -91,16 +91,28 @@
   })();
   return loading;
  }
+ function placePollV454(){
+  const root=$('customerPollMenuV432');if(!root)return;
+  const target=window.customerBellaPilotEnabledV453?.()===true?$('bellaOverviewScrollV454'):null;
+  if(target){if(root.parentElement!==target)target.append(root);const badge=$('customerPollNavBadgeV432');if(badge)badge.hidden=true;}
+  else if(root.parentElement!==$('menuTab')){$('menuTab')?.querySelector('.customer-social-v223')?.before(root);if(root.parentElement!==$('menuTab'))$('menuTab')?.append(root);}
+ }
+ window.customerPollRestoreMenuV454=()=>{const root=$('customerPollMenuV432');if(root&&root.parentElement!==$('menuTab')){$('menuTab')?.querySelector('.customer-social-v223')?.before(root);if(root.parentElement!==$('menuTab'))$('menuTab')?.append(root);}const badge=$('customerPollNavBadgeV432');if(badge)badge.hidden=!active||thankYou||allowed!==account();};
+ window.customerPollRefreshLayoutV454=placePollV454;
+ window.customerPollPriorityV454=()=>window.customerBellaPilotEnabledV453?.()===true&&allowed===account()&&active&&!thankYou&&$('customerPollMenuV432')?.parentElement===$('bellaOverviewScrollV454')?{id:active.id,title:active.title}:null;
+ window.customerPollOpenOverviewV454=()=>{if(!window.customerPollPriorityV454())return;const root=$('customerPollMenuV432'),scroll=$('bellaOverviewScrollV454');const behavior=matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth';if(scroll&&/auto|scroll/.test(getComputedStyle(scroll).overflowY)){scroll.scrollTo({top:Math.max(0,scroll.scrollTop+root.getBoundingClientRect().top-scroll.getBoundingClientRect().top-8),behavior});}else root.scrollIntoView({block:'start',behavior});root.querySelector('h2')?.focus({preventScroll:true});};
+ function refreshBellaPollV454(){if(window.customerBellaPilotEnabledV453?.()===true&&typeof renderNotifications==='function')renderNotifications();else window.customerBellaRefreshV450?.();}
  function render(){
   if(!allowed||allowed!==account())return;
   const show=Boolean(active||thankYou);
   // The compact Menu is the standard design for all signed-in customers.
   // Published, unvoted polls render below Menu; completed/out-of-scope polls stay hidden.
   if(!menuLayout(show))return;
-  if(!show)return;
+  if(!show){refreshBellaPollV454();return;}
+  placePollV454();
   const root=$('customerPollMenuV432'),badge=$('customerPollNavBadgeV432');
   root.hidden=false;root.replaceChildren();
-  if(badge)badge.hidden=!active||thankYou;
+  if(badge)badge.hidden=!active||thankYou||root.parentElement===$('bellaOverviewScrollV454');
   if(thankYou){
    const success=el('div','customer-poll-complete-v432');
    success.setAttribute('role','status');
@@ -108,7 +120,7 @@
      el('p','',text('Váš záujem sme zaznamenali.','Your response has been recorded.')));
    const done=el('button','customer-poll-finish-v433',text('Hotovo','Done'));
    done.type='button';done.dataset.pollDone='true';
-   root.append(success,done);return;
+   root.append(success,done);refreshBellaPollV454();return;
   }
   const h=el('h2','',active.title);h.id='customerPollMenuTitleV432';h.tabIndex=-1;
   const question=el('p','customer-poll-question-v432',active.question);
@@ -148,6 +160,7 @@
    opts.append(wrap);
   });
   root.append(opts);
+  refreshBellaPollV454();
   if(error){
    const msg=el('p','customer-poll-error-v433',error);msg.setAttribute('role','alert');root.append(msg);
   }
@@ -219,7 +232,7 @@
  }
  addCustomerHook('afterBootstrap',sync);
  addCustomerHook('afterRenderDog',()=>{if(allowed===account())render();else void sync()});
- addCustomerHook('afterSwitchTab',tab=>{if(allowed===account()){render();if(tab==='menu'&&!sending)void refresh(allowed,true)}});
+ addCustomerHook('afterSwitchTab',tab=>{if(allowed===account()){render();if((tab==='menu'||tab==='booking'&&window.customerBellaPilotEnabledV453?.()===true)&&!sending)void refresh(allowed,true)}});
  document.addEventListener('click',event=>{
   if(event.target.closest?.('[data-customer-locale]')&&allowed===account())
    requestAnimationFrame(render);

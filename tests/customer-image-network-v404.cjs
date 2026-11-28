@@ -50,7 +50,7 @@ const title30='A'.repeat(28)+'🟢🔴';
 assert.equal(card({...bulletin,title:title30},false,false,true).querySelector('.customer-notice-head-v363 strong').textContent,title30,'30 graphemes including emoji preserved');
 const oldLongTitle='A'.repeat(29)+'👨‍👩‍👧‍👦'+'🔴';
 const oldCard=card({...bulletin,title:oldLongTitle},false,false,true).querySelector('.customer-notice-head-v363 strong');
-assert.equal(oldCard.textContent,'A'.repeat(29)+'…','legacy long title truncated by grapheme, not UTF-16');
+assert.equal(oldCard.textContent,'A'.repeat(27)+'…'+'👨‍👩‍👧‍👦'+'🔴','legacy long title capped while preserving terminal emoji graphemes');
 assert.equal(oldCard.title,oldLongTitle,'original title remains available');
 assert.equal(card({...bulletin,title:oldLongTitle},false).querySelector('.customer-notice-head-v363 strong').textContent,oldLongTitle,'ordinary overview stays unchanged');
 assert.equal(card({...bulletin,title:oldLongTitle},true).querySelector('.customer-notice-head-v363 strong').textContent,oldLongTitle,'archive title unchanged');

@@ -225,11 +225,30 @@
   const bellaReadyV450=()=>!!bellaAccountV450()&&!!state.session?.access_token&&state.data?.profile?.status==='active'&&!!state.data?.dogs?.length;
   const bellaEnabledV450=()=>bellaReadyV450()&&bellaAllowedV450===bellaAccountV450();
   window.customerBellaPilotEnabledV453=bellaEnabledV450;
+  function bellaMiddleV454(){
+    const overview=byId('bookingTab'),profile=byId('bookingDogProfile');if(!overview||!profile||!bellaEnabledV450())return;
+    let scroll=byId('bellaOverviewScrollV454'),created=false;
+    if(!scroll){scroll=document.createElement('div');scroll.id='bellaOverviewScrollV454';scroll.setAttribute('role','region');scroll.setAttribute('aria-label','Prehľad');scroll.tabIndex=0;profile.after(scroll);created=true;}
+    let previous=null;
+    for(const id of ['customerInboxV363','designTicket','designNearest','customerNoticeOverviewV376','notificationList']){
+      const node=byId(id);if(!node)continue;
+      const target=previous?previous.nextElementSibling:scroll.firstElementChild;
+      if(node!==target)scroll.insertBefore(node,target);previous=node;
+    }
+    if(created)window.customerPollRefreshLayoutV454?.();
+    return scroll;
+  }
+  function restoreBellaMiddleV454(){
+    const scroll=byId('bellaOverviewScrollV454');if(!scroll)return;
+    window.customerPollRestoreMenuV454?.();
+    while(scroll.firstChild)scroll.before(scroll.firstChild);scroll.remove();
+  }
   function clearBellaUiV450(){
     document.documentElement.classList.remove('bella-pilot-active-v450');
     bellaSizeObserverV453?.disconnect();bellaSizeObserverV453=null;
     byId('bookingTab')?.style.removeProperty('--bella-height-v453');
     byId('customerBellaPilotV450')?.remove();
+    restoreBellaMiddleV454();
     const ticketRoot=byId('designTicket');
     if(ticketRoot?.classList.contains('design-pass-validity-v452')){ticketRoot.classList.remove('design-pass-validity-v452');delete ticketRoot.dataset.validityLevel;delete ticketRoot.dataset.presentationKey;ticketRoot.querySelector('.design-pass-meter-v452')?.remove();}
     if(!bellaReadyV450())document.querySelectorAll('.bella-capacity-v450').forEach(el=>el.remove());
@@ -247,15 +266,21 @@
       if(epoch!==bellaEpochV450||id!==bellaAccountV450()||!bellaReadyV450())return;
       const hash=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
       if(hash!==BELLA_PILOT_ACCOUNT_SHA256_V450)return;
-      bellaAllowedV450=id;ticket();window.customerRefreshNoticeOverviewV376?.();renderBellaV450();
+      bellaAllowedV450=id;ticket();window.customerRefreshNoticeOverviewV376?.();renderBellaV450();renderNotifications();
       if(!byId('bookingPickerV37')?.classList.contains('hidden'))window.customerDesignPickerRender?.();
     }).catch(()=>{});
   }
   function bellaCopyV450(){
     const model=window.customerOverviewBookingGuidanceV442?.();if(!model?.next)return null;
     const en=document.documentElement.lang==='en',tr=(sk,english)=>en?english:sk;
+    const messages=window.customerBellaNotificationsV454?.()||[];
+    const alerts=messages.filter(n=>n.type!=='poll_invitation');
+    const alert=alerts.find(n=>/cancel|clos|reject/i.test(n.type))||alerts[0];
+    if(alert){const body=[alert.title,alert.body].filter(Boolean).join(' · ');return {text:tr('Haf! ','Woof! ')+body,action:alert.type==='pass_expiry'?tr('Vybrať termín','Choose a date'):tr('Rozumiem','Got it'),notification:alert.id};}
     const notice=window.customerBellaPriorityNoticeV450?.();
     if(notice&&Number.isFinite(notice.id)&&notice.id>0)return {text:tr('Haf! Máme pre vás nový oznam. ','Woof! We have a new announcement. ')+notice.title,action:tr('Otvoriť oznam','Open announcement'),notice:notice.id};
+    const poll=window.customerPollPriorityV454?.();
+    if(poll){const invite=messages.find(n=>n.type==='poll_invitation');return {text:tr('Haf! Zaujíma nás váš názor. Zapojte sa do hlasovania.','Woof! We would love your opinion. Take part in our poll.'),action:tr('Zobraziť hlasovanie','View poll'),poll:true,notification:invite?.id};}
     const next=model.next,bookings=futureItems().filter(r=>r.reservation_date>=next.from&&r.reservation_date<=next.to&&['pending','approved'].includes(r.status));
     const dogIds=new Set(bookings.map(r=>Number(r.dog_id))),names=(state.data.dogs||[]).filter(d=>dogIds.has(Number(d.id))).map(d=>String(d.name||'')).filter(Boolean);
     const bookAction=tr('Rezervovať miesto','Book a place');
@@ -269,13 +294,16 @@
     if(clock.date===next.deadline&&clock.minutes>=1200)return {text:tr('Haf! Riadna uzávierka na budúci týždeň už skončila. Ak je ešte voľné miesto, pošlite žiadosť.','Woof! The regular deadline for next week has passed. If a place is available, send a request.'),action:bookAction};
     if(!next.hidden){
       const date=new Intl.DateTimeFormat(en?'en-GB':'sk-SK',{day:'numeric',month:'numeric',timeZone:'UTC'}).format(new Date(next.deadline+'T12:00:00Z'));
-      return {text:tr('Haf! Nezabudnite rezervovať miesto na ďalší týždeň do nedele '+date+' do 20:00.','Woof! Remember to book next week by Sunday '+date+' at 8 PM.'),action:bookAction};
+      const days=Math.max(0,Math.round((Date.parse(next.deadline+'T12:00:00Z')-Date.parse(clock.date+'T12:00:00Z'))/86400000));
+      const sk=days===0?'Haf! Dnes do 20:00 rezervujte miesto na ďalší týždeň.':days===1?'Haf! Na rezerváciu zostáva už len 1 deň. Do nedele '+date+' do 20:00.':days<=4?'Haf! Na rezerváciu zostávajú '+(days===2?'už len ':'')+days+' dni. Do nedele '+date+' do 20:00.':'Haf! Rezervujte miesto na ďalší týždeň do nedele '+date+' do 20:00.';
+      return {text:tr(sk,'Woof! '+(days===0?'Book today by 8 PM.':days===1?'Only 1 day left to book. By Sunday '+date+' at 8 PM.':days+' days left to book. By Sunday '+date+' at 8 PM.')),action:bookAction};
     }
     return {text:tr('Haf! Tešíme sa na ďalšie dni v Chvostíkove.','Woof! We look forward to more days at Chvostíkovo.')};
   }
   function renderBellaV450(){
     if(!bellaEnabledV450()){clearBellaUiV450();return;}
     const anchor=byId('designNearest'),overview=byId('bookingTab');if(!anchor||!overview){clearBellaUiV450();return;}
+    bellaMiddleV454();
     const copy=bellaCopyV450();if(!copy){clearBellaUiV450();return;}
     let host=byId('customerBellaPilotV450');
     if(!host){
@@ -285,7 +313,9 @@
       const name=document.createElement('strong');name.textContent='Bella';const message=document.createElement('p');message.className='bella-message-v450';
       const action=document.createElement('button');action.type='button';action.className='bella-action-v450';action.onclick=()=>{
         if(!bellaEnabledV450())return;
-        if(action.dataset.notice)void window.openCustomerAnnouncementV363?.(Number(action.dataset.notice));
+        if(action.dataset.notification)window.customerBellaActNotificationV454?.(Number(action.dataset.notification));
+        else if(action.dataset.poll==='true')window.customerPollOpenOverviewV454?.();
+        else if(action.dataset.notice)void window.openCustomerAnnouncementV363?.(Number(action.dataset.notice));
         else window.openBookingPickerV37?.();
       };
       bubble.append(name,message,action);host.append(photo,bubble);
@@ -294,6 +324,7 @@
     if(msg.textContent!==copy.text)msg.textContent=copy.text;
     if(action.textContent!==(copy.action||''))action.textContent=copy.action||'';
     action.hidden=!copy.action;action.dataset.notice=copy.notice?String(copy.notice):'';
+    action.dataset.notification=copy.notification?String(copy.notification):'';action.dataset.poll=String(!!copy.poll);
     host.dataset.notice=String(!!copy.notice);
     if(host.parentElement!==overview)overview.append(host);
     if(!bellaSizeObserverV453&&typeof ResizeObserver==='function'){
@@ -362,7 +393,7 @@
     root.querySelector('.compact-overview-v437')?.remove();
     overviewGuidanceV442(root);
     byId('designBulletinTitle')?.remove();
-    const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile');if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);
+    const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile'),scroll=byId('bellaOverviewScrollV454');if(inbox&&scroll&&bellaEnabledV450()){if(scroll.firstElementChild!==inbox)scroll.prepend(inbox);}else if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);
     window.customerRefreshNoticeOverviewV376?.();
     if(bellaEnabledV450())renderBellaV450();
   }

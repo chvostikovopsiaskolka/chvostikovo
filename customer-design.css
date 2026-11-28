@@ -1336,3 +1336,40 @@ html:is(.design-reservations-open,.booking-picker-open-v37,.design-modal-open,.c
 #customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-head-v363{grid-column:1/-1;min-width:0}
 #customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-head-v363 strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;font-size:clamp(11px,3.5vw,14px);line-height:1.35}
 #customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-footer-v453{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+
+/* v454: pilot only. One vertical scroll owner in portrait Overview; no shared dock changes. */
+html.bella-pilot-active-v450.customer-design #customerBellaPilotV450 .bella-bubble-v450{padding:7px 10px 4px}
+#customerBellaPilotV450 .bella-action-v450{margin-left:auto;text-align:right;font-weight:850;padding:0;min-height:44px}
+html.bella-pilot-active-v450.customer-design #bookingTab:has(#bellaOverviewScrollV454) #bookingDogProfile{flex:none}
+#bellaOverviewScrollV454{min-width:0;min-height:0;box-sizing:border-box}
+@media(min-height:541px){
+ html.bella-pilot-active-v450.customer-design:has(#bookingTab:not(.hidden):not([inert])) #appView.app{height:100dvh!important;min-height:0!important;padding-bottom:0!important;box-sizing:border-box}
+ html.bella-pilot-active-v450.customer-design #bookingTab:not(.hidden):has(#bellaOverviewScrollV454){display:flex!important;flex-direction:column;height:calc(100dvh - max(8px,env(safe-area-inset-top)) - max(8px,env(safe-area-inset-bottom)) - 68px - var(--bella-height-v453,118px) - 6px)!important;max-height:none!important;min-height:0!important;padding-bottom:0!important;overflow:visible!important}
+ html.bella-pilot-active-v450 #bellaOverviewScrollV454{flex:1 1 0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;scrollbar-width:none;margin:0 -7px;padding:1px 7px 10px;scroll-padding-top:8px;touch-action:auto}
+ html.bella-pilot-active-v450 #bellaOverviewScrollV454::-webkit-scrollbar{display:none}
+}
+@media(max-height:540px){html.bella-pilot-active-v450 #bellaOverviewScrollV454{overflow:visible}html.bella-pilot-active-v450.customer-design #bookingTab:not(.hidden):has(#customerBellaPilotV450){padding-bottom:calc(var(--bella-height-v453,118px) + 10px)!important}}
+/* Keep date badge physically joined via the outer pale track, with a visibly distinct inner fill. */
+html.bella-pilot-active-v450.customer-design #designTicket .design-pass-meter-v452{height:7px;box-sizing:border-box;border:1px solid var(--pass-time-track);background:#fff;border-radius:6px 0 6px 6px}
+html.bella-pilot-active-v450.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage .design-validity{padding-bottom:5px!important}
+html.bella-pilot-active-v450.customer-design #designTicket .design-pass-meter-v452>span{border-radius:4px}
+/* Same outline/shadow as the existing pass and reservation cards. Full-width headline; emojis are never inside the clipping span. */
+#customerNoticeOverviewV376[data-pilot-v453=true]{background:#fff;border:1px solid #e8e3e8;border-radius:19px;box-shadow:0 7px 19px rgba(89,58,40,.16),0 2px 6px rgba(89,58,40,.10),0 0 0 1px rgba(173,138,112,.19),inset 0 1px 2px rgba(255,255,255,.82);padding:11px 12px;margin:10px 0;min-width:0}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-header-v382{padding:0 0 5px}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-title-v381{display:flex;align-items:center;gap:7px;font-size:17px}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-megaphone-v454{display:inline-flex;color:#c45d1a}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-megaphone-v454 svg{width:20px;height:20px}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-stage-v382{padding-right:0!important}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-controls-v381{position:static;transform:none;display:flex;flex-direction:row;gap:0}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-controls-v381 button{width:44px;height:44px;background:transparent;font-size:23px}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-carousel-v376>.customer-bulletin-history-row-v229{flex-basis:100%;padding:4px;min-height:0;box-shadow:none;background:transparent}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-panel-v383{padding:8px;grid-template-columns:minmax(0,1fr) 48px;column-gap:9px;row-gap:5px;align-items:end}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-head-v363 strong{display:flex;gap:0;font-size:clamp(11px,3.55vw,14px);align-items:center}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-head-text-v454{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:pre}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-head-emoji-v454{flex:none;white-space:nowrap}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-thumb-v363{width:48px;height:48px;border-radius:10px}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-thumb-v363 img{border-radius:10px}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-content-v363{align-self:stretch;display:flex;flex-direction:column;justify-content:flex-end;gap:4px}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-footer-v453{margin-top:auto}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-action-v363{margin-top:0;padding:6px 8px}
+body:has(#notificationPopup:not(.hidden)) #customerBellaPilotV450{visibility:hidden!important}
