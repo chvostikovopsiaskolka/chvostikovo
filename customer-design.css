@@ -1292,7 +1292,7 @@ html.customer-design #designTicket .design-ticket-usage .design-validity{font-si
 /* v450: account-only Bella preview and the same continuous occupied/total bar as admin. */
 html.bella-pilot-active-v450 #designNearest .design-booking-guidance-v442{display:none!important}
 html.bella-pilot-active-v450 #customerBellaPilotV450{position:fixed;z-index:90;left:0;right:0;bottom:calc(max(8px,env(safe-area-inset-bottom)) + 68px);display:grid;grid-template-columns:clamp(45px,15vw,58px) minmax(0,1fr);align-items:end;gap:8px;width:min(440px,calc(100% - 24px));margin:0 auto;padding:0;box-sizing:border-box;pointer-events:none}
-#customerBellaPilotV450>img{width:100%;height:clamp(48px,16vw,60px);object-fit:cover;object-position:center top;align-self:end;filter:brightness(1.16) contrast(1.04) drop-shadow(0 2px 3px #40331e26)}
+#customerBellaPilotV450>img{width:100%;height:clamp(48px,16vw,60px);object-fit:contain;object-position:center bottom;align-self:end;filter:drop-shadow(0 2px 3px #40331e26)}
 #customerBellaPilotV450 .bella-bubble-v450{position:relative;min-width:0;background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(255,255,255,.85));border:1px solid #ef8b37;border-radius:18px;padding:8px 11px;box-shadow:0 5px 15px #73543a19,inset 0 1px 2px #fff;-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);color:#247646;overflow-wrap:anywhere}
 #customerBellaPilotV450 .bella-bubble-v450::before{content:"";position:absolute;left:-6px;bottom:17px;width:10px;height:10px;background:#fff;border-left:1px solid #ef8b37;border-bottom:1px solid #ef8b37;transform:rotate(45deg)}
 #customerBellaPilotV450 .bella-bubble-v450>strong{display:block;color:#a8480b;font-size:13px;font-weight:850;margin-bottom:3px}

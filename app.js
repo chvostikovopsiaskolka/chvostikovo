@@ -4908,6 +4908,11 @@ function installVaccinationViewerZoomV244(modal){
     // Keep later offscreen items lazy to avoid downloading the entire archive.
     saved.forEach((row,i)=>host.append(noticeCard(row,true,i<3)));
   }
+  function overviewHeadlineV453(title){
+    const value=String(title||'Oznam');
+    const chars=typeof Intl.Segmenter==='function'?Array.from(new Intl.Segmenter('sk',{granularity:'grapheme'}).segment(value),part=>part.segment):Array.from(value);
+    return chars.length>30?chars.slice(0,29).join('')+'…':value;
+  }
   function noticeCard(row,fromHistory,priority=false){
     const b=el('button','customer-bulletin-history-row-v229');b.type='button';b.dataset.announcementId=String(row.id);
     const photo=noticePreviewPhotoV423(row.image_path),thumb=el('span','customer-notice-thumb-v363');
@@ -4933,7 +4938,7 @@ function installVaccinationViewerZoomV244(modal){
       thumb.innerHTML='<svg aria-hidden="true"><use href="#ci-paw"/></svg>';
     }
     const content=el('span','customer-notice-content-v363');
-    const head=el('span','customer-notice-head-v363'),headline=el('strong','',row.title||'Oznam');head.append(headline);
+    const head=el('span','customer-notice-head-v363'),headline=el('strong','',fromHistory?row.title||'Oznam':overviewHeadlineV453(row.title));head.append(headline);
     const unread=!row.preview&&!rowsState.read.has(Number(row.id));
     if(fromHistory&&unread)head.append(el('span','customer-bulletin-new-v229','Nové'));
     if(!fromHistory)headline.title=String(row.title||'Oznam');
@@ -4946,15 +4951,16 @@ function installVaccinationViewerZoomV244(modal){
     const panel=el('span','customer-notice-panel-v383');if(!fromHistory)panel.append(head);panel.append(content,thumb);b.append(panel);b.addEventListener('click',()=>openArticle(row,fromHistory));return b;
   }
   function drawOverview(){
-    const anchor=$('designNearest');let host=$('customerNoticeOverviewV376');
+    const anchor=$('customerInboxV363')||$('bookingDogProfile');let host=$('customerNoticeOverviewV376');
     const preview=new URLSearchParams(location.search).get('notice-carousel-preview')==='1';
     const selected=loggedIn()?rows().filter(row=>row.show_in_overview===true&&current(row)):[];
     if(preview&&loggedIn()){
-      if(!selected.length)selected.push({id:'preview-first',preview:true,title:'Oznam zo škôlky',body:'Takto bude vyzerať vybraný oznam pod vašimi rezerváciami.',overview_text:'Pozrite si ukážku krátkej upútavky.'});
+      if(!selected.length)selected.push({id:'preview-first',preview:true,title:'Oznam zo škôlky',body:'Takto bude vyzerať vybraný oznam nad permanentkou.',overview_text:'Pozrite si ukážku krátkej upútavky.'});
       selected.push({id:'preview-extra',preview:true,title:'Skúšobný oznam',body:'Druhý oznam na ukážku karuselu. Potiahnite karty do strán alebo použite šípky. Tento oznam sa zákazníkom nepublikuje.',overview_text:'Potiahnite karty do strán alebo použite šípky.'});
     }
-    if(!anchor||!selected.length){host?.remove();return;}
-    if(!host){host=el('section','customer-notice-overview-v376');host.id='customerNoticeOverviewV376';host.setAttribute('aria-label','Oznamy škôlky');anchor.after(host);}
+    if(!$('designNearest')||!anchor||!selected.length){host?.remove();return;}
+    if(!host){host=el('section','customer-notice-overview-v376');host.id='customerNoticeOverviewV376';host.setAttribute('aria-label','Oznamy škôlky');}
+    if(anchor.nextElementSibling!==host)anchor.after(host);
     const key=JSON.stringify(selected.map(row=>[row.id,row.title,row.body,row.overview_text,row.image_path,rowsState.read.has(Number(row.id))]));
     if(host.dataset.contentKey===key)return;
     const oldTrack=host.querySelector('.customer-notice-carousel-v376');

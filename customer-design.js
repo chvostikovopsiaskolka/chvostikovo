@@ -279,7 +279,7 @@
     let host=byId('customerBellaPilotV450');
     if(!host){
       host=document.createElement('section');host.id='customerBellaPilotV450';host.className='bella-pilot-v450';host.setAttribute('translate','no');host.setAttribute('aria-label','Bella');
-      const photo=document.createElement('img');photo.src='/bella-pilot-v450.webp';photo.alt='';photo.decoding='async';photo.width=58;photo.height=60;
+      const photo=document.createElement('img');photo.src='/bella-pilot-v453.webp';photo.alt='';photo.decoding='async';photo.width=58;photo.height=60;
       const bubble=document.createElement('div');bubble.className='bella-bubble-v450';
       const name=document.createElement('strong');name.textContent='Bella';const message=document.createElement('p');message.className='bella-message-v450';
       const action=document.createElement('button');action.type='button';action.className='bella-action-v450';action.onclick=()=>{
