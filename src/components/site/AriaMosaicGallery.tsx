@@ -46,7 +46,7 @@ export function AriaMosaicGallery({ paidLead = false }: { paidLead?: boolean }) 
         <p className="text-center font-display text-sm font-bold uppercase tracking-widest text-coral-dark">Nahliadnite k nám</p>
         <h2 id="aria-mosaic-heading" className="section-title mt-2 text-center text-[clamp(22px,5.2vw,38px)]">{paidLead ? "Kde bude váš psík počas dňa?" : "Takto vyzerá Chvostíkovo"}</h2>
         {paidLead && (
-          <div data-daycare-location-copy className="mx-auto mt-3 max-w-2xl space-y-2 text-center text-sm leading-relaxed text-forest/80 sm:text-base">
+          <div data-daycare-location-copy className="mx-auto mt-3 max-w-2xl space-y-2 text-center text-sm leading-relaxed text-forest/80 sm:text-base lg:max-w-none">
             <FaqAnswer question={DAYCARE_LOCATION_QUESTION} answer={DAYCARE_LOCATION_ANSWER} compact />
           </div>
         )}
