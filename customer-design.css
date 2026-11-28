@@ -1312,3 +1312,9 @@ html.bella-pilot-active-v450 #bookingPickerDaysV37 .booking-day-v37.selected .be
 #customerNoticeOverviewV376 .customer-notice-panel-v383>.lg-v3-material{background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 #customerNoticeOverviewV376 .customer-notice-panel-v383>.lg-v3-material::after,#customerNoticeOverviewV376 .customer-notice-panel-v383 .lg-v3-output{display:none!important}
 #customerNoticeOverviewV376 .customer-notice-thumb-v363 img{box-sizing:border-box;border:1px solid rgba(0,0,0,.24);border-radius:14px}
+
+/* v452: safe rich announcement article, same full-body and photo/CTA container. */
+.customer-bulletin-article-v229 :is(p,div,h2,h3){margin:0 0 .45em;overflow-wrap:anywhere}
+.customer-bulletin-article-v229 :is(ul,ol){padding-inline-start:1.6em;margin:.4em 0;list-style-position:outside}
+.customer-bulletin-article-v229 h2{font-size:1.25em;line-height:1.3}
+.customer-bulletin-article-v229 h3{font-size:1.1em;line-height:1.3}
