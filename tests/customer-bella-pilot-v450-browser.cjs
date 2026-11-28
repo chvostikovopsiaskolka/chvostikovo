@@ -49,11 +49,11 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  assert(Math.abs(alignment.right-alignment.dateRight)<2,'track ends below the date');
  assert.equal(alignment.direction,'ltr');
  const assertConnected=async()=>{
-   const geometry=await meter.evaluate(el=>{const badge=el.closest('#designTicket').querySelector('.design-validity'),b=badge.getBoundingClientRect(),m=el.getBoundingClientRect(),style=getComputedStyle(badge);return {gap:m.top-b.bottom,right:m.right-b.right,bg:style.backgroundColor,track:getComputedStyle(el).borderTopColor,bottomRight:style.borderBottomRightRadius,overflow:b.right>m.right+1};});
-   assert(Math.abs(geometry.gap)<1,'date badge physically touches track');
+   const geometry=await meter.evaluate(el=>{const badge=el.closest('#designTicket').querySelector('.design-validity'),b=badge.getBoundingClientRect(),m=el.getBoundingClientRect(),style=getComputedStyle(badge);return {gap:m.top-b.bottom,right:m.right-b.right,bg:style.backgroundColor,border:style.borderTopWidth,track:getComputedStyle(el).borderTopWidth,bottomRight:style.borderBottomRightRadius,overflow:b.right>m.right+1};});
+   assert(geometry.gap>=1&&geometry.gap<=4,'date badge and track separated by a small gap');
    assert(Math.abs(geometry.right)<2,'date badge aligns with track end');
-   assert.equal(geometry.bg,geometry.track,'date background and track form one shape');
-   assert.equal(geometry.bottomRight,'0px');assert.equal(geometry.overflow,false);
+   assert.equal(geometry.border,'1px');assert.equal(geometry.track,'1px');
+   assert.equal(geometry.bottomRight,'3px');assert.equal(geometry.overflow,false);
  };
  await assertConnected();
  assert.equal(await page.locator('#designTicket').getAttribute('data-validity-level'),'green');
@@ -78,6 +78,8 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  await page.evaluate(()=>{state.data.passes=[];renderAll();});
  assert.equal(await page.locator('#customerBellaPilotV450 img').evaluate(img=>img.complete&&img.naturalWidth===120&&img.naturalHeight===126),true,'new isolated head asset loads');
  assert.match(await page.locator('.bella-message-v450').textContent(),/Haf!.*1 deň/);
+ assert.equal(await page.locator('.bella-message-v450 strong').first().textContent(),'už len 1 deň');
+ assert.match(await page.locator('.bella-message-v450 strong').allTextContents().then(x=>x.join(' ')),/29\.\s*11\..*20:00/);
  const assistant=page.locator('#customerBellaPilotV450');
  assert.equal(await assistant.evaluate(el=>el.parentElement.id),'bookingTab');
  assert.equal(await assistant.evaluate(el=>getComputedStyle(el).position),'fixed');
@@ -116,11 +118,18 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  const headline=page.locator('#customerNoticeOverviewV376 [data-announcement-id="71"] .customer-notice-head-v363 strong');
  assert.equal(await headline.textContent(),'Otváracie dni počas sviatkov🟢🔴');
  assert.equal(await headline.locator('.customer-notice-head-emoji-v454').textContent(),'🟢🔴');
- assert(await headline.locator('.customer-notice-head-text-v454').evaluate(el=>el.scrollWidth<=el.clientWidth+1),'holiday wording fits without losing emoji');
- assert.equal(await headline.evaluate(el=>getComputedStyle(el).whiteSpace),'nowrap');
- assert(await headline.evaluate(el=>el.scrollWidth<=el.clientWidth+1),'holiday title fits one line including emoji');
+ assert(await headline.locator('.customer-notice-head-emoji-v454').evaluate(el=>el.getBoundingClientRect().right<=el.closest('.customer-notice-content-v363').getBoundingClientRect().right+1),'emoji remains inside the text column');
+ assert.equal(await headline.evaluate(el=>getComputedStyle(el).whiteSpace),'normal');
+ const notice=page.locator('#customerNoticeOverviewV376'),first=notice.locator('[data-announcement-id="71"]'),track=notice.locator('.customer-notice-carousel-v376');
+ assert.equal(await notice.locator('.customer-notice-megaphone-v454').textContent(),'📣');
+ assert.equal(await notice.locator('.customer-notice-controls-v381').count(),0,'no visible arrows in pilot');
+ await notice.locator(':scope > .lg-v3-material').waitFor({state:'attached'});
+ assert.equal(await notice.evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
+ const rects=await first.evaluate(el=>{const box=s=>el.querySelector(s).getBoundingClientRect();const photo=box('.customer-notice-thumb-v363'),title=box('.customer-notice-head-v363'),cta=box('.customer-notice-action-v363'),content=box('.customer-notice-content-v363');return {square:Math.abs(photo.width-photo.height),left:photo.right<=title.left,top:Math.abs(photo.top-title.top),ctaRight:Math.abs(cta.right-content.right),bottom:Math.abs(photo.bottom-cta.bottom)}});
+ assert(rects.square<1&&rects.left&&rects.top<8&&rects.ctaRight<2&&rects.bottom<8,'photo left, title top, CTA bottom right');
+ assert(await track.evaluate(el=>{const second=el.children[1].getBoundingClientRect(),box=el.getBoundingClientRect();return second.left<box.right-2&&second.right>box.right}),'next notice peeks into carousel');
  const longTitle=page.locator('#customerNoticeOverviewV376 [data-announcement-id="72"] .customer-notice-head-v363 strong');
- assert.equal(await longTitle.evaluate(el=>getComputedStyle(el).textOverflow),'ellipsis');
+ assert.equal(await longTitle.locator('.customer-notice-head-text-v454').evaluate(el=>getComputedStyle(el).webkitLineClamp),'2');
  assert.equal(Array.from(await longTitle.textContent()).length,30,'legacy long title is limited to 30 characters including ellipsis');
  assert.equal(await longTitle.getAttribute('title'),'Veľmi dlhý testovací nadpis oznamu s ďalším textom a emoji 🐾🎄');
  assert(await page.evaluate(()=>document.getElementById('designNearest').nextElementSibling===document.getElementById('customerNoticeOverviewV376')),'notice follows reservations in pilot too');

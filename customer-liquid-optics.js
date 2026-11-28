@@ -16,7 +16,7 @@ const chromium=svgSyntax&&/\b(Chrome|Chromium|Edg|SamsungBrowser)\//.test(naviga
 const webkit=/AppleWebKit/.test(navigator.userAgent)&&!chromium;
 // iOS long registration needs a fixed wallpaper; Android preserves the approved liquid glass.
 const ios=/\b(iPhone|iPad|iPod)\b/i.test(navigator.userAgent)||(/Macintosh/i.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
-const selectors=['#authView>.auth-card','#bookingDogProfile:not(.dual-dog-v241) .dog-overview-content','#bookingDogProfile .dual-dog-info-v254','#menuTab .customer-menu-group','#menuTab .customer-social-v223','#designTicket.design-ticket','#designNearest.design-nearest','#bookingPickerV37 #designMyBookings','.customer-bulletin-history-row-v229 .customer-notice-panel-v383','.bottom-nav'];
+const selectors=['#authView>.auth-card','#bookingDogProfile:not(.dual-dog-v241) .dog-overview-content','#bookingDogProfile .dual-dog-info-v254','#menuTab .customer-menu-group','#menuTab .customer-social-v223','#designTicket.design-ticket','#designNearest.design-nearest','#customerNoticeOverviewV376[data-pilot-v453=true]','#bookingPickerV37 #designMyBookings','.customer-bulletin-history-row-v229 .customer-notice-panel-v383','.bottom-nav'];
 const states=new Map(),maps=new Map();let bank,source,sourceImage,sourceKey='',revision=0,frame=0,sequence=0;
 const stats={mode:'fallback',mapGenerations:0,contexts:0,peakContexts:0,contextLimit:low?0:2,source:'original-wallpaper-only'};
 window.customerLiquidV3Diagnostics=()=>({...stats,material:reels?'reels':'lens',turbulenceReady,surfaces:[...states.values()].map(s=>({renderer:s.layer.dataset.renderer,reason:s.reason||null,width:s.width,height:s.height}))});
