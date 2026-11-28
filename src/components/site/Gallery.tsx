@@ -1,8 +1,9 @@
 import { Fragment, useRef, useState } from "react";
 import { Car, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
-import { PhotoLightbox } from "./PhotoLightbox";
-import { GALLERY, MAP_LINK, DAYCARE_LOCATION_ANSWER } from "@/content/site";
+import { FaqAnswer } from "./ContextFaq";
 import { DaycareArrivalMap } from "./DaycareArrivalMap";
+import { PhotoLightbox } from "./PhotoLightbox";
+import { GALLERY, MAP_LINK, DAYCARE_LOCATION_ANSWER, DAYCARE_LOCATION_QUESTION } from "@/content/site";
 import { highQualityMosaicSrc } from "./AriaMosaicGallery";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
@@ -96,7 +97,7 @@ export function Gallery({ language = "sk", homeMosaic = false }: { language?: "s
           </div>
         </div>
 
-        {homeMosaic && !isEnglish && <div data-daycare-location-copy className="mt-4 max-w-2xl space-y-2 text-sm leading-relaxed text-forest/80 sm:text-base">{DAYCARE_LOCATION_ANSWER.split("\n\n").map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>}
+        {homeMosaic && !isEnglish && <div data-daycare-location-copy className="mt-4 max-w-2xl text-sm leading-relaxed text-forest/80 sm:text-base lg:max-w-none"><FaqAnswer question={DAYCARE_LOCATION_QUESTION} answer={DAYCARE_LOCATION_ANSWER} compact /></div>}
         {homeMosaic ? (
           <div data-home-spaces-mosaic className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
             {photos.map((photo, i) => (

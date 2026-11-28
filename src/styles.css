@@ -1797,7 +1797,12 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
     text-align: left;
   }
   .lead-brand-live [data-aria-hero-heading-spacer] { display: none; }
-  .lead-brand-live [data-lead-hero-grid] h1 { grid-area: title; align-self: start; margin: 0; font-size: clamp(2.25rem, calc(7svh - 12px), 3.25rem); }
+  .lead-brand-live [data-lead-hero-grid] h1 { grid-area: title; align-self: start; position: relative; margin: 0; font-size: clamp(2.25rem, calc(7svh - 12px), 3.25rem); }
+  /* Keep the original heading flow box (and therefore the approved desktop fold).
+     Only paint the two-line version in that exact reserved space. */
+  .lead-brand-live [data-lead-title-flow] { display: block; opacity: 0; }
+  .lead-brand-live [data-lead-title-display] { display: block; position: absolute; inset: 0; font-size: min(1em, 2.6875rem); line-height: 1.05; }
+  .lead-brand-live [data-lead-title-display] > span:first-child { white-space: nowrap; }
   .lead-brand-live [data-aria-service-group] { grid-area: service; align-self: end; margin: 0; }
   .lead-brand-live [data-aria-service-badge] { font-size: 0.875rem; text-align: left; }
   .lead-brand-live [data-lead-hero-pills] { grid-area: pills; align-self: end; width: 100%; margin: 0; max-width: none; flex-wrap: nowrap; justify-content: space-between; gap: 0.75rem; }

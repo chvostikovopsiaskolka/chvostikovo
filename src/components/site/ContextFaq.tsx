@@ -1,10 +1,11 @@
 import { useId, useState, type ReactNode } from "react";
 import { Minus, Plus } from "lucide-react";
-import { FAQ } from "@/content/site";
+import { FAQ, DAYCARE_LOCATION_QUESTION } from "@/content/site";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
 // Emphasise only verified words from the canonical FAQ; the underlying answer stays unchanged.
 const HIGHLIGHTS: Record<string, string[]> = {
+  [DAYCARE_LOCATION_QUESTION]: ["Poľskej 6", "Starou nemocnicou a Verejným cintorínom", "ulice Rastislavova pri autoumyvárke", "bezplatné parkovisko", "zastávka Poľská", "autobusy 12 a 54"],
   "Pre koho je škôlka určená?": ["stredné a veľké psy", "nad 15 kg", "približne od 4 mesiacov", "bezplatnej úvodnej návšteve"],
   "Bude môj psík počas dňa niekedy sám bez dozoru?": ["celodenným dohľadom", "minimálne dvaja skúsení opatrovatelia"],
   "Ako prebieha prvá návšteva psíka v škôlke?": ["vstupnú návštevu", "2–3 kratšie návštevy", "pravdivo všetko", "zoznamovanie prebieha postupne"],
@@ -43,13 +44,13 @@ function withHighlights(text: string, words: string[]): ReactNode[] {
 }
 
 /** Shared readable FAQ answer, on the homepage and the complete FAQ page. */
-export function FaqAnswer({ question, answer }: { question: string; answer: string }) {
-  const paragraphs = answer.replace(/\u00a0/g, " ").split(/\n+/).map((paragraph) => paragraph.trim()).filter(Boolean);
+export function FaqAnswer({ question, answer, compact = false }: { question: string; answer: string; compact?: boolean }) {
+  const paragraphs = answer.replace(/\u00a0/g, " ").split(question === DAYCARE_LOCATION_QUESTION ? /\n{2,}/ : /\n+/).map((paragraph) => paragraph.trim()).filter(Boolean);
   const highlights = HIGHLIGHTS[question] ?? [];
   return (
-    <div className="space-y-3">
+    <div className={compact ? "space-y-2" : "space-y-3"}>
       {paragraphs.map((paragraph, index) => (
-        <p key={index}>{withHighlights(paragraph, highlights)}</p>
+        <p key={index} className={question === DAYCARE_LOCATION_QUESTION ? "whitespace-pre-line" : undefined}>{withHighlights(paragraph, highlights)}</p>
       ))}
     </div>
   );

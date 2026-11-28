@@ -446,7 +446,10 @@ async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=n
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
   const arrival=page.locator('#aria-mosaic [data-daycare-arrival-map]');
   if(await arrival.getAttribute('href')!==expected.MAP_LINK||!await arrival.locator('img').evaluate(async img=>{await img.decode();return img.naturalWidth===1536&&img.naturalHeight===1024}))throw new Error('Campaign arrival map asset/link');
-  const locationCopy=await page.locator('#aria-mosaic [data-daycare-location-copy]').innerText();
+  const locationBlock=page.locator('#aria-mosaic [data-daycare-location-copy]');
+  const locationCopy=await locationBlock.innerText();
+  const boldLocations=await locationBlock.locator('strong').allTextContents();
+  if(await locationBlock.locator('p').count()!==3||JSON.stringify(boldLocations)!==JSON.stringify(['Poľskej 6','Starou nemocnicou a Verejným cintorínom','ulice Rastislavova pri autoumyvárke','bezplatné parkovisko','zastávka Poľská','autobusy 12 a 54']))throw new Error('Location emphasis or paragraph structure');
   if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationCopy.includes(value)))throw new Error('Campaign location copy missing practical directions');
   for(const [width,height] of [[320,720],[360,780],[375,667],[390,740],[430,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
     await page.setViewportSize({width,height});
@@ -479,6 +482,8 @@ async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=n
         admissionClear:(()=>{const h=box('#lead-requirements h2');return [...document.querySelectorAll('#lead-requirements > [aria-hidden="true"] svg')].every(e=>{const p=e.getBoundingClientRect();return p.right<=h.left||p.left>=h.right||p.bottom<=h.top||p.top>=h.bottom;});})(),
         galleryEdge:(()=>{const r=box('#lead-photo-carousel [data-gesture-track="photos"]');return Math.abs(r.left)<2&&Math.abs(r.right-document.documentElement.offsetWidth)<2;})(),
         locationBold:[...document.querySelectorAll('[data-aria-location-chips] > *')].every(e=>Number(getComputedStyle(e).fontWeight)>=700),
+        locationLayout:(()=>{const e=document.querySelector('#aria-mosaic [data-daycare-location-copy]');const p=e.querySelectorAll('p')[1];return p.textContent.includes('autoumyvárke.\nPriamo')&&getComputedStyle(p).whiteSpace==='pre-line'&&(innerWidth<1024||Math.abs(e.getBoundingClientRect().width-(e.parentElement.clientWidth-32))<2);})(),
+        headingTwoLines:(()=>{const display=document.querySelector('[data-lead-title-display]'),flow=document.querySelector('[data-lead-title-flow]'),h=display.closest('h1');if(innerWidth<1024)return getComputedStyle(display).display==='none';const rects=[...display.children].map(node=>{const r=document.createRange();r.selectNodeContents(node);return [...r.getClientRects()].filter(x=>x.width>0&&x.height>0)});const b=h.getBoundingClientRect(),f=flow.getBoundingClientRect();return rects.length===2&&rects.every(r=>new Set(r.map(x=>Math.round(x.top))).size===1&&r.every(x=>x.right<=b.right+1&&x.left>=b.left-1))&&rects[1][0].top>rects[0][0].top&&Math.abs(b.height-f.height)<1&&display.scrollHeight<=h.clientHeight+1;})(),
         hoursRemoved:!document.querySelector('[data-lead-hero-hours]'),
         pairedBenefits:(()=>{const rows=[...document.querySelectorAll('[data-lead-benefits] > article')];return rows.length===3&&rows.every((e,i)=>{const image=e.querySelector('img').getBoundingClientRect(),text=e.querySelector('div').getBoundingClientRect();return image.right<text.left&&(!i||e.getBoundingClientRect().top>rows[i-1].getBoundingClientRect().bottom);});})(),
         cards:(()=>{const cards=[...document.querySelectorAll('[data-lead-price-card]')].map(el=>el.getBoundingClientRect());const taxi=box('#lead-pricing [data-aria-taxi]');return cards.length===2&&Math.abs(cards[0].top-cards[1].top)<2&&Math.abs(cards[0].bottom-cards[1].bottom)<2&&taxi.top>cards[0].bottom&&taxi.width>=cards[1].right-cards[0].left-2;})(),
@@ -507,7 +512,7 @@ async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=n
           (innerWidth<1024||speech.width>=455&&speech.width<=482)&&!!tail&&Number(tail.dataset.tipX)<-8&&
           document.querySelectorAll('[data-aria-section-navigation]').length===0&&document.querySelectorAll('[data-aria-chat-trigger]').length===1&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
     });
-    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 255, 255)'||fold.actionFg!=='rgb(169, 84, 0)'||fold.actionBorder!=='rgb(255, 164, 20)'||fold.actionArrow!=='rgb(184, 46, 127)'||!fold.actionArrowDecorative||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.greetingFit||!fold.compactLauncher||!fold.mobileLauncherLayout||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
+    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.locationLayout||!fold.headingTwoLines||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 255, 255)'||fold.actionFg!=='rgb(169, 84, 0)'||fold.actionBorder!=='rgb(255, 164, 20)'||fold.actionArrow!=='rgb(184, 46, 127)'||!fold.actionArrowDecorative||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.greetingFit||!fold.compactLauncher||!fold.mobileLauncherLayout||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
   await assertPaidReturnArrow(page);
@@ -3638,6 +3643,12 @@ async function assertPublicContent(browser,engine){
               await centerFixtureControl(locationFaq);await locationFaq.click();
               const locationCard=locationFaq.locator('..');
               const locationText=await locationCard.innerText();
+              const homeLocation=page.locator('#priestory [data-daycare-location-copy]');
+              if(!await homeLocation.locator('p').nth(1).evaluate(p=>p.textContent.includes('autoumyvárke.\nPriamo')&&getComputedStyle(p).whiteSpace==='pre-line'))throw new Error('HOME parking line break');
+              await page.setViewportSize({width:1440,height:900});
+              if(!await homeLocation.evaluate(e=>Math.abs(e.getBoundingClientRect().width-(e.parentElement.clientWidth-32))<2))throw new Error('HOME desktop location full width');
+              await page.setViewportSize({width:390,height:844});
+              if(await homeLocation.locator('p').count()!==3||JSON.stringify(await homeLocation.locator('strong').allTextContents())!==JSON.stringify(await locationCard.locator('strong').allTextContents()))throw new Error('HOME location section and FAQ emphasis differs');
               if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationText.includes(value))||await locationCard.locator('a').getAttribute('href')!==readPublicContent().MAP_LINK)throw new Error('Homepage location FAQ differs');
               const puppyFaq=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
               // Center the real disclosure and link above the fixed mobile dock.
