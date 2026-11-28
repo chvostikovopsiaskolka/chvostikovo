@@ -444,7 +444,10 @@ async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=n
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==2||structure.benefits!==3||structure.requirements!==4||
     structure.carousel!==1||!structure.checker||!structure.faqLast||!structure.health||!structure.inquiryHeadings||!structure.inquirySubtitles||structure.mapLinks.length<2||structure.mapLinks.some(link=>link!==expected.MAP_LINK)||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
-  const locationCopy=await page.locator('#aria-mosaic [data-daycare-location-copy]').innerText();
+  const locationBlock=page.locator('#aria-mosaic [data-daycare-location-copy]');
+  const locationCopy=await locationBlock.innerText();
+  const boldLocations=await locationBlock.locator('strong').allTextContents();
+  if(await locationBlock.locator('p').count()!==3||JSON.stringify(boldLocations)!==JSON.stringify(['Poľskej 6','Starou nemocnicou a Verejným cintorínom','ulice Rastislavova pri autoumyvárke','bezplatné parkovisko','zastávka Poľská','autobusy 12 a 54']))throw new Error('Location emphasis or paragraph structure');
   if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationCopy.includes(value)))throw new Error('Campaign location copy missing practical directions');
   for(const [width,height] of [[320,720],[360,780],[375,667],[390,740],[430,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
     await page.setViewportSize({width,height});
@@ -3636,6 +3639,8 @@ async function assertPublicContent(browser,engine){
               await centerFixtureControl(locationFaq);await locationFaq.click();
               const locationCard=locationFaq.locator('..');
               const locationText=await locationCard.innerText();
+              const homeLocation=page.locator('#priestory [data-daycare-location-copy]');
+              if(await homeLocation.locator('p').count()!==3||JSON.stringify(await homeLocation.locator('strong').allTextContents())!==JSON.stringify(await locationCard.locator('strong').allTextContents()))throw new Error('HOME location section and FAQ emphasis differs');
               if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationText.includes(value))||await locationCard.locator('a').getAttribute('href')!==readPublicContent().MAP_LINK)throw new Error('Homepage location FAQ differs');
               const puppyFaq=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
               // Center the real disclosure and link above the fixed mobile dock.
