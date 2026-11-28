@@ -158,7 +158,7 @@
   }
   // Calendar days in Bratislava; inclusive validity, independent of visits and DST.
   function passValidityV452(source){
-    if(!bellaEnabledV450())return null;
+    if(!overviewPreviewEnabledV456())return null;
     const day=value=>{
       if(!/^\d{4}-\d{2}-\d{2}$/.test(value||''))return NaN;
       const date=new Date(value+'T00:00:00Z');
@@ -219,14 +219,19 @@
     block.hidden=next.hidden&&missed.hidden;
   }
   // v450: visual-only, fail-closed account pilot. No account email or raw UUID in the bundle.
-  const BELLA_PILOT_ACCOUNT_SHA256_V450='288c196a3d8f47da8e96737e2c1753be2db7b1864c406c95e312c7687e0dcd66';
-  let bellaCheckedV450='',bellaAllowedV450='',bellaEpochV450=0,bellaSizeObserverV453=null;
+  // Existing authenticated account previews the future public layout, without Bella. New pilot must be explicitly assigned by verified UUID hash.
+  const OVERVIEW_PREVIEW_ACCOUNT_SHA256_V456='288c196a3d8f47da8e96737e2c1753be2db7b1864c406c95e312c7687e0dcd66';
+  const BELLA_PILOT_ACCOUNT_SHA256_V450=null;
+  let bellaCheckedV450='',bellaAllowedV450='',overviewAllowedV456='',bellaEpochV450=0,bellaSizeObserverV453=null;
   const bellaAccountV450=()=>String(state.session?.user?.id||'');
   const bellaReadyV450=()=>!!bellaAccountV450()&&!!state.session?.access_token&&state.data?.profile?.status==='active'&&!!state.data?.dogs?.length;
   const bellaEnabledV450=()=>bellaReadyV450()&&bellaAllowedV450===bellaAccountV450();
+  const overviewPreviewEnabledV456=()=>bellaReadyV450()&&(overviewAllowedV456===bellaAccountV450()||bellaEnabledV450());
+  window.customerOverviewPreviewEnabledV456=overviewPreviewEnabledV456;
   window.customerBellaPilotEnabledV453=bellaEnabledV450;
   function bellaMiddleV454(){
-    const overview=byId('bookingTab'),profile=byId('bookingDogProfile');if(!overview||!profile||!bellaEnabledV450())return;
+    const overview=byId('bookingTab'),profile=byId('bookingDogProfile');if(!overview||!profile||!overviewPreviewEnabledV456())return;
+    document.documentElement.classList.add('overview-preview-v456');
     let scroll=byId('bellaOverviewScrollV454'),created=false;
     if(!scroll){scroll=document.createElement('div');scroll.id='bellaOverviewScrollV454';scroll.setAttribute('role','region');scroll.setAttribute('aria-label','Prehľad');scroll.tabIndex=0;profile.after(scroll);created=true;}
     let previous=null;
@@ -235,7 +240,7 @@
       const target=previous?previous.nextElementSibling:scroll.firstElementChild;
       if(node!==target)scroll.insertBefore(node,target);previous=node;
     }
-    if(created)window.customerPollRefreshLayoutV454?.();
+    if(created&&bellaEnabledV450())window.customerPollRefreshLayoutV454?.();
     return scroll;
   }
   function restoreBellaMiddleV454(){
@@ -244,7 +249,7 @@
     while(scroll.firstChild)scroll.before(scroll.firstChild);scroll.remove();
   }
   function clearBellaUiV450(){
-    document.documentElement.classList.remove('bella-pilot-active-v450');
+    document.documentElement.classList.remove('bella-pilot-active-v450','overview-preview-v456');
     bellaSizeObserverV453?.disconnect();bellaSizeObserverV453=null;
     byId('bookingTab')?.style.removeProperty('--bella-height-v453');
     byId('customerBellaPilotV450')?.remove();
@@ -253,7 +258,7 @@
     if(ticketRoot?.classList.contains('design-pass-validity-v452')){ticketRoot.classList.remove('design-pass-validity-v452');delete ticketRoot.dataset.validityLevel;delete ticketRoot.dataset.presentationKey;ticketRoot.querySelector('.design-pass-meter-v452')?.remove();}
     if(!bellaReadyV450())document.querySelectorAll('.bella-capacity-v450').forEach(el=>el.remove());
   }
-  window.customerBellaPilotClearV450=()=>{++bellaEpochV450;bellaCheckedV450='';bellaAllowedV450='';clearBellaUiV450();};
+  window.customerBellaPilotClearV450=()=>{++bellaEpochV450;bellaCheckedV450='';bellaAllowedV450='';overviewAllowedV456='';clearBellaUiV450();};
   function checkBellaV450(){
     const id=bellaAccountV450();
     if(!bellaReadyV450()){if(bellaCheckedV450||bellaAllowedV450)window.customerBellaPilotClearV450();return;}
@@ -265,8 +270,10 @@
     void crypto.subtle.digest('SHA-256',new TextEncoder().encode(id)).then(bytes=>{
       if(epoch!==bellaEpochV450||id!==bellaAccountV450()||!bellaReadyV450())return;
       const hash=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
-      if(hash!==BELLA_PILOT_ACCOUNT_SHA256_V450)return;
-      bellaAllowedV450=id;ticket();window.customerRefreshNoticeOverviewV376?.();renderBellaV450();renderNotifications();
+      if(hash!==OVERVIEW_PREVIEW_ACCOUNT_SHA256_V456&&hash!==BELLA_PILOT_ACCOUNT_SHA256_V450)return;
+      if(hash===OVERVIEW_PREVIEW_ACCOUNT_SHA256_V456)overviewAllowedV456=id;
+      if(BELLA_PILOT_ACCOUNT_SHA256_V450&&hash===BELLA_PILOT_ACCOUNT_SHA256_V450)bellaAllowedV450=id;
+      ticket();window.customerRefreshNoticeOverviewV376?.();bellaMiddleV454();if(bellaEnabledV450())renderBellaV450();renderNotifications();
       if(!byId('bookingPickerV37')?.classList.contains('hidden'))window.customerDesignPickerRender?.();
     }).catch(()=>{});
   }
@@ -301,7 +308,7 @@
     return {text:tr('Haf! Tešíme sa na ďalšie dni v Chvostíkove.','Woof! We look forward to more days at Chvostíkovo.')};
   }
   function bellaEmphasizeV455(node,copy){
-    const value=String(copy.text||''),key=JSON.stringify([value,copy.emphasis||[]]);
+    const raw=String(copy.text||'');const value=raw.replace(/^(Haf!|Woof!)\s*/u,'')+(raw.startsWith('Haf!')?' Haf!':raw.startsWith('Woof!')?' Woof!':'');const key=JSON.stringify([value,copy.emphasis||[]]);
     if(node.dataset.copyKeyV455===key)return;
     const ranges=[];
     for(const word of copy.emphasis||[]){if(!word)continue;const at=value.indexOf(word);if(at>=0)ranges.push([at,at+word.length]);}
@@ -331,7 +338,7 @@
         else if(action.dataset.notice)void window.openCustomerAnnouncementV363?.(Number(action.dataset.notice));
         else window.openBookingPickerV37?.();
       };
-      bubble.append(name,document.createTextNode(' '),message,action);host.append(photo,bubble);
+      const portrait=document.createElement('div');portrait.className='bella-portrait-v456';name.className='bella-name-v456';portrait.append(photo,name);bubble.append(message,action);host.append(portrait,bubble);
     }
     const msg=host.querySelector('.bella-message-v450'),action=host.querySelector('.bella-action-v450');
     bellaEmphasizeV455(msg,copy);
@@ -406,8 +413,9 @@
     root.querySelector('.compact-overview-v437')?.remove();
     overviewGuidanceV442(root);
     byId('designBulletinTitle')?.remove();
-    const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile'),scroll=byId('bellaOverviewScrollV454');if(inbox&&scroll&&bellaEnabledV450()){if(scroll.firstElementChild!==inbox)scroll.prepend(inbox);}else if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);
+    const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile'),scroll=byId('bellaOverviewScrollV454');if(inbox&&scroll&&overviewPreviewEnabledV456()){if(scroll.firstElementChild!==inbox)scroll.prepend(inbox);}else if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);
     window.customerRefreshNoticeOverviewV376?.();
+    if(overviewPreviewEnabledV456())bellaMiddleV454();
     if(bellaEnabledV450())renderBellaV450();
   }
   function layout() {

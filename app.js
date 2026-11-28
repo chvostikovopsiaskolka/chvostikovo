@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v455';
-const APP_VERSION='2.0.128';
+const APP_BUILD='v456';
+const APP_VERSION='2.0.129';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -713,7 +713,7 @@ function renderNotifications(){
   void acknowledgeAssignedDogNoticeV312();
   const careRows=(state.data?.notifications||[]).filter(n=>n.notification_type==='pass_expiry'&&careNotificationIsCurrent(n)).slice(0,12);
   const notice=$('notificationList'),booking=$('bookingTab');
-  const scroll=window.customerBellaPilotEnabledV453?.()===true?$('bellaOverviewScrollV454'):null;
+  const scroll=window.customerOverviewPreviewEnabledV456?.()===true?$('bellaOverviewScrollV454'):null;
   if(notice&&booking&&notice.parentElement!==(scroll||booking)){if(scroll)scroll.append(notice);else $('bookingDogProfile')?.insertAdjacentElement('afterend',notice);}
   const groups=new Map();
   for(const n of careRows){
@@ -4982,7 +4982,7 @@ function installVaccinationViewerZoomV244(modal){
     const panel=el('span','customer-notice-panel-v383');if(pilotOverview)panel.append(thumb,content);else panel.append(content,thumb);b.append(panel);b.addEventListener('click',()=>openArticle(row,fromHistory));return b;
   }
   function drawOverview(){
-    const pilot=window.customerBellaPilotEnabledV453?.()===true;
+    const pilot=window.customerOverviewPreviewEnabledV456?.()===true;
     const anchor=$('designNearest');let host=$('customerNoticeOverviewV376');
     const preview=new URLSearchParams(location.search).get('notice-carousel-preview')==='1';
     const selected=loggedIn()?rows().filter(row=>row.show_in_overview===true&&current(row)):[];
