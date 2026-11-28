@@ -135,6 +135,12 @@ export function AriaPreviewPage() {
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const ariaChatRef = useRef<{ open: () => void }>(null);
   const adChatOpened = useRef(false);
+  const [standaloneIOSSafari, setStandaloneIOSSafari] = useState(false);
+  useEffect(() => {
+    if (!isLiveLead) return;
+    const ua = navigator.userAgent;
+    setStandaloneIOSSafari(/iPhone|iPad|iPod/i.test(ua) && /Version\/[\d.]+.*Safari\//i.test(ua) && !/FBAN|FBAV|FB_IAB|FB4A|Instagram|CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua));
+  }, [isLiveLead]);
 
   // Paid creative already points to ?aria=open. Keep its UTM/fbclid intact,
   // and give the existing cookie choice priority (including opt-out).
@@ -527,7 +533,7 @@ export function AriaPreviewPage() {
   );
 
   return (
-    <div className={"aria-brand-experiment min-h-screen overflow-x-clip bg-background" + (isLiveLead ? " lead-brand-live" : "")} data-aria-brand-experiment="orange-rose">
+    <div className={"aria-brand-experiment min-h-screen overflow-x-clip bg-background" + (isLiveLead ? " lead-brand-live" : "")} data-aria-brand-experiment="orange-rose" data-lead-ios-safari={isLiveLead && standaloneIOSSafari || undefined}>
       {/* Keep Aria floating in the viewport throughout the lead journey.
           The paid lead hero stays visually unchanged; the menu no longer
           participates in the document layout. */}
