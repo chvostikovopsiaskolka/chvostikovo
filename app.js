@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v449';
-const APP_VERSION='2.0.122';
+const APP_BUILD='v450';
+const APP_VERSION='2.0.123';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -224,8 +224,8 @@ function loading(on){const el=$('loading');if(!el)return;const inApp=!!on&&!$('a
 function box(type,msg){return `<div class="${type}-box">${esc(msg)}</div>`}
 function authMessage(type,msg){$('authMessage').innerHTML=box(type,msg)}
 function currentSession(){for(const s of [localStorage,sessionStorage]){try{const x=JSON.parse(s.getItem(SESSION_KEY)||'null');if(x?.access_token){state.storage=s;return x}}catch(_){}}return null}
-function saveSession(s,remember=true){state.storage=remember?localStorage:sessionStorage;state.storage.setItem(SESSION_KEY,JSON.stringify(s));(remember?sessionStorage:localStorage).removeItem(SESSION_KEY);state.session=s}
-function clearSession(){document.documentElement.classList.remove('customer-liquid-v364');window.customerGuideAbortV358?.();window.customerBulletinAbortV358?.();void clearCustomerAppBadgeV171();localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['passInterestConfirmationV44','schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
+function saveSession(s,remember=true){if(state.session?.user?.id!==s?.user?.id)window.customerBellaPilotClearV450?.();state.storage=remember?localStorage:sessionStorage;state.storage.setItem(SESSION_KEY,JSON.stringify(s));(remember?sessionStorage:localStorage).removeItem(SESSION_KEY);state.session=s}
+function clearSession(){document.documentElement.classList.remove('customer-liquid-v364');window.customerGuideAbortV358?.();window.customerBulletinAbortV358?.();void clearCustomerAppBadgeV171();localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;window.customerBellaPilotClearV450?.();state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['passInterestConfirmationV44','schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
 async function authFetch(path,opts={}){const r=await fetch(SUPABASE_URL+path,{...opts,headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',...(opts.headers||{})}});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok){const error=new Error(data?.msg||data?.error_description||data?.message||'Požiadavka sa nepodarila.');error.status=r.status;error.code=data?.code||data?.error_code||'';if(error.code==='user_banned'||/user is banned/i.test(error.message))error.message='Prístup k účtu je zablokovaný. Kontaktujte Chvostíkovo.';throw error}return data}
 let sessionRefreshInFlight=null,sessionRefreshOwnerV357=null;
 // A suspended tab must adopt the token another tab rotated before using its copy.
@@ -4874,6 +4874,7 @@ function installVaccinationViewerZoomV244(modal){
   function rows(){return rowsState.items.slice().sort((a,b)=>String(b.valid_from||b.created_at||'').localeCompare(String(a.valid_from||a.created_at||'')))}
   function drawBoard(){
     drawOverview();
+    window.customerBellaRefreshV450?.();
     const count=rows().filter(row=>!rowsState.read.has(Number(row.id))).length;
     const badge=$('customerAnnouncementsCountV363');if(badge){badge.textContent=String(count);badge.classList.toggle('hidden',!count);}
     $('menuBulletinV229')?.setAttribute('aria-label',count?'Oznamy, neprečítané: '+count:'Oznamy');
@@ -5083,6 +5084,12 @@ function installVaccinationViewerZoomV244(modal){
       .slice(0,2).map(row=>{const photo=noticePreviewPhotoV423(row.image_path);return photo?preparePhotoV358(photo).promise:Promise.resolve();})
   );
   window.customerRefreshNoticeOverviewV376=drawOverview;
+  // Reuse only already loaded, account-scoped, current promoted notices; no extra fetch or auto-ack.
+  window.customerBellaPriorityNoticeV450=()=>{
+    if(!loggedIn()||rowsState.account!==state.session?.user?.id||rowsState.error)return null;
+    const row=rows().find(r=>r.show_in_overview===true&&current(r)&&!rowsState.read.has(Number(r.id)));
+    return row?{id:Number(row.id),title:String(row.title||'Oznam')}:null;
+  };
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loggedIn())void refresh(true)});
   window.addEventListener('pageshow',event=>{if(event.persisted&&loggedIn())void refresh(false)});
   function init(){

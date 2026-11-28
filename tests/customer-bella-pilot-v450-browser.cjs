@@ -1,0 +1,61 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{createHash}=require('node:crypto');
+const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwright');
+const engine=process.env.V3_ENGINE==='webkit'?webkit:chromium;
+const pilot='synthetic-bella-owner',ordinary='synthetic-browser';
+const hash=createHash('sha256').update(pilot).digest('hex');
+const design=fs.readFileSync('customer-design.js','utf8');
+assert.match(design,/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{64}'/);
+const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{64}'/,"BELLA_PILOT_ACCOUNT_SHA256_V450='"+hash+"'");
+(async()=>{
+ let browser;try{
+ browser=await engine.launch(engine===webkit?{headless:true}:{headless:true,args:['--no-sandbox']});
+ for(const dogs of [1,2])for(const width of [320,390]){
+ const context=await browser.newContext({viewport:{width,height:844},hasTouch:true,serviceWorkers:'block'}),page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.route('**/*',async route=>{
+ const url=new URL(route.request().url()),f=path.join(process.cwd(),url.pathname==='/'?'index.html':url.pathname);
+ if(url.hostname==='inbox.fixture'&&fs.existsSync(f))return route.fulfill({body:url.pathname==='/customer-design.js'?syntheticDesign:fs.readFileSync(f),contentType:f.endsWith('.js')?'text/javascript':f.endsWith('.css')?'text/css':f.endsWith('.png')?'image/png':f.endsWith('.webp')?'image/webp':'text/html'});
+ return route.fulfill({body:'[]',contentType:'application/json'});
+ });
+  await page.addInitScript(()=>{const NativeDate=Date;window.Date=class extends NativeDate{constructor(...args){super(...(args.length?args:[window.__calendarTestNowV442||NativeDate.now()]));}static now(){return window.__calendarTestNowV442?new NativeDate(window.__calendarTestNowV442).getTime():NativeDate.now();}};sessionStorage.setItem('chvostikovo_install_guide_seen_v1','1');Object.defineProperty(navigator,'serviceWorker',{value:undefined});window.__noticeFixture=[];window.__noticeReads=[];window.__calls=[];window.fetch=async(url,opts={})=>{window.__calls.push(String(url));let data=[];if(String(url).includes('portal_announcements?'))data=window.__noticeFixture;if(String(url).includes('portal_announcement_dismissals?')){if(opts.method==='POST')window.__noticeReads.push(JSON.parse(opts.body).announcement_id);else data=window.__noticeReads.map(announcement_id=>({announcement_id}));}return {ok:true,status:200,json:async()=>data,text:async()=>JSON.stringify(data),headers:{get:()=>''}};};});
+  await page.goto('https://inbox.fixture/');await page.waitForTimeout(400);
+  await page.evaluate(dogs=>{queueCustomerSync=()=>{};window.runCustomerOnboardingV75=()=>{};state.session={user:{id:'synthetic-browser'},access_token:'fixture',expires_at:Date.parse('2100-01-01T00:00:00Z')/1000};state.selectedDogId=1;state.data={profile:{status:'active',intro_guide_eligible:false,privacy_notice_acknowledged_at:'2026-01-01',push_prompt_answered_at:'2026-01-01'},dogs:Array.from({length:dogs},(_,i)=>({id:i+1,name:i?'Iris':'Bella',sex:i?'male':'female',default_entry_type:'single',photo_path:'fixture/dog',photo_url:i?null:'https://inbox.fixture/storage/fixture-dog.png',share_name_photo_at:'2026-01-01'})),messages:[],conversation_id:7,vaccinations:Array.from({length:dogs},(_,i)=>['rabies','infectious','kennel_cough'].map(vaccination_type=>({dog_id:i+1,vaccination_type,valid_until:'2099-12-31'}))).flat(),vaccination_proofs:Array.from({length:dogs},(_,i)=>({id:i+1,dog_id:i+1,storage_path:'fixture'})),dog_onboarding:Array.from({length:dogs},(_,i)=>({dog_id:i+1,details_prompt_answered_at:'2026-01-01'})),passes:[],requests:[],reservations:[],visits:[],pass_requests:[],monthly_totals:[],notifications:[],availability:{days:[]}};showApp();renderAll();loading(false);window.__customerOnboardingCompleteV75=true;return loadAnnouncements(true);},dogs);
+
+ await page.evaluate(()=>{window.__calendarTestNowV442='2026-11-28T08:00:00.000Z';state.data.availability.days=Array.from({length:5},(_,i)=>({date:['2026-11-30','2026-12-01','2026-12-02','2026-12-03','2026-12-04'][i],capacity:11,occupied:[2,7,10,11,0][i],available:[9,4,1,0,11][i],bookings_open:i!==4}));renderAll();});
+ const count=()=>page.locator('#customerBellaPilotV450').count();
+ assert.equal(await count(),0,'ordinary account has no Bella');
+ await page.evaluate(()=>{window.openBookingPickerV37();window.customerDesignRefreshCalendarV351()});
+ assert.equal(await page.locator('.bella-capacity-v450').count(),0,'ordinary account has no bars');
+ await page.evaluate(()=>{window.closeBookingPickerV305();state.session.user.id='synthetic-bella-owner';renderAll();});
+ await page.locator('#customerBellaPilotV450').waitFor({state:'visible'});
+ assert.equal(await page.locator('#customerBellaPilotV450 img').evaluate(img=>img.complete&&img.naturalWidth>0),true);
+ assert.match(await page.locator('.bella-message-v450').textContent(),/Haf!/);
+ assert.equal(await page.locator('#customerBellaPilotV450').evaluate(el=>el.previousElementSibling.id),'designNearest');
+ assert(await page.locator('#customerBellaPilotV450').evaluate(el=>el.scrollWidth<=el.clientWidth+1));
+ await page.locator('.bella-action-v450').click();
+ await page.locator('#bookingPickerV37').waitFor({state:'visible'});
+ const one=page.locator('.booking-day-v37[data-date="2026-11-30"]');
+ assert.equal(await one.locator(':scope > span').textContent(),'Voľné: 9');
+ assert(Math.abs(parseFloat(await one.locator('.bella-capacity-v450>i').evaluate(el=>el.style.width))-200/11)<.01,'true occupied/capacity');
+ assert(Math.abs((await one.boundingBox()).height-48)<1);
+ assert.equal(await page.locator('.booking-day-v37[data-date="2026-12-03"] .bella-capacity-v450').count(),0);
+ assert.equal(await page.locator('.booking-day-v37[data-date="2026-12-04"] .bella-capacity-v450').count(),0);
+ assert.equal(await page.locator('[data-preview-date] .bella-capacity-v450,#guidePickerPreviewV360 .bella-capacity-v450').count(),0);
+ await page.evaluate(()=>{window.closeBookingPickerV305();state.data.requests=[{id:991,dog_id:1,reservation_date:'2026-11-30',status:'approved'}];renderAll();});
+ assert.match(await page.locator('.bella-message-v450').textContent(),/Bella/);
+ await page.evaluate(()=>{window.__noticeFixture=[{id:71,active:true,title:'Synthetic promoted announcement',body:'Fixture',valid_from:'2020-01-01',show_in_overview:true}];return loadAnnouncements(true)});
+ assert.match(await page.locator('.bella-message-v450').textContent(),/Synthetic promoted announcement/);
+ await page.evaluate(()=>{state.session.user.id='synthetic-browser';renderAll();});
+ assert.equal(await count(),0,'switch removes pilot immediately');
+ await page.evaluate(()=>{window.openBookingPickerV37();window.customerDesignRefreshCalendarV351()});
+ assert.equal(await page.locator('.bella-capacity-v450').count(),0);
+ await page.evaluate(()=>{window.closeBookingPickerV305();state.session.user.id='synthetic-bella-owner';renderAll();clearSession();});
+ await page.waitForTimeout(100);
+ assert.equal(await count(),0,'late digest must not remount after logout');
+ assert.equal(await page.locator('.bella-capacity-v450').count(),0);
+ assert.deepEqual(errors,[]);
+ console.log('PASS isolated Bella, occupancy, ordinary account, switch/logout',engine.name(),dogs,width);
+ await context.close();
+ }
+ }finally{await browser?.close()}
+})().catch(e=>{console.error(e);process.exitCode=1});
