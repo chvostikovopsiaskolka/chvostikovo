@@ -400,12 +400,16 @@ async function assertPaidReturnNavigation(browser,engine) {
     await assertPaidAriaAdEntry(page,true);
     // Explicit UA fixtures: standalone Safari changes only the photo focal points; Meta in-app retains them.
     for (const [ua, safari] of [['Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',true],['Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1 [FBAN/FBIOS;FBAV/500.0]',false],['Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1 Instagram 350.0',false]]) {
-      await page.addInitScript(value=>Object.defineProperty(navigator,'userAgent',{get:()=>value,configurable:true}),ua);
-      await page.goto(new URL('/psia-skolka-kosice/',base).href,{waitUntil:'domcontentloaded'});
-      await page.locator('[data-aria-speech] [data-aria-tail]').waitFor({state:'attached'});
-      await page.waitForFunction(value=>Boolean(document.querySelector('[data-lead-ios-safari]'))===value,safari);
-      const positions=await page.locator('[data-lead-hero-photo] img').evaluateAll(imgs=>imgs.map(img=>getComputedStyle(img).objectPosition));
-      if(JSON.stringify(positions)!==JSON.stringify(safari?['50% 30%','50% 18%']:['50% 58%','50% 58%']))throw new Error('Safari-only crop regression '+JSON.stringify(positions));
+      const fixture=await context.newPage();
+      try {
+        fixture.on('pageerror',e=>errors.push(e.message));
+        await fixture.addInitScript(value=>Object.defineProperty(navigator,'userAgent',{get:()=>value,configurable:true}),ua);
+        await fixture.goto(new URL('/psia-skolka-kosice/',base).href,{waitUntil:'domcontentloaded'});
+        await fixture.locator('[data-aria-speech] [data-aria-tail]').waitFor({state:'attached'});
+        await fixture.waitForFunction(value=>Boolean(document.querySelector('[data-lead-ios-safari]'))===value,safari);
+        const positions=await fixture.locator('[data-lead-hero-photo] img').evaluateAll(imgs=>imgs.map(img=>getComputedStyle(img).objectPosition));
+        if(JSON.stringify(positions)!==JSON.stringify(safari?['50% 30%','50% 18%']:['50% 58%','50% 58%']))throw new Error('Safari-only crop regression '+JSON.stringify(positions));
+      } finally { await fixture.close(); }
     }
     if(errors.length)throw new Error('Paid navigation runtime errors: '+errors.join('; '));
     console.log('PASS paid LEAD mobile return arrow and desktop absence '+engine);
@@ -3637,6 +3641,11 @@ async function assertPublicContent(browser,engine){
               if(brandPreviewCandidate)await assertApplicationDogLayout(dockApplication,engine,'modal');
               await dockApplication.getByRole('button',{name:'Close'}).click();
               await dockApplication.waitFor({state:'hidden'});
+              const locationFaq=page.locator('#faq button').filter({hasText:'Kde sa škôlka nachádza?'});
+              await centerFixtureControl(locationFaq);await locationFaq.click();
+              const locationCard=locationFaq.locator('..');
+              const locationText=await locationCard.innerText();
+              if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationText.includes(value))||await locationCard.locator('a').getAttribute('href')!==readPublicContent().MAP_LINK)throw new Error('Homepage location FAQ differs');
               const puppyFaq=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
               // Center the real disclosure and link above the fixed mobile dock.
               if(await puppyFaq.getAttribute('aria-expanded')!=='true') {
