@@ -276,11 +276,11 @@
     const messages=window.customerBellaNotificationsV454?.()||[];
     const alerts=messages.filter(n=>n.type!=='poll_invitation');
     const alert=alerts.find(n=>/cancel|clos|reject/i.test(n.type))||alerts[0];
-    if(alert){const body=[alert.title,alert.body].filter(Boolean).join(' · ');return {text:tr('Haf! ','Woof! ')+body,action:alert.type==='pass_expiry'?tr('Vybrať termín','Choose a date'):tr('Rozumiem','Got it'),notification:alert.id};}
+    if(alert){const body=[alert.title,alert.body].filter(Boolean).join(' · ');return {text:tr('Haf! ','Woof! ')+body,action:alert.type==='pass_expiry'?tr('Vybrať termín','Choose a date'):tr('Rozumiem','Got it'),notification:alert.id,emphasis:[alert.title]};}
     const notice=window.customerBellaPriorityNoticeV450?.();
-    if(notice&&Number.isFinite(notice.id)&&notice.id>0)return {text:tr('Haf! Máme pre vás nový oznam. ','Woof! We have a new announcement. ')+notice.title,action:tr('Otvoriť oznam','Open announcement'),notice:notice.id};
+    if(notice&&Number.isFinite(notice.id)&&notice.id>0)return {text:tr('Haf! Máme pre vás nový oznam. ','Woof! We have a new announcement. ')+notice.title,action:tr('Otvoriť oznam','Open announcement'),notice:notice.id,emphasis:[notice.title]};
     const poll=window.customerPollPriorityV454?.();
-    if(poll){const invite=messages.find(n=>n.type==='poll_invitation');return {text:tr('Haf! Zaujíma nás váš názor. Zapojte sa do hlasovania.','Woof! We would love your opinion. Take part in our poll.'),action:tr('Zobraziť hlasovanie','View poll'),poll:true,notification:invite?.id};}
+    if(poll){const invite=messages.find(n=>n.type==='poll_invitation');return {text:tr('Haf! Zaujíma nás váš názor. Zapojte sa do hlasovania.','Woof! We would love your opinion. Take part in our poll.'),action:tr('Zobraziť hlasovanie','View poll'),poll:true,notification:invite?.id,emphasis:[tr('hlasovania','poll')]};}
     const next=model.next,bookings=futureItems().filter(r=>r.reservation_date>=next.from&&r.reservation_date<=next.to&&['pending','approved'].includes(r.status));
     const dogIds=new Set(bookings.map(r=>Number(r.dog_id))),names=(state.data.dogs||[]).filter(d=>dogIds.has(Number(d.id))).map(d=>String(d.name||'')).filter(Boolean);
     const bookAction=tr('Rezervovať miesto','Book a place');
@@ -288,7 +288,7 @@
     if(bookings.length&&names.length){
       const joined=new Intl.ListFormat(en?'en':'sk',{style:'long',type:'conjunction'}).format(names);
       const pending=bookings.some(r=>r.status==='pending');
-      return {text:pending?tr('Haf! Ďakujeme za rezerváciu. Žiadosť pre '+joined+' čaká na schválenie.','Woof! Thanks for booking. A request for '+joined+' is awaiting approval.'):tr('Haf! Ďakujeme za rezerváciu. Tešíme sa na návštevu: '+joined+'!','Woof! Thanks for booking. We look forward to seeing '+joined+'!')};
+      return {text:pending?tr('Haf! Ďakujeme za rezerváciu. Žiadosť pre '+joined+' čaká na schválenie.','Woof! Thanks for booking. A request for '+joined+' is awaiting approval.'):tr('Haf! Ďakujeme za rezerváciu. Tešíme sa na návštevu: '+joined+'!','Woof! Thanks for booking. We look forward to seeing '+joined+'!'),emphasis:[joined]};
     }
     const clock=overviewClock();
     if(clock.date===next.deadline&&clock.minutes>=1200)return {text:tr('Haf! Riadna uzávierka na budúci týždeň už skončila. Ak je ešte voľné miesto, pošlite žiadosť.','Woof! The regular deadline for next week has passed. If a place is available, send a request.'),action:bookAction};
@@ -299,6 +299,19 @@
       return {text:tr(sk,'Woof! '+(days===0?'Book today by 8 PM.':days===1?'Only 1 day left to book. By Sunday '+date+' at 8 PM.':days+' days left to book. By Sunday '+date+' at 8 PM.')),action:bookAction};
     }
     return {text:tr('Haf! Tešíme sa na ďalšie dni v Chvostíkove.','Woof! We look forward to more days at Chvostíkovo.')};
+  }
+  function bellaEmphasizeV455(node,copy){
+    const value=String(copy.text||''),key=JSON.stringify([value,copy.emphasis||[]]);
+    if(node.dataset.copyKeyV455===key)return;
+    const ranges=[];
+    for(const word of copy.emphasis||[]){if(!word)continue;const at=value.indexOf(word);if(at>=0)ranges.push([at,at+word.length]);}
+    const important=/už len\s+\d+\s+(?:deň|dni|dní)|zostáva(?:jú)?\s+\d+\s+(?:deň|dni|dní)|(?:do\s+)?(?:nedele|nedeľu|nedeľa|Sunday)\s+\d{1,2}\.\s*\d{1,2}\.(?:\s*do\s*\d{1,2}:\d{2})?|\b\d{1,2}\.\s*\d{1,2}\.(?:\s*\d{4})?|\b\d{1,2}:\d{2}\b|\b\d{1,2}\s*(?:AM|PM)\b|čaká na schválenie|zrušen[áéý]|zatvoren[áéý]|voľné miesto|nový oznam|platnosti permanentky|platnosti očkovania|posledný vstup|Only 1 day|\d+ days left|awaiting approval|new announcement|cancelled|closed/giu;
+    for(const match of value.matchAll(important))ranges.push([match.index,match.index+match[0].length]);
+    ranges.sort((a,b)=>a[0]-b[0]);const merged=[];
+    for(const range of ranges){const last=merged.at(-1);if(last&&range[0]<=last[1])last[1]=Math.max(last[1],range[1]);else merged.push(range);}
+    const fragment=document.createDocumentFragment();let pos=0;
+    for(const [start,end] of merged){fragment.append(document.createTextNode(value.slice(pos,start)));const strong=document.createElement('strong');strong.textContent=value.slice(start,end);fragment.append(strong);pos=end;}
+    fragment.append(document.createTextNode(value.slice(pos)));node.replaceChildren(fragment);node.dataset.copyKeyV455=key;
   }
   function renderBellaV450(){
     if(!bellaEnabledV450()){clearBellaUiV450();return;}
@@ -318,10 +331,10 @@
         else if(action.dataset.notice)void window.openCustomerAnnouncementV363?.(Number(action.dataset.notice));
         else window.openBookingPickerV37?.();
       };
-      bubble.append(name,message,action);host.append(photo,bubble);
+      bubble.append(name,document.createTextNode(' '),message,action);host.append(photo,bubble);
     }
     const msg=host.querySelector('.bella-message-v450'),action=host.querySelector('.bella-action-v450');
-    if(msg.textContent!==copy.text)msg.textContent=copy.text;
+    bellaEmphasizeV455(msg,copy);
     if(action.textContent!==(copy.action||''))action.textContent=copy.action||'';
     action.hidden=!copy.action;action.dataset.notice=copy.notice?String(copy.notice):'';
     action.dataset.notification=copy.notification?String(copy.notification):'';action.dataset.poll=String(!!copy.poll);

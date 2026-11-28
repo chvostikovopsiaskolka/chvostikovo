@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v454';
-const APP_VERSION='2.0.127';
+const APP_BUILD='v455';
+const APP_VERSION='2.0.128';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -4975,11 +4975,11 @@ function installVaccinationViewerZoomV244(modal){
     if(pilotOverview)headline.title=String(row.title||'Oznam');
     // The full article remains unchanged; Overview only displays authored plain-text teaser.
     const excerpt=fromHistory?row.body||'':String(row.overview_text||'').trim();
-    if(!pilotOverview)content.append(head);
+    content.append(head);
     if(excerpt)content.append(el('span','customer-notice-excerpt-v363',excerpt));
     const action=el('span','customer-notice-action-v363','Otvoriť oznam ›');
     if(!pilotOverview)content.append(action);else{const footer=el('span','customer-notice-footer-v453');footer.append(action);if(unread)footer.append(el('span','customer-bulletin-new-v229','Nové'));content.append(footer);}
-    const panel=el('span','customer-notice-panel-v383');if(pilotOverview)panel.append(head);panel.append(content,thumb);b.append(panel);b.addEventListener('click',()=>openArticle(row,fromHistory));return b;
+    const panel=el('span','customer-notice-panel-v383');if(pilotOverview)panel.append(thumb,content);else panel.append(content,thumb);b.append(panel);b.addEventListener('click',()=>openArticle(row,fromHistory));return b;
   }
   function drawOverview(){
     const pilot=window.customerBellaPilotEnabledV453?.()===true;
@@ -4997,10 +4997,10 @@ function installVaccinationViewerZoomV244(modal){
     const key=JSON.stringify([pilot,selected.map(row=>[row.id,row.title,row.body,row.overview_text,row.image_path,rowsState.read.has(Number(row.id))])]);
     if(host.dataset.contentKey===key)return;
     const oldTrack=host.querySelector('.customer-notice-carousel-v376');
-    const oldIndex=oldTrack?Math.round(oldTrack.scrollLeft/Math.max(1,(oldTrack.firstElementChild?.offsetWidth||0)+12)):0;
+    const oldIndex=oldTrack?Math.round(oldTrack.scrollLeft/Math.max(1,(oldTrack.firstElementChild?.offsetWidth||0)+(parseFloat(getComputedStyle(oldTrack).columnGap)||12))):0;
     host.dataset.contentKey=key;
     const heading=el('h2','customer-notice-title-v381',preview?'Oznamy · ukážka':'Oznamy');
-    if(pilot){const mark=el('span','customer-notice-megaphone-v454');mark.setAttribute('aria-hidden','true');mark.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6h4l12 5V4L7 9H3zm4 6 2 6h3l-2-5M22 9v6"/></svg>';heading.prepend(mark);}
+    if(pilot){const mark=el('span','customer-notice-megaphone-v454','📣');mark.setAttribute('aria-hidden','true');heading.prepend(mark);}
     const track=el('div','customer-notice-carousel-v376');track.dataset.multiple=String(selected.length>1);track.setAttribute('role','region');track.setAttribute('aria-label','Oznamy škôlky');track.tabIndex=0;
     selected.forEach((row,index)=>{const card=noticeCard(row,false,false,pilot);card.setAttribute('aria-label',(index+1)+' z '+selected.length+': '+(row.title||'Oznam'));track.append(card)});
     const header=el('div','customer-notice-header-v382'),stage=el('div','customer-notice-stage-v382');stage.dataset.multiple=String(selected.length>1);header.append(heading);stage.append(track);host.replaceChildren(header,stage);
@@ -5009,13 +5009,13 @@ function installVaccinationViewerZoomV244(modal){
       const prev=el('button','','‹'),next=el('button','','›');
       prev.type=next.type='button';prev.setAttribute('aria-label','Predchádzajúci oznam');next.setAttribute('aria-label','Ďalší oznam');
       let index=Math.min(oldIndex,selected.length-1),pending=0;
-      const step=()=>Math.max(1,track.firstElementChild.getBoundingClientRect().width+12);
+      const step=()=>Math.max(1,track.firstElementChild.getBoundingClientRect().width+(parseFloat(getComputedStyle(track).columnGap)||12));
       const update=()=>{pending=0;index=Math.max(0,Math.min(selected.length-1,Math.round(track.scrollLeft/step())));prev.disabled=index===0;next.disabled=index===selected.length-1;track.dataset.currentIndex=String(index);};
       const move=direction=>track.scrollTo({left:(index+direction)*step(),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
       prev.onclick=()=>move(-1);next.onclick=()=>move(1);
       track.addEventListener('scroll',()=>{if(!pending)pending=requestAnimationFrame(update)},{passive:true});
       track.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();move(event.key==='ArrowRight'?1:-1)}});
-      if(pilot){controls.append(prev,next);header.append(controls);}else{controls.append(next,prev);stage.append(controls);}track.scrollLeft=index*step();update();
+      if(!pilot){controls.append(next,prev);stage.append(controls);}track.scrollLeft=index*step();update();
     }
   }
   async function markRead(row){
