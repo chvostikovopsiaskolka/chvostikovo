@@ -398,6 +398,19 @@ async function assertPaidReturnNavigation(browser,engine) {
     if(await interest.isVisible())throw new Error('Return to Hero must restore original questions');
     await assertPaidAriaAdEntry(page);
     await assertPaidAriaAdEntry(page,true);
+    // Explicit UA fixtures: standalone Safari changes only the photo focal points; Meta in-app retains them.
+    for (const [ua, safari] of [['Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',true],['Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1 [FBAN/FBIOS;FBAV/500.0]',false],['Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1 Instagram 350.0',false]]) {
+      const fixture=await context.newPage();
+      try {
+        fixture.on('pageerror',e=>errors.push(e.message));
+        await fixture.addInitScript(value=>Object.defineProperty(navigator,'userAgent',{get:()=>value,configurable:true}),ua);
+        await fixture.goto(new URL('/psia-skolka-kosice/',base).href,{waitUntil:'domcontentloaded'});
+        await fixture.locator('[data-aria-speech] [data-aria-tail]').waitFor({state:'attached'});
+        await fixture.waitForFunction(value=>Boolean(document.querySelector('[data-lead-ios-safari]'))===value,safari);
+        const positions=await fixture.locator('[data-lead-hero-photo] img').evaluateAll(imgs=>imgs.map(img=>getComputedStyle(img).objectPosition));
+        if(JSON.stringify(positions)!==JSON.stringify(safari?['50% 30%','50% 18%']:['50% 58%','50% 58%']))throw new Error('Safari-only crop regression '+JSON.stringify(positions));
+      } finally { await fixture.close(); }
+    }
     if(errors.length)throw new Error('Paid navigation runtime errors: '+errors.join('; '));
     console.log('PASS paid LEAD mobile return arrow and desktop absence '+engine);
   }finally{await context.close();}
@@ -431,6 +444,8 @@ async function assertCampaignContentFlow(page, {visualOnly=false,trackedEvents=n
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==2||structure.benefits!==3||structure.requirements!==4||
     structure.carousel!==1||!structure.checker||!structure.faqLast||!structure.health||!structure.inquiryHeadings||!structure.inquirySubtitles||structure.mapLinks.length<2||structure.mapLinks.some(link=>link!==expected.MAP_LINK)||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
+  const locationCopy=await page.locator('#aria-mosaic [data-daycare-location-copy]').innerText();
+  if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationCopy.includes(value)))throw new Error('Campaign location copy missing practical directions');
   for(const [width,height] of [[320,720],[360,780],[375,667],[390,740],[430,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
     await page.setViewportSize({width,height});
     await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
@@ -2261,6 +2276,13 @@ async function assertPublicContent(browser,engine){
                   await questionMenu.locator('[data-aria-chat-question="taxi"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
                   if(!(await chat.locator('[data-aria-chat-turn="aria"]').last().innerText()).includes('5 € za jednu jazdu')||JSON.stringify(await ids())!==JSON.stringify(['first_visit','location','space']))throw new Error('Taxi answer and final three remaining choices must be correct');
+                  // Location answer always exposes the canonical map link, without third-party requests.
+                  await questionMenu.locator('[data-aria-chat-question="location"]').click();
+                  await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
+                  const locationMap=chat.locator('[data-aria-location-map]');
+                  await locationMap.waitFor({state:'visible'});
+                  const locationReply=await chat.locator('[data-aria-chat-turn="aria"]').last().innerText();
+                  if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationReply.includes(value))||await locationMap.locator('iframe').count()||await locationMap.locator('a').getAttribute('href')!==readPublicContent().MAP_LINK)throw new Error('Location answer or canonical map link');
                   await otherCta.click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
                   const other=chat.locator('[data-aria-chat-other]');
@@ -3420,7 +3442,7 @@ async function assertPublicContent(browser,engine){
                       benefits.getBoundingClientRect().bottom<=aboutText.getBoundingClientRect().top+2,
                     centeredFullWidthTaxi:Math.abs((taxi.getBoundingClientRect().left+taxi.getBoundingClientRect().right-included.left-prices.right)/2)<3,
                     faqContactResponsiveWidth:(()=>{const card=faq.querySelector('[data-home-faq-contact]'), question=faq.querySelector('button[aria-expanded]');if(!card||!question)return false;const c=card.getBoundingClientRect(),q=question.getBoundingClientRect();return c.width<=q.width+2 && (innerWidth>=1024?Math.abs(c.width-q.width)<2:c.width<=512+2) && card.scrollWidth<=card.clientWidth+2 && getComputedStyle(card).backgroundColor==='rgba(255, 252, 248, 0.94)';})(),
-                    singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===8 && !faq.querySelector('a[href="/caste-otazky"]') && !!faq.querySelector('[data-home-faq-contact]') && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
+                    singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===9 && !faq.querySelector('a[href="/caste-otazky"]') && !!faq.querySelector('[data-home-faq-contact]') && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
                     applicationAfterPricing:document.getElementById('cennik').nextElementSibling?.id==='psie-priatelstva' && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='cennik' && document.getElementById('psie-priatelstva').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
                     approvedMainDock:(()=>{const style=getComputedStyle(dock.querySelector('.mobile-dock-bar'));return style.boxShadow.includes('inset') && style.backgroundImage.includes('gradient') && (style.backdropFilter||style.webkitBackdropFilter||'').includes('blur');})(),
@@ -3610,6 +3632,11 @@ async function assertPublicContent(browser,engine){
               if(brandPreviewCandidate)await assertApplicationDogLayout(dockApplication,engine,'modal');
               await dockApplication.getByRole('button',{name:'Close'}).click();
               await dockApplication.waitFor({state:'hidden'});
+              const locationFaq=page.locator('#faq button').filter({hasText:'Kde sa škôlka nachádza?'});
+              await centerFixtureControl(locationFaq);await locationFaq.click();
+              const locationCard=locationFaq.locator('..');
+              const locationText=await locationCard.innerText();
+              if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationText.includes(value))||await locationCard.locator('a').getAttribute('href')!==readPublicContent().MAP_LINK)throw new Error('Homepage location FAQ differs');
               const puppyFaq=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
               // Center the real disclosure and link above the fixed mobile dock.
               if(await puppyFaq.getAttribute('aria-expanded')!=='true') {
@@ -4775,7 +4802,7 @@ async function assertPublicContent(browser,engine){
             }
             await productPage.waitForURL(url=>url.pathname==='/'&&url.hash==='#faq');
             await productPage.locator('#faq [data-home-faq-contact]').waitFor({state:'visible'});
-            if(await productPage.locator('#faq button[aria-expanded]').count()!==8) throw new Error('FAQ redirect did not land on consolidated home content');
+            if(await productPage.locator('#faq button[aria-expanded]').count()!==9) throw new Error('FAQ redirect did not land on consolidated home content');
             results.push({engine, restricted:false, route:'product-inquiries-' + width, status:'PASS'});
             console.log('PASS product inquiries and retired shop redirects ' + engine + ' ' + width);
           } catch (error) {

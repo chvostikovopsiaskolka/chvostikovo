@@ -1,4 +1,4 @@
-import { FAQ, PRICING } from "./site";
+import { FAQ, PRICING, DAYCARE_LOCATION_QUESTION, DAYCARE_LOCATION_ANSWER } from "./site";
 import { DAYCARE_ELIGIBILITY_ANSWER } from "./daycare-eligibility";
 
 export const HOME_PRICE_QUESTION = "Aký je cenník a treba si rezervovať miesto vopred?";
@@ -19,6 +19,7 @@ export const HOME_PRIMARY_FAQ = [
   { trackingId: 9, q: "Aké sú otváracie hodiny a ponúkate aj odvoz?",
     a: faqAnswer("Aké sú otváracie hodiny?") + "\n" + faqAnswer("Zabezpečujete aj vyzdvihnutie a odvoz psíka?") },
   { trackingId: 10, q: "Zabezpečujete aj stravu?", a: faqAnswer("Zabezpečujete aj stravu?") },
+  { trackingId: 12, q: DAYCARE_LOCATION_QUESTION, a: DAYCARE_LOCATION_ANSWER },
 ];
 
 

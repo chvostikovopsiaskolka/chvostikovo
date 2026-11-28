@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { ChvostikovoPaw } from "./ChvostikovoPaw";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "./AriaPreviewText";
-import { ADDRESS, PHONE, PHONE_PRETTY, PRICING } from "@/content/site";
+import { PHONE, PHONE_PRETTY, PRICING, MAP_LINK, DAYCARE_LOCATION_QUESTION, DAYCARE_LOCATION_ANSWER } from "@/content/site";
 import { ShortForm, HomeFaqContactForm } from "./Forms";
 import { LeadStepForm } from "./LeadStepForm";
 import { AriaPuppyChecker } from "./AriaPuppyChecker";
@@ -74,8 +74,8 @@ const chatQuestions: Question[] = [
   },
   {
     id: "location",
-    title: "Kde sa škôlka nachádza?",
-    answer: "Haf! 🐾 Nájdeš nás v **Košiciach na " + (ADDRESS.street === "Poľská 6" ? "Poľskej 6" : ADDRESS.street) + "**.\n\nMáme vlastné vnútorné priestory aj vonkajší výbeh, kde si naši škôlkari môžu užívať deň plný hier, pohybu a oddychu.\n\nNa našej stránke nájdeš aj **mapu a kontakt**, aby si nás jednoducho našiel.",
+    title: DAYCARE_LOCATION_QUESTION,
+    answer: "Haf! 🐾 " + DAYCARE_LOCATION_ANSWER + " 🧡",
   },
   {
     id: "space",
@@ -408,6 +408,11 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                       {typedLength > 0 && <span aria-hidden="true" className="ml-0.5 inline-block h-3 w-1 motion-safe:animate-pulse bg-[#9e336f] align-middle" />}
                     </>
                   ) : renderChatText(message.text)}
+                  {!isTyping && message.questionId === "location" && (
+                    <div data-aria-location-map className="mt-3 space-y-2 whitespace-normal">
+                      <a href={MAP_LINK} target="_blank" rel="noopener noreferrer" onClick={() => track("location_map_open")} className="flex min-h-11 items-center justify-center rounded-xl border border-[#9e336f]/30 px-2 text-center text-xs font-bold text-[#9e336f]">📍 Otvoriť v Google Maps</a>
+                    </div>
+                  )}
                   {!isTyping && message.questionId === "requirements" && (
                     <div data-aria-chat-requirements className="mt-3 space-y-2 whitespace-normal">
                       {ARIA_PREVIEW_REQUIREMENTS.map((item, index) => (

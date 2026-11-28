@@ -1762,6 +1762,13 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .lead-brand-live [data-aria-lead-review-spacing] { margin-top: 24px; }
 }
 
+/* Standalone iOS Safari only: reveal more of the top of the original portraits.
+   Do not change the approved FB/IG in-app crop or the geometry of either tile. */
+@media (max-width: 639px) {
+  .lead-brand-live[data-lead-ios-safari] [data-lead-hero-photo="1"] img { object-position: 50% 30%; }
+  .lead-brand-live[data-lead-ios-safari] [data-lead-hero-photo="2"] img { object-position: 50% 18%; }
+}
+
 .lead-brand-live [data-lead-faq-cta] { background: #ffa414; color: #26322b; }
 .lead-brand-live [data-lead-faq-cta]:is(:hover, :active) { color: #fff; }
 

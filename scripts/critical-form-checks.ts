@@ -213,7 +213,11 @@ const approvedTitles = [
   "Je potrebné rezervovať miesto vopred?", "Kde sa škôlka nachádza?",
   "Aké priestory má škôlka?", "Ponúkate aj psie taxi?",
 ];
-assert(approvedTitles.every((title, index) => ariaChatMobile.includes('title: "' + title + '"') && (index === 0 || ariaChatMobile.indexOf('title: "' + approvedTitles[index - 1] + '"') < ariaChatMobile.indexOf('title: "' + title + '"'))) &&
+const locationContent = readFileSync(new URL("../src/content/site.ts", import.meta.url), "utf8");
+const chatTitleToken = (title: string) => title === "Kde sa škôlka nachádza?" ? 'title: DAYCARE_LOCATION_QUESTION' : 'title: "' + title + '"';
+assert(locationContent.includes('export const DAYCARE_LOCATION_QUESTION = "Kde sa škôlka nachádza?"') &&
+  ariaChatMobile.includes('answer: "Haf! 🐾 " + DAYCARE_LOCATION_ANSWER + " 🧡"') &&
+  approvedTitles.every((title, index) => ariaChatMobile.includes(chatTitleToken(title)) && (index === 0 || ariaChatMobile.indexOf(chatTitleToken(approvedTitles[index - 1]!)) < ariaChatMobile.indexOf(chatTitleToken(title)))) &&
   ariaChatMobile.includes('id: "reservation"') &&
   ariaChatMobile.includes("**do nedele 20:00**") &&
   ariaChatMobile.includes("**vieme sa dohodnúť aj individuálne**") &&
