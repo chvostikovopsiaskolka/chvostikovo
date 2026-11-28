@@ -49,11 +49,11 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  assert(Math.abs(alignment.right-alignment.dateRight)<2,'track ends below the date');
  assert.equal(alignment.direction,'ltr');
  const assertConnected=async()=>{
-   const geometry=await meter.evaluate(el=>{const badge=el.closest('#designTicket').querySelector('.design-validity'),b=badge.getBoundingClientRect(),m=el.getBoundingClientRect(),style=getComputedStyle(badge);return {gap:m.top-b.bottom,right:m.right-b.right,bg:style.backgroundColor,border:style.borderTopWidth,track:getComputedStyle(el).borderTopWidth,bottomRight:style.borderBottomRightRadius,overflow:b.right>m.right+1};});
-   assert(geometry.gap>=1&&geometry.gap<=4,'date badge and track separated by a small gap');
+   const geometry=await meter.evaluate(el=>{const badge=el.closest('#designTicket').querySelector('.design-validity'),b=badge.getBoundingClientRect(),m=el.getBoundingClientRect(),style=getComputedStyle(badge);return {gap:m.top-b.bottom,right:m.right-b.right,bg:style.backgroundColor,border:style.borderTopWidth,bottomBorder:style.borderBottomWidth,track:getComputedStyle(el).borderTopWidth,bottomRight:style.borderBottomRightRadius,overflow:b.right>m.right+1};});
+   assert(Math.abs(geometry.gap)<1,'date badge and track touch without a gap');
    assert(Math.abs(geometry.right)<2,'date badge aligns with track end');
-   assert.equal(geometry.border,'1px');assert.equal(geometry.track,'1px');
-   assert.equal(geometry.bottomRight,'3px');assert.equal(geometry.overflow,false);
+   assert.equal(geometry.border,'1px');assert.equal(geometry.bottomBorder,'0px');assert.equal(geometry.track,'1px');
+   assert.equal(geometry.bottomRight,'0px');assert.equal(geometry.overflow,false);
  };
  await assertConnected();
  assert.equal(await page.locator('#designTicket').getAttribute('data-validity-level'),'green');
@@ -77,7 +77,13 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  assert.equal(await meter.count(),0,'unlimited pass has no time meter');
  await page.evaluate(()=>{state.data.passes=[];renderAll();});
  assert.equal(await page.locator('#customerBellaPilotV450 img').evaluate(img=>img.complete&&img.naturalWidth===120&&img.naturalHeight===126),true,'new isolated head asset loads');
- assert.match(await page.locator('.bella-message-v450').textContent(),/Haf!.*1 deň/);
+ assert.match(await page.locator('.bella-message-v450').textContent(),/1 deň.*Haf!$/);
+ assert.equal(await page.locator('#customerBellaPilotV450 .bella-identity-v456').textContent(),'Bella');
+ assert(await page.locator('#customerBellaPilotV450 .bella-identity-v456').evaluate(el=>el.querySelector('img').getBoundingClientRect().bottom<=el.querySelector('strong').getBoundingClientRect().top+1),'name below head');
+ const bookStyles=await page.locator('.bella-action-v450').evaluate(el=>({bg:getComputedStyle(el).backgroundColor,fg:getComputedStyle(el).color,gap:el.getBoundingClientRect().top-el.previousElementSibling.getBoundingClientRect().bottom}));
+ assert.equal(bookStyles.bg,'rgb(198, 76, 8)');assert.equal(bookStyles.fg,'rgb(255, 255, 255)');assert(bookStyles.gap>=0&&bookStyles.gap<=5,'compact message to CTA gap');
+ const dockStyles=await page.locator('#navBookAddV220').evaluate(el=>({bg:getComputedStyle(el).backgroundColor,border:getComputedStyle(el).borderTopWidth,fg:getComputedStyle(el).color}));
+ assert.deepEqual(dockStyles,{bg:'rgb(255, 255, 255)',border:'1px',fg:'rgb(189, 77, 9)'});
  assert.equal(await page.locator('.bella-message-v450 strong').first().textContent(),'už len 1 deň');
  assert.match(await page.locator('.bella-message-v450 strong').allTextContents().then(x=>x.join(' ')),/29\.\s*11\..*20:00/);
  const assistant=page.locator('#customerBellaPilotV450');
@@ -126,7 +132,7 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  await notice.locator(':scope > .lg-v3-material').waitFor({state:'attached'});
  assert.equal(await notice.evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
  const rects=await first.evaluate(el=>{const box=s=>el.querySelector(s).getBoundingClientRect();const photo=box('.customer-notice-thumb-v363'),title=box('.customer-notice-head-v363'),cta=box('.customer-notice-action-v363'),content=box('.customer-notice-content-v363');return {square:Math.abs(photo.width-photo.height),left:photo.right<=title.left,top:Math.abs(photo.top-title.top),ctaRight:Math.abs(cta.right-content.right),bottom:Math.abs(photo.bottom-cta.bottom)}});
- assert(rects.square<1&&rects.left&&rects.top<8&&rects.ctaRight<2&&rects.bottom<8,'photo left, title top, CTA bottom right');
+ assert(rects.square<1&&rects.left&&rects.top<8&&rects.ctaRight>=2&&rects.ctaRight<=5&&rects.bottom<8,'photo left, title top, CTA bottom right');
  assert(await track.evaluate(el=>{const second=el.children[1].getBoundingClientRect(),box=el.getBoundingClientRect();return second.left<box.right-2&&second.right>box.right}),'next notice peeks into carousel');
  const longTitle=page.locator('#customerNoticeOverviewV376 [data-announcement-id="72"] .customer-notice-head-v363 strong');
  assert.equal(await longTitle.locator('.customer-notice-head-text-v454').evaluate(el=>getComputedStyle(el).webkitLineClamp),'2');
@@ -140,6 +146,7 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  await page.evaluate(()=>{state.session.user.id='synthetic-browser';renderAll();});
  assert.equal(await count(),0,'switch removes pilot immediately');
  assert.equal(await page.locator('#bellaOverviewScrollV454').count(),0,'ordinary account has no private scroll container');
+ assert.equal(await page.locator('#navBookAddV220').evaluate(el=>getComputedStyle(el).borderTopWidth),'0px','ordinary dock unchanged on switch');
  assert.equal(await meter.count(),0,'switch removes private meter immediately');
  await page.evaluate(()=>{return loadAnnouncements(true)});
  assert.equal(await page.locator('#customerNoticeOverviewV376').getAttribute('data-pilot-v453'),'false');
