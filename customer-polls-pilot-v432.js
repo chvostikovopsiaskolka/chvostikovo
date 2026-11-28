@@ -91,16 +91,27 @@
   })();
   return loading;
  }
+ function placePollV454(){
+  const root=$('customerPollMenuV432');if(!root)return;
+  const target=window.customerBellaPilotEnabledV453?.()===true?$('bellaOverviewScrollV454'):null;
+  if(target){if(root.parentElement!==target)target.append(root);}
+  else if(root.parentElement!==$('menuTab')){$('menuTab')?.querySelector('.customer-social-v223')?.before(root);if(root.parentElement!==$('menuTab'))$('menuTab')?.append(root);}
+ }
+ window.customerPollRestoreMenuV454=()=>{const root=$('customerPollMenuV432');if(root&&root.parentElement!==$('menuTab')){$('menuTab')?.querySelector('.customer-social-v223')?.before(root);if(root.parentElement!==$('menuTab'))$('menuTab')?.append(root);}};
+ window.customerPollRefreshLayoutV454=placePollV454;
+ window.customerPollPriorityV454=()=>window.customerBellaPilotEnabledV453?.()===true&&allowed===account()&&active&&!thankYou&&$('customerPollMenuV432')?.parentElement===$('bellaOverviewScrollV454')?{id:active.id,title:active.title}:null;
+ window.customerPollOpenOverviewV454=()=>{if(!window.customerPollPriorityV454())return;const root=$('customerPollMenuV432');root.scrollIntoView({block:'start',behavior:'smooth'});root.querySelector('h2')?.focus({preventScroll:true});};
  function render(){
   if(!allowed||allowed!==account())return;
   const show=Boolean(active||thankYou);
   // The compact Menu is the standard design for all signed-in customers.
   // Published, unvoted polls render below Menu; completed/out-of-scope polls stay hidden.
   if(!menuLayout(show))return;
-  if(!show)return;
+  if(!show){window.customerBellaRefreshV450?.();return;}
+  placePollV454();
   const root=$('customerPollMenuV432'),badge=$('customerPollNavBadgeV432');
   root.hidden=false;root.replaceChildren();
-  if(badge)badge.hidden=!active||thankYou;
+  if(badge)badge.hidden=!active||thankYou||root.parentElement===$('bellaOverviewScrollV454');
   if(thankYou){
    const success=el('div','customer-poll-complete-v432');
    success.setAttribute('role','status');
@@ -108,7 +119,7 @@
      el('p','',text('Váš záujem sme zaznamenali.','Your response has been recorded.')));
    const done=el('button','customer-poll-finish-v433',text('Hotovo','Done'));
    done.type='button';done.dataset.pollDone='true';
-   root.append(success,done);return;
+   root.append(success,done);window.customerBellaRefreshV450?.();return;
   }
   const h=el('h2','',active.title);h.id='customerPollMenuTitleV432';h.tabIndex=-1;
   const question=el('p','customer-poll-question-v432',active.question);
@@ -148,6 +159,7 @@
    opts.append(wrap);
   });
   root.append(opts);
+  window.customerBellaRefreshV450?.();
   if(error){
    const msg=el('p','customer-poll-error-v433',error);msg.setAttribute('role','alert');root.append(msg);
   }
@@ -219,7 +231,7 @@
  }
  addCustomerHook('afterBootstrap',sync);
  addCustomerHook('afterRenderDog',()=>{if(allowed===account())render();else void sync()});
- addCustomerHook('afterSwitchTab',tab=>{if(allowed===account()){render();if(tab==='menu'&&!sending)void refresh(allowed,true)}});
+ addCustomerHook('afterSwitchTab',tab=>{if(allowed===account()){render();if((tab==='menu'||tab==='booking'&&window.customerBellaPilotEnabledV453?.()===true)&&!sending)void refresh(allowed,true)}});
  document.addEventListener('click',event=>{
   if(event.target.closest?.('[data-customer-locale]')&&allowed===account())
    requestAnimationFrame(render);

@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v453';
-const APP_VERSION='2.0.126';
+const APP_BUILD='v454';
+const APP_VERSION='2.0.127';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -687,12 +687,34 @@ async function acknowledgeAssignedDogNoticeV312(){
   customerDogApprovalReadsV312.set(key,task);
   return task;
 }
+function customerPopupRowsV454(){return (state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test','staff_message_customer','announcement_push'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5)}
+function bellaPopupRowsV454(){
+  if(window.__customerOnboardingCompleteV75!==true||window.customerBellaPilotEnabledV453?.()!==true||matchMedia('(max-height:420px) and (orientation:landscape)').matches)return [];
+  // Only short informational rows that the old popup could acknowledge. Retain the vaccine policy and lengthy notices in their original UI.
+  return customerPopupRowsV454().filter(n=>Number.isSafeInteger(Number(n.id))&&Number(n.id)>0&&n.notification_type!=='vaccination_expiry'&&String(n.title||'').length+String(n.body||'').length<=240&&(n.notification_type!=='poll_invitation'||window.customerPollPriorityV454?.()));
+}
+window.customerBellaNotificationsV454=()=>bellaPopupRowsV454().map(n=>({id:Number(n.id),type:String(n.notification_type||''),title:String(n.title||''),body:vaccinationCopyV234(n)}));
+async function acknowledgeCustomerPopupRowsV454(ids){
+  if(!state.session?.user?.id||!ids.length)return;
+  ids.forEach(id=>customerClosedNotificationIdsV59.add(id));
+  const stamp=new Date().toISOString();
+  (state.data?.notifications||[]).forEach(n=>{if(ids.includes(Number(n.id)))n.read_at=stamp});
+  syncCustomerAppBadgeV186();
+  try{await api({action:'mark_notifications_read',notification_ids:ids})}catch(_){queueCustomerSync('notifications',80)}
+}
+window.customerBellaActNotificationV454=id=>{
+  const row=bellaPopupRowsV454().find(n=>Number(n.id)===Number(id));if(!row)return;
+  void acknowledgeCustomerPopupRowsV454([Number(row.id)]);renderNotifications();
+  if(row.notification_type==='pass_expiry')customerCareAction(row);
+  else if(row.notification_type==='poll_invitation')window.customerPollOpenOverviewV454?.();
+};
 function renderNotifications(){
   if(window.__customerOnboardingCompleteV75!==true){$('notificationPopup')?.classList.add('hidden');return}
   void acknowledgeAssignedDogNoticeV312();
   const careRows=(state.data?.notifications||[]).filter(n=>n.notification_type==='pass_expiry'&&careNotificationIsCurrent(n)).slice(0,12);
   const notice=$('notificationList'),booking=$('bookingTab');
-  if(notice&&booking&&notice.parentElement!==booking)$('bookingDogProfile')?.insertAdjacentElement('afterend',notice);
+  const scroll=window.customerBellaPilotEnabledV453?.()===true?$('bellaOverviewScrollV454'):null;
+  if(notice&&booking&&notice.parentElement!==(scroll||booking)){if(scroll)scroll.append(notice);else $('bookingDogProfile')?.insertAdjacentElement('afterend',notice);}
   const groups=new Map();
   for(const n of careRows){
     const vaccination=(state.data?.vaccinations||[]).find(v=>Number(v.id)===Number(n.entity_id));
@@ -702,7 +724,9 @@ function renderNotifications(){
   }
   notice.innerHTML=[...groups.values()].map(group=>`<div class="care-notice"><strong>${esc(group[0].title)}</strong><p>${group.map(n=>esc(vaccinationCopyV234(n))).join('<br>')}</p>${group[0].notification_type==='vaccination_expiry'?`<p class="vacc-policy-note-v233">${esc(vaccinationCarePolicyV233)}</p>`:''}<button class="btn secondary compact" type="button" data-care-notice="${Number(group[0].id)}">${group[0].notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button></div>`).join('');
   notice.querySelectorAll('[data-care-notice]').forEach(b=>b.addEventListener('click',()=>{const row=careRows.find(n=>Number(n.id)===Number(b.dataset.careNotice));if(row)customerCareAction(row)}));
-  const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test','staff_message_customer','announcement_push'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
+  const routed=new Set(bellaPopupRowsV454().map(n=>Number(n.id)));
+  const rows=customerPopupRowsV454().filter(n=>!routed.has(Number(n.id)));
+  if(window.customerBellaPilotEnabledV453?.()===true)window.customerBellaRefreshV450?.();
   let modal=$('notificationPopup');
   if(!rows.length){modal?.classList.add('hidden');return}
   if(!modal){
@@ -716,14 +740,8 @@ function renderNotifications(){
   list.innerHTML=rows.map(n=>`<div class="notification-popup-item"><strong>${esc(n.title||'Upozornenie')}</strong><div>${esc(vaccinationCopyV234(n))}</div>${n.notification_type==='vaccination_expiry'?`<p class="vacc-policy-note-v233">${esc(vaccinationCarePolicyV233)}</p>`:''}${['pass_expiry','vaccination_expiry'].includes(n.notification_type)?`<button type="button" class="btn compact" data-popup-care="${Number(n.id)}">${n.notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button>`:''}</div>`).join('');
   list.querySelectorAll('[data-popup-care]').forEach(b=>b.addEventListener('click',()=>{const row=rows.find(n=>Number(n.id)===Number(b.dataset.popupCare));if(row){close();customerCareAction(row)}}));
   const close=async()=>{
-    visibleIds.forEach(id=>customerClosedNotificationIdsV59.add(id));
     modal.classList.add('hidden');
-    const stamp=new Date().toISOString();
-    (state.data?.notifications||[]).forEach(n=>{if(visibleIds.includes(Number(n.id)))n.read_at=stamp});
-    syncCustomerAppBadgeV186();
-    try{
-      await api({action:'mark_notifications_read',notification_ids:visibleIds});
-    }catch(_){queueCustomerSync('notifications',80)}
+    await acknowledgeCustomerPopupRowsV454(visibleIds);
   };
   $('notificationPopupClose').onclick=close;
   const hasOtherModal=[...document.querySelectorAll('[aria-modal="true"]')].some(el=>el!==modal&&!el.classList.contains('hidden'));
@@ -4911,7 +4929,18 @@ function installVaccinationViewerZoomV244(modal){
   function overviewHeadlineV453(title){
     const value=String(title||'Oznam');
     const chars=typeof Intl.Segmenter==='function'?Array.from(new Intl.Segmenter('sk',{granularity:'grapheme'}).segment(value),part=>part.segment):Array.from(value);
-    return chars.length>30?chars.slice(0,29).join('')+'…':value;
+    const emoji=char=>/\p{Extended_Pictographic}|\p{Regional_Indicator}|\u20e3/u.test(char);
+    let at=chars.length;while(at>0&&emoji(chars[at-1]))at--;
+    const suffix=chars.slice(at).join(''),count=chars.length-at;
+    let label=chars.slice(0,at).join('');
+    if(chars.length>30&&count>0&&count<29){
+      label=label.trimEnd();const letters=chars.slice(0,at).filter((_,i)=>i<at);
+      while(letters.length&&/\s/u.test(letters.at(-1)))letters.pop();
+      if(letters.length+count>30)label=letters.slice(0,29-count).join('').trimEnd()+'…';
+      return {text:label,suffix};
+    }
+    if(chars.length>30)return {text:chars.slice(0,29).join('')+'…',suffix:''};
+    return {text:label,suffix};
   }
   function noticeCard(row,fromHistory,priority=false,pilot=false){
     const pilotOverview=!fromHistory&&pilot;
@@ -4939,7 +4968,8 @@ function installVaccinationViewerZoomV244(modal){
       thumb.innerHTML='<svg aria-hidden="true"><use href="#ci-paw"/></svg>';
     }
     const content=el('span','customer-notice-content-v363');
-    const head=el('span','customer-notice-head-v363'),headline=el('strong','',pilotOverview?overviewHeadlineV453(row.title):row.title||'Oznam');head.append(headline);
+    const head=el('span','customer-notice-head-v363'),headline=el('strong','',pilotOverview?'':row.title||'Oznam');head.append(headline);
+    if(pilotOverview){const fitted=overviewHeadlineV453(row.title);headline.append(el('span','customer-notice-head-text-v454',fitted.text));if(fitted.suffix)headline.append(el('span','customer-notice-head-emoji-v454',fitted.suffix));}
     const unread=!row.preview&&!rowsState.read.has(Number(row.id));
     if(!pilotOverview&&unread)head.append(el('span','customer-bulletin-new-v229','Nové'));
     if(pilotOverview)headline.title=String(row.title||'Oznam');
@@ -4953,11 +4983,11 @@ function installVaccinationViewerZoomV244(modal){
   }
   function drawOverview(){
     const pilot=window.customerBellaPilotEnabledV453?.()===true;
-    const anchor=pilot?$('customerInboxV363')||$('bookingDogProfile'):$('designNearest');let host=$('customerNoticeOverviewV376');
+    const anchor=$('designNearest');let host=$('customerNoticeOverviewV376');
     const preview=new URLSearchParams(location.search).get('notice-carousel-preview')==='1';
     const selected=loggedIn()?rows().filter(row=>row.show_in_overview===true&&current(row)):[];
     if(preview&&loggedIn()){
-      if(!selected.length)selected.push({id:'preview-first',preview:true,title:'Oznam zo škôlky',body:pilot?'Takto bude vyzerať vybraný oznam nad permanentkou.':'Takto bude vyzerať vybraný oznam pod vašimi rezerváciami.',overview_text:'Pozrite si ukážku krátkej upútavky.'});
+      if(!selected.length)selected.push({id:'preview-first',preview:true,title:'Oznam zo škôlky',body:'Takto bude vyzerať vybraný oznam pod vašimi rezerváciami.',overview_text:'Pozrite si ukážku krátkej upútavky.'});
       selected.push({id:'preview-extra',preview:true,title:'Skúšobný oznam',body:'Druhý oznam na ukážku karuselu. Potiahnite karty do strán alebo použite šípky. Tento oznam sa zákazníkom nepublikuje.',overview_text:'Potiahnite karty do strán alebo použite šípky.'});
     }
     if(!$('designNearest')||!anchor||!selected.length){host?.remove();return;}
@@ -4970,6 +5000,7 @@ function installVaccinationViewerZoomV244(modal){
     const oldIndex=oldTrack?Math.round(oldTrack.scrollLeft/Math.max(1,(oldTrack.firstElementChild?.offsetWidth||0)+12)):0;
     host.dataset.contentKey=key;
     const heading=el('h2','customer-notice-title-v381',preview?'Oznamy · ukážka':'Oznamy');
+    if(pilot){const mark=el('span','customer-notice-megaphone-v454');mark.setAttribute('aria-hidden','true');mark.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6h4l12 5V4L7 9H3zm4 6 2 6h3l-2-5M22 9v6"/></svg>';heading.prepend(mark);}
     const track=el('div','customer-notice-carousel-v376');track.dataset.multiple=String(selected.length>1);track.setAttribute('role','region');track.setAttribute('aria-label','Oznamy škôlky');track.tabIndex=0;
     selected.forEach((row,index)=>{const card=noticeCard(row,false,false,pilot);card.setAttribute('aria-label',(index+1)+' z '+selected.length+': '+(row.title||'Oznam'));track.append(card)});
     const header=el('div','customer-notice-header-v382'),stage=el('div','customer-notice-stage-v382');stage.dataset.multiple=String(selected.length>1);header.append(heading);stage.append(track);host.replaceChildren(header,stage);
@@ -4984,7 +5015,7 @@ function installVaccinationViewerZoomV244(modal){
       prev.onclick=()=>move(-1);next.onclick=()=>move(1);
       track.addEventListener('scroll',()=>{if(!pending)pending=requestAnimationFrame(update)},{passive:true});
       track.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();move(event.key==='ArrowRight'?1:-1)}});
-      controls.append(next,prev);stage.append(controls);track.scrollLeft=index*step();update();
+      if(pilot){controls.append(prev,next);header.append(controls);}else{controls.append(next,prev);stage.append(controls);}track.scrollLeft=index*step();update();
     }
   }
   async function markRead(row){
