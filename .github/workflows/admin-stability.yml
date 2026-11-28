@@ -6,6 +6,9 @@ on:
     branches: [customer-portal-production]
 permissions:
   contents: read
+concurrency:
+  group: customer-ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -163,7 +166,13 @@ jobs:
           ADMIN_SOURCE=/tmp/admin-candidate-v335.html node tests/admin-taxi-v329.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v335.html node tests/admin-runtime-v275.cjs
 
-  liquid-v3-browser:
+  browser-regression:
+    name: Browser regression (${{ matrix.shard }})
+    strategy:
+      fail-fast: true
+      max-parallel: 4
+      matrix:
+        shard: [customer-flow, account-and-care, layout-and-navigation, optical-and-guide]
     runs-on: ubuntu-latest
     env:
       LIBGL_ALWAYS_SOFTWARE: "1"
@@ -173,6 +182,7 @@ jobs:
         with:
           node-version: '22'
       - name: Reproduce vendored optical bundle
+        if: matrix.shard == 'optical-and-guide'
         run: |
           npm ci --prefix tools/liquid-v3 --ignore-scripts
           node tools/build-liquid-v3.cjs
@@ -182,7 +192,22 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/chvo-v3-browser" --no-save --no-package-lock playwright@1.62.1 pngjs@7.0.0
           echo "CODEX_PRIMARY_RUNTIME_NODE_MODULES=$RUNNER_TEMP/chvo-v3-browser/node_modules" >> "$GITHUB_ENV"
           "$RUNNER_TEMP/chvo-v3-browser/node_modules/.bin/playwright" install --with-deps chromium webkit
-      - name: Current customer browser regression and pixel proof
+      - name: customer-flow regression and pixel proof
+        if: matrix.shard == 'customer-flow'
+        run: |
+          node tests/customer-bella-pilot-v450-browser.cjs
+          V3_ENGINE=webkit node tests/customer-bella-pilot-v450-browser.cjs
+          node tests/customer-en-nav-bulletins-v422-browser.cjs
+          V3_ENGINE=webkit node tests/customer-en-nav-bulletins-v422-browser.cjs
+          node tests/customer-push-onboarding-v398-browser.cjs
+          V3_ENGINE=webkit node tests/customer-push-onboarding-v398-browser.cjs
+          node tests/customer-native-push-v426-browser.cjs
+          V3_ENGINE=webkit node tests/customer-native-push-v426-browser.cjs
+          node tests/customer-polls-pilot-v432-browser.cjs
+          V3_ENGINE=webkit node tests/customer-polls-pilot-v432-browser.cjs
+          node tests/customer-inbox-browser-v363.cjs
+      - name: account-and-care regression and pixel proof
+        if: matrix.shard == 'account-and-care'
         run: |
           node tests/customer-session-rotation-browser.cjs
           V3_ENGINE=webkit node tests/customer-session-rotation-browser.cjs
@@ -192,28 +217,28 @@ jobs:
           V3_ENGINE=webkit node tests/customer-welcome-v403-browser.cjs
           node tests/customer-auth-v418-browser.cjs
           V3_ENGINE=webkit node tests/customer-auth-v418-browser.cjs
-          node tests/customer-en-ui-v420-browser.cjs
-          V3_ENGINE=webkit node tests/customer-en-ui-v420-browser.cjs
-          node tests/customer-en-nav-bulletins-v422-browser.cjs
-          V3_ENGINE=webkit node tests/customer-en-nav-bulletins-v422-browser.cjs
-          node tests/customer-push-onboarding-v398-browser.cjs
-          V3_ENGINE=webkit node tests/customer-push-onboarding-v398-browser.cjs
-          node tests/customer-native-push-v426-browser.cjs
-          V3_ENGINE=webkit node tests/customer-native-push-v426-browser.cjs
-          node tests/customer-polls-pilot-v432-browser.cjs
-          V3_ENGINE=webkit node tests/customer-polls-pilot-v432-browser.cjs
-          V3_ENGINE=webkit node tests/customer-ios-menu-v426-browser.cjs
-          node tests/customer-polish-v396-browser.cjs
-          V3_ENGINE=webkit node tests/customer-polish-v396-browser.cjs
-          node tests/customer-mobile-v393-browser.cjs
-          V3_ENGINE=webkit node tests/customer-mobile-v393-browser.cjs
           node tests/customer-weight-v415-browser.cjs
           V3_ENGINE=webkit node tests/customer-weight-v415-browser.cjs
           node tests/customer-vaccination-actions-v416-browser.cjs
           V3_ENGINE=webkit node tests/customer-vaccination-actions-v416-browser.cjs
           node tests/customer-proof-delete-v392-browser.cjs
           V3_ENGINE=webkit node tests/customer-proof-delete-v392-browser.cjs
+      - name: layout-and-navigation regression and pixel proof
+        if: matrix.shard == 'layout-and-navigation'
+        run: |
+          node tests/customer-en-ui-v420-browser.cjs
+          V3_ENGINE=webkit node tests/customer-en-ui-v420-browser.cjs
+          V3_ENGINE=webkit node tests/customer-ios-menu-v426-browser.cjs
+          node tests/customer-polish-v396-browser.cjs
+          V3_ENGINE=webkit node tests/customer-polish-v396-browser.cjs
+          node tests/customer-mobile-v393-browser.cjs
+          V3_ENGINE=webkit node tests/customer-mobile-v393-browser.cjs
           node tests/customer-android-dock-v389-browser.cjs
+          node tests/customer-followup-v376-browser.cjs
+          V3_ENGINE=webkit node tests/customer-followup-v376-browser.cjs
+      - name: optical-and-guide regression and pixel proof
+        if: matrix.shard == 'optical-and-guide'
+        run: |
           node tests/customer-auth-glass-v386-browser.cjs
           V3_ENGINE=webkit node tests/customer-auth-glass-v386-browser.cjs
           node tests/customer-scroll-optics-v389-browser.cjs
@@ -222,18 +247,13 @@ jobs:
           V3_ENGINE=webkit node tests/customer-reels-v385-browser.cjs
           node tests/customer-liquid-browser-v364.cjs
           node tests/customer-liquid-v3-browser.cjs
-          node tests/customer-followup-v376-browser.cjs
-          V3_ENGINE=webkit node tests/customer-followup-v376-browser.cjs
           V3_ENGINE=webkit V3_LOW_CONTEXT=1 node tests/customer-liquid-v3-browser.cjs
-          node tests/customer-inbox-browser-v363.cjs
           node tests/customer-guide-browser-v358.cjs
           V3_ENGINE=webkit node tests/customer-guide-browser-v358.cjs
-          node tests/customer-bella-pilot-v450-browser.cjs
-          V3_ENGINE=webkit node tests/customer-bella-pilot-v450-browser.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: liquid-v3-browser-evidence
+          name: liquid-v3-browser-evidence-${{ matrix.shard }}
           path: |
             /tmp/chvo-v403-auth/
             /tmp/chvo-v392-proof/
@@ -242,3 +262,14 @@ jobs:
             /tmp/chvo-v385-screenshots/
             /tmp/chvo-v3-screenshots/
             /tmp/chvo-v376-screenshots/
+
+  # Keep the existing required check name. No shard may be skipped or fail.
+  liquid-v3-browser:
+    if: always()
+    needs: [browser-regression]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every browser shard to pass
+        env:
+          BROWSER_RESULT: ${{ needs.browser-regression.result }}
+        run: test "$BROWSER_RESULT" = success
