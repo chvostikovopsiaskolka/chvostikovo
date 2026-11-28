@@ -62,9 +62,12 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  assert.match(await page.locator('.bella-message-v450').textContent(),/Bella/);
  await page.evaluate(()=>{window.__noticeFixture=[{id:71,active:true,title:'Synthetic promoted announcement',body:'Fixture',valid_from:'2020-01-01',show_in_overview:true}];return loadAnnouncements(true)});
  assert.match(await page.locator('.bella-message-v450').textContent(),/Synthetic promoted announcement/);
+ await page.evaluate(()=>{state.data.passes=[{id:82,dog_id:1,status:'active',used_entries:3,total_entries:10,valid_from:'2026-11-03',valid_until:'2026-12-23'}];renderAll();});
+ await meter.waitFor({state:'visible'});
  await page.evaluate(()=>{state.session.user.id='synthetic-browser';renderAll();});
  assert.equal(await count(),0,'switch removes pilot immediately');
  assert.equal(await meter.count(),0,'switch removes private meter immediately');
+ assert.equal(await page.locator('#designTicket .design-paws').evaluate(el=>getComputedStyle(el).borderTopStyle),'dashed');
  await page.evaluate(()=>{window.openBookingPickerV37();window.customerDesignRefreshCalendarV351()});
  assert.equal(await page.locator('.bella-capacity-v450').count(),3,'public bars survive account switch');
  await page.evaluate(()=>{window.closeBookingPickerV305();state.session.user.id='synthetic-bella-owner';renderAll();clearSession();});
