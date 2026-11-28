@@ -25,6 +25,7 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  const count=()=>page.locator('#customerBellaPilotV450').count();
  const meter=page.locator('#designTicket .design-pass-meter-v452');
  assert.equal(await meter.count(),0,'ordinary account has no private pass meter');
+ assert.equal(await page.locator('#designTicket .design-validity').evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)','ordinary date appearance unchanged');
  assert.equal(await count(),0,'ordinary account has no Bella');
  await page.evaluate(()=>{window.openBookingPickerV37();window.customerDesignRefreshCalendarV351()});
  assert.equal(await page.locator('.bella-capacity-v450').count(),dogs===2?2:3,'public strips only on days with enough places for selected dogs');
@@ -47,6 +48,14 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  const alignment=await meter.evaluate(el=>({right:el.getBoundingClientRect().right,dateRight:el.closest('#designTicket').querySelector('.design-validity').getBoundingClientRect().right,direction:getComputedStyle(el).direction}));
  assert(Math.abs(alignment.right-alignment.dateRight)<2,'track ends below the date');
  assert.equal(alignment.direction,'ltr');
+ const assertConnected=async()=>{
+   const geometry=await meter.evaluate(el=>{const badge=el.closest('#designTicket').querySelector('.design-validity'),b=badge.getBoundingClientRect(),m=el.getBoundingClientRect(),style=getComputedStyle(badge);return {gap:m.top-b.bottom,right:m.right-b.right,bg:style.backgroundColor,track:getComputedStyle(el).backgroundColor,bottomRight:style.borderBottomRightRadius,overflow:b.right>m.right+1};});
+   assert(Math.abs(geometry.gap)<1,'date badge physically touches track');
+   assert(Math.abs(geometry.right)<2,'date badge aligns with track end');
+   assert.equal(geometry.bg,geometry.track,'date background and track form one shape');
+   assert.equal(geometry.bottomRight,'0px');assert.equal(geometry.overflow,false);
+ };
+ await assertConnected();
  assert.equal(await page.locator('#designTicket').getAttribute('data-validity-level'),'green');
  assert.equal(await page.locator('#designTicket .design-paws').evaluate(el=>getComputedStyle(el).borderTopWidth),'0px');
  assert.equal(await page.locator('#designTicket .design-paws .used').count(),3);
@@ -55,12 +64,15 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  await page.evaluate(()=>{state.data.passes[0].valid_until='2026-12-03';renderAll();});
  assert.equal(await page.locator('#designTicket').getAttribute('data-validity-level'),'yellow');
  assert(Number(await meter.getAttribute('aria-valuenow'))>75,'elapsed fill grows toward date');
+ await assertConnected();
  await page.evaluate(()=>{state.data.passes[0].valid_until='2026-11-30';renderAll();});
  assert.equal(await page.locator('#designTicket').getAttribute('data-validity-level'),'red');
  assert(Number(await meter.getAttribute('aria-valuenow'))>90);
+ await assertConnected();
  await page.evaluate(()=>{state.data.passes[0].valid_until='2026-11-28';renderAll();});
  assert.equal(await meter.getAttribute('aria-valuenow'),'100');
  assert.equal(await meter.getAttribute('data-complete'),'true');
+ assert.equal(await meter.evaluate(el=>getComputedStyle(el.closest('#designTicket').querySelector('.design-validity')).backgroundColor===getComputedStyle(el.firstElementChild).backgroundColor),true,'fully elapsed bar connects to filled date badge');
  await page.evaluate(()=>{state.data.passes[0].no_expiry=true;renderAll();});
  assert.equal(await meter.count(),0,'unlimited pass has no time meter');
  await page.evaluate(()=>{state.data.passes=[];renderAll();});

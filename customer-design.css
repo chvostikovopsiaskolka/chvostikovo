@@ -1317,11 +1317,10 @@ html.customer-design #bookingPickerDaysV37 .booking-day-v37.selected .bella-capa
 html.customer-design #designTicket.design-pass-validity-v452{--pass-time-color:#247646;--pass-time-track:#dcece1}
 html.customer-design #designTicket.design-pass-validity-v452[data-validity-level=yellow]{--pass-time-color:#a66b08;--pass-time-track:#f7e9bc}
 html.customer-design #designTicket.design-pass-validity-v452[data-validity-level=red]{--pass-time-color:#be3434;--pass-time-track:#f6dada}
-html.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage .design-validity{color:var(--pass-time-color)!important}
-html.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage{margin-bottom:10px}
+html.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage .design-validity{align-self:flex-end;background:var(--pass-time-track)!important;color:var(--pass-time-color)!important;border-radius:9px 9px 0 0!important;padding:5px 8px 4px!important;box-sizing:border-box}
+html.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage{margin-bottom:0}
 html.customer-design #designTicket.design-pass-validity-v452 .design-paws{border-top:0!important;margin-top:3px;padding-top:7px!important}
-html.customer-design #designTicket .design-pass-meter-v452{position:relative;display:block;height:5px;width:100%;border-radius:8px;background:var(--pass-time-track);pointer-events:none}
+html.customer-design #designTicket .design-pass-meter-v452{position:relative;display:block;height:5px;width:100%;border-radius:8px 0 8px 8px;background:var(--pass-time-track);pointer-events:none}
 html.customer-design #designTicket .design-pass-meter-v452>span{display:block;height:100%;border-radius:inherit;background:var(--pass-time-color)}
-html.customer-design #designTicket .design-pass-meter-v452::after{content:"";position:absolute;right:0;bottom:0;width:8px;height:12px;border-right:3px solid var(--pass-time-track);border-bottom:3px solid var(--pass-time-track);border-radius:0 0 5px 0;box-sizing:border-box}
-
-html.customer-design #designTicket .design-pass-meter-v452[data-complete=true]::after{border-color:var(--pass-time-color)}
+/* v453: the expiry badge touches the track directly; no separate hook. */
+html.customer-design #designTicket.design-pass-validity-v452:has(.design-pass-meter-v452[data-complete=true]) .design-validity{background:var(--pass-time-color)!important;color:#fff!important}
