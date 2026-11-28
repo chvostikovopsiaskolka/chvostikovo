@@ -71,12 +71,16 @@ const fixture=require('./liquid-v3-fixture.cjs');
    await page.clock.setFixedTime(new Date('2026-11-24T10:06:00Z'));
    await page.route('**/storage/v1/object/public/chvostikovo-bulletin-public/**',route=>route.fulfill({body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j8WQAAAAASUVORK5CYII=','base64'),contentType:'image/png'}));
    await page.evaluate(()=>{
-     window.__noticeFixture=[{id:12346,active:true,title:'Featured title',body:'Full article body, not the teaser.',overview_text:'Short teaser.',valid_from:'2026-01-01',valid_until:null,show_in_overview:true,image_path:'fixture/notice.png'}];
+     window.__noticeFixture=[{id:12346,active:true,title:'A very long existing announcement title that must stay complete in the article',body:'Full article body, not the teaser.',overview_text:'Short teaser.',valid_from:'2026-01-01',valid_until:null,show_in_overview:true,image_path:'fixture/notice.png'}];
      window.__noticeReads=[];
      return loadAnnouncements(true);
    });
    const featured=page.locator('#customerNoticeOverviewV376 [data-announcement-id="12346"]');
    await expect(featured).toBeVisible();
+   const title=featured.locator('.customer-notice-head-v363 strong');
+   await expect(title).toHaveCSS('white-space','nowrap');await expect(title).toHaveCSS('text-overflow','ellipsis');
+   assert.equal(await title.evaluate(el=>el.scrollWidth>el.clientWidth),true);
+   await expect(title).toHaveText('A very long existing announcement title that must stay complete in the article');
    assert.equal(await featured.locator('.customer-notice-excerpt-v363').textContent(),'Short teaser.');
    assert(!(await featured.textContent()).includes('Full article body'));
    assert.equal(await featured.locator('.customer-notice-panel-v383').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
@@ -87,8 +91,34 @@ const fixture=require('./liquid-v3-fixture.cjs');
    assert.equal(await page.evaluate(()=>window.__noticeReads.length),0,'preview does not mark read');
    await featured.click();
    await expect(page.locator('#customerBulletinArticleV229 .customer-bulletin-article-v229')).toHaveText('Full article body, not the teaser.');
+   await expect(page.locator('#customerBulletinArticleV229')).toContainText('A very long existing announcement title that must stay complete in the article');
    await page.waitForFunction(()=>window.__noticeReads.includes(12346));
    await page.locator('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();
+   // Rich body is an optional bounded tree, not HTML. Keep the existing teaser and read receipt.
+   await page.evaluate(()=>{
+     const row=window.__noticeFixture[0];row.body='Tučné a kurzíva\n• Bod';row.body_format={v:1,plain:row.body,nodes:[{tag:'h1',align:'center',children:[{tag:'b',children:['Tučné']},' a ',{tag:'i',children:['kurzíva']}]},{tag:'ul',children:[{tag:'li',children:['Bod']}]}]};
+     return loadAnnouncements(true)
+   });
+   await expect(featured.locator('.customer-notice-excerpt-v363')).toHaveText('Short teaser.');
+   await featured.click();
+   const rich=page.locator('#customerBulletinArticleV229 .customer-bulletin-article-v229');
+   await expect(rich.locator('b')).toHaveText('Tučné');
+   await expect(rich.locator('i')).toHaveText('kurzíva');
+   await expect(rich.locator('h1')).toHaveCSS('text-align','center');
+   await expect(rich.locator('li')).toHaveText('Bod');
+   await page.locator('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();
+   // Only formatting changed, so the existing overview card must open the new tree.
+   await page.evaluate(()=>{window.__noticeFixture[0].body_format.nodes[0].align='right';return loadAnnouncements(true)});
+   await featured.click();
+   await expect(rich.locator('h1')).toHaveCSS('text-align','right');
+   await page.locator('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();
+   // Unsupported elements and stale plain snapshots must fall back to text, never raw HTML.
+   await page.evaluate(()=>{const row=window.__noticeFixture[0];row.body_format.nodes=[{tag:'img',children:[]}];return loadAnnouncements(true)});
+   await featured.click();
+   await expect(rich).toHaveText('Tučné a kurzíva • Bod');
+   assert.equal(await rich.locator('img,script,iframe').count(),0);
+   await page.locator('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();
+
    await page.evaluate(()=>{
      window.__noticeFixture=[{id:12345,active:true,title:'Súkromný titul oznamu',body:'Zostáva v slovenčine',
        valid_from:'2026-01-01',valid_until:null,show_in_overview:false,created_at:'2026-01-01',image_path:null}];
