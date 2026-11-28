@@ -32,7 +32,11 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  await page.evaluate(()=>{window.closeBookingPickerV305();state.session.user.id='synthetic-bella-owner';renderAll();});
  await page.locator('#customerBellaPilotV450').waitFor({state:'visible'});
  await meter.waitFor({state:'visible'});
- assert.equal(await meter.getAttribute('aria-valuenow'),'51');
+ assert.equal(await meter.getAttribute('aria-valuenow'),'50');
+ assert.equal(await meter.locator('span').evaluate(el=>el.style.width),'50%');
+ const alignment=await meter.evaluate(el=>({right:el.getBoundingClientRect().right,dateRight:el.closest('#designTicket').querySelector('.design-validity').getBoundingClientRect().right,direction:getComputedStyle(el).direction}));
+ assert(Math.abs(alignment.right-alignment.dateRight)<2,'track ends below the date');
+ assert.equal(alignment.direction,'ltr');
  assert.equal(await page.locator('#designTicket').getAttribute('data-validity-level'),'green');
  assert.equal(await page.locator('#designTicket .design-paws').evaluate(el=>getComputedStyle(el).borderTopWidth),'0px');
  assert.equal(await page.locator('#designTicket .design-paws .used').count(),3);
@@ -40,8 +44,13 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  assert(await meter.evaluate(el=>el.scrollWidth<=el.clientWidth+1));
  await page.evaluate(()=>{state.data.passes[0].valid_until='2026-12-03';renderAll();});
  assert.equal(await page.locator('#designTicket').getAttribute('data-validity-level'),'yellow');
+ assert(Number(await meter.getAttribute('aria-valuenow'))>75,'elapsed fill grows toward date');
  await page.evaluate(()=>{state.data.passes[0].valid_until='2026-11-30';renderAll();});
  assert.equal(await page.locator('#designTicket').getAttribute('data-validity-level'),'red');
+ assert(Number(await meter.getAttribute('aria-valuenow'))>90);
+ await page.evaluate(()=>{state.data.passes[0].valid_until='2026-11-28';renderAll();});
+ assert.equal(await meter.getAttribute('aria-valuenow'),'100');
+ assert.equal(await meter.getAttribute('data-complete'),'true');
  await page.evaluate(()=>{state.data.passes[0].no_expiry=true;renderAll();});
  assert.equal(await meter.count(),0,'unlimited pass has no time meter');
  await page.evaluate(()=>{state.data.passes=[];renderAll();});

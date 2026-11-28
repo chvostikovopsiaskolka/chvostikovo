@@ -166,8 +166,9 @@
     };
     const start=day(source.dataset.validityStartV452),end=day(source.dataset.validityEndV452),today=day(bratislavaToday());
     if(![start,end,today].every(Number.isFinite)||end<start||end<today)return null;
-    const total=end-start+1,remaining=Math.min(total,Math.max(0,end-today+1)),percent=remaining/total*100;
-    return {remaining,percent,level:remaining<=3?'red':percent<25?'yellow':'green'};
+    const total=end-start+1,remaining=Math.min(total,Math.max(0,end-today+1));
+    const elapsedPercent=end===start?(today>=start?100:0):Math.max(0,Math.min(100,(today-start)/(end-start)*100));
+    return {remaining,elapsedPercent,level:remaining<=3?'red':remaining/total<.25?'yellow':'green'};
   }
   function ticket() {
     const source=byId('passSummary'),dog=selectedDog(); if(!source||!dog)return;
@@ -194,8 +195,8 @@
     const material=root.querySelector(':scope > .lg-v3-material');
     root.innerHTML=`<div class="design-ticket-head"><h2 aria-label="${esc(originalTitle)}">${icon("ticket")}<span>${esc(originalTitle)}</span></h2></div><div class="design-ticket-usage">${match?`<p>${usage}</p>`:`<p class="design-single-entry"><strong>${esc(counts==='Jednorazový'?'Jednorazový vstup':counts)}</strong></p>`}${badge?`<span class="design-validity" title="${esc(small)}">${esc(badge)}</span>`:''}</div>${match?`<div class="design-paws" aria-hidden="true">${Array.from({length:Number(match[2])},(_,i)=>`<span class="${i<Number(match[1])?'used':''}">${icon('pass-paw')}</span>`).join('')}</div>`:''}`;
     if(progress){
-      const meter=document.createElement('div');meter.className='design-pass-meter-v452';meter.setAttribute('role','progressbar');meter.setAttribute('aria-label',isEn?'Pass time remaining':'Zostávajúca platnosť permanentky');meter.setAttribute('aria-valuemin','0');meter.setAttribute('aria-valuemax','100');meter.setAttribute('aria-valuenow',String(Math.round(progress.percent)));meter.setAttribute('aria-valuetext',isEn?`${progress.remaining} days remaining, including today`:`Zostávajúce dni vrátane dneška: ${progress.remaining}`);
-      const fill=document.createElement('span');fill.style.width=progress.percent+'%';meter.append(fill);root.querySelector('.design-paws')?.before(meter);
+      const meter=document.createElement('div');meter.className='design-pass-meter-v452';meter.setAttribute('role','progressbar');meter.setAttribute('aria-label',isEn?'Pass validity elapsed':'Uplynutá platnosť permanentky');meter.setAttribute('aria-valuemin','0');meter.setAttribute('aria-valuemax','100');meter.setAttribute('aria-valuenow',String(Math.round(progress.elapsedPercent)));meter.setAttribute('aria-valuetext',isEn?`${progress.remaining} days remaining, including today`:`Zostávajúce dni vrátane dneška: ${progress.remaining}`);
+      const fill=document.createElement('span');fill.style.width=progress.elapsedPercent+'%';meter.dataset.complete=String(progress.elapsedPercent===100);meter.append(fill);root.querySelector('.design-paws')?.before(meter);
     }
     if(material)root.prepend(material);
   }

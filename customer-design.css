@@ -1313,7 +1313,7 @@ html.customer-design #bookingPickerDaysV37 .booking-day-v37.selected .bella-capa
 #customerNoticeOverviewV376 .customer-notice-panel-v383>.lg-v3-material::after,#customerNoticeOverviewV376 .customer-notice-panel-v383 .lg-v3-output{display:none!important}
 #customerNoticeOverviewV376 .customer-notice-thumb-v363 img{box-sizing:border-box;border:1px solid rgba(0,0,0,.24);border-radius:14px}
 
-/* v452: public capacity strips reuse v450; private time remaining replaces only the dashed ticket divider. */
+/* v452: public capacity strips reuse v450; private elapsed time grows towards the validity date. */
 html.customer-design #designTicket.design-pass-validity-v452{--pass-time-color:#247646;--pass-time-track:#dcece1}
 html.customer-design #designTicket.design-pass-validity-v452[data-validity-level=yellow]{--pass-time-color:#a66b08;--pass-time-track:#f7e9bc}
 html.customer-design #designTicket.design-pass-validity-v452[data-validity-level=red]{--pass-time-color:#be3434;--pass-time-track:#f6dada}
@@ -1322,4 +1322,6 @@ html.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usag
 html.customer-design #designTicket.design-pass-validity-v452 .design-paws{border-top:0!important;margin-top:3px;padding-top:7px!important}
 html.customer-design #designTicket .design-pass-meter-v452{position:relative;display:block;height:5px;width:100%;border-radius:8px;background:var(--pass-time-track);pointer-events:none}
 html.customer-design #designTicket .design-pass-meter-v452>span{display:block;height:100%;border-radius:inherit;background:var(--pass-time-color)}
-html.customer-design #designTicket .design-pass-meter-v452::after{content:"";position:absolute;right:0;bottom:0;width:8px;height:12px;border-right:2px solid var(--pass-time-color);border-bottom:2px solid var(--pass-time-color);border-radius:0 0 5px 0;box-sizing:border-box}
+html.customer-design #designTicket .design-pass-meter-v452::after{content:"";position:absolute;right:0;bottom:0;width:8px;height:12px;border-right:3px solid var(--pass-time-track);border-bottom:3px solid var(--pass-time-track);border-radius:0 0 5px 0;box-sizing:border-box}
+
+html.customer-design #designTicket .design-pass-meter-v452[data-complete=true]::after{border-color:var(--pass-time-color)}
