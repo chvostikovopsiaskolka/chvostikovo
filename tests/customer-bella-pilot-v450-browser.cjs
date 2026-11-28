@@ -113,11 +113,16 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  assert.equal(Array.from(await longTitle.textContent()).length,30,'legacy long title is limited to 30 characters including ellipsis');
  assert.equal(await longTitle.getAttribute('title'),'Veľmi dlhý testovací nadpis oznamu s ďalším textom a emoji 🐾🎄');
  assert(await page.evaluate(()=>document.getElementById('customerNoticeOverviewV376').compareDocumentPosition(document.getElementById('designNearest'))&Node.DOCUMENT_POSITION_FOLLOWING));
+ assert.equal(await page.locator('#customerNoticeOverviewV376').getAttribute('data-pilot-v453'),'true');
  await page.evaluate(()=>{state.data.passes=[{id:82,dog_id:1,status:'active',used_entries:3,total_entries:10,valid_from:'2026-11-03',valid_until:'2026-12-23'}];renderAll();});
  await meter.waitFor({state:'visible'});
  await page.evaluate(()=>{state.session.user.id='synthetic-browser';renderAll();});
  assert.equal(await count(),0,'switch removes pilot immediately');
  assert.equal(await meter.count(),0,'switch removes private meter immediately');
+ await page.evaluate(()=>{return loadAnnouncements(true)});
+ assert.equal(await page.locator('#customerNoticeOverviewV376').getAttribute('data-pilot-v453'),'false');
+ assert(await page.evaluate(()=>document.getElementById('designNearest').nextElementSibling?.id==='customerNoticeOverviewV376'),'ordinary notice position restored on switch');
+ assert.equal(await page.locator('#customerNoticeOverviewV376 [data-announcement-id="72"] .customer-notice-head-v363 strong').textContent(),'Veľmi dlhý testovací nadpis oznamu s ďalším textom a emoji 🐾🎄');
  assert.equal(await page.locator('#designTicket .design-paws').evaluate(el=>getComputedStyle(el).borderTopStyle),'dashed');
  await page.evaluate(()=>{window.openBookingPickerV37();window.customerDesignRefreshCalendarV351()});
  assert.equal(await page.locator('.bella-capacity-v450').count(),dogs===2?1:2,'unreserved public bars survive account switch');

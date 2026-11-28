@@ -1332,7 +1332,7 @@ html:is(.design-reservations-open,.booking-picker-open-v37,.design-modal-open,.c
 @media(max-height:420px) and (orientation:landscape){html.bella-pilot-active-v450 #customerBellaPilotV450{display:none!important}html.bella-pilot-active-v450.customer-design #bookingTab:not(.hidden):has(#customerBellaPilotV450){padding-bottom:0!important}}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){#customerBellaPilotV450 .bella-bubble-v450{background:white;-webkit-backdrop-filter:none;backdrop-filter:none}}
 /* v453: full-width headline in Overview only; full original title remains in accessible name/detail. */
-#customerNoticeOverviewV376 .customer-notice-panel-v383{row-gap:7px}
-#customerNoticeOverviewV376 .customer-notice-head-v363{grid-column:1/-1;min-width:0}
-#customerNoticeOverviewV376 .customer-notice-head-v363 strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;font-size:clamp(11px,3.5vw,14px);line-height:1.35}
-#customerNoticeOverviewV376 .customer-notice-footer-v453{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-panel-v383{row-gap:7px}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-head-v363{grid-column:1/-1;min-width:0}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-head-v363 strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;font-size:clamp(11px,3.5vw,14px);line-height:1.35}
+#customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-footer-v453{display:flex;align-items:center;gap:5px;flex-wrap:wrap}

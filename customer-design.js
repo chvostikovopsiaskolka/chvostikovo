@@ -224,6 +224,7 @@
   const bellaAccountV450=()=>String(state.session?.user?.id||'');
   const bellaReadyV450=()=>!!bellaAccountV450()&&!!state.session?.access_token&&state.data?.profile?.status==='active'&&!!state.data?.dogs?.length;
   const bellaEnabledV450=()=>bellaReadyV450()&&bellaAllowedV450===bellaAccountV450();
+  window.customerBellaPilotEnabledV453=bellaEnabledV450;
   function clearBellaUiV450(){
     document.documentElement.classList.remove('bella-pilot-active-v450');
     bellaSizeObserverV453?.disconnect();bellaSizeObserverV453=null;
@@ -246,7 +247,7 @@
       if(epoch!==bellaEpochV450||id!==bellaAccountV450()||!bellaReadyV450())return;
       const hash=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
       if(hash!==BELLA_PILOT_ACCOUNT_SHA256_V450)return;
-      bellaAllowedV450=id;ticket();renderBellaV450();
+      bellaAllowedV450=id;ticket();window.customerRefreshNoticeOverviewV376?.();renderBellaV450();
       if(!byId('bookingPickerV37')?.classList.contains('hidden'))window.customerDesignPickerRender?.();
     }).catch(()=>{});
   }

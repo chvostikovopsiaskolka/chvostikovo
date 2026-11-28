@@ -4913,7 +4913,8 @@ function installVaccinationViewerZoomV244(modal){
     const chars=typeof Intl.Segmenter==='function'?Array.from(new Intl.Segmenter('sk',{granularity:'grapheme'}).segment(value),part=>part.segment):Array.from(value);
     return chars.length>30?chars.slice(0,29).join('')+'…':value;
   }
-  function noticeCard(row,fromHistory,priority=false){
+  function noticeCard(row,fromHistory,priority=false,pilot=false){
+    const pilotOverview=!fromHistory&&pilot;
     const b=el('button','customer-bulletin-history-row-v229');b.type='button';b.dataset.announcementId=String(row.id);
     const photo=noticePreviewPhotoV423(row.image_path),thumb=el('span','customer-notice-thumb-v363');
     if(photo){
@@ -4938,37 +4939,39 @@ function installVaccinationViewerZoomV244(modal){
       thumb.innerHTML='<svg aria-hidden="true"><use href="#ci-paw"/></svg>';
     }
     const content=el('span','customer-notice-content-v363');
-    const head=el('span','customer-notice-head-v363'),headline=el('strong','',fromHistory?row.title||'Oznam':overviewHeadlineV453(row.title));head.append(headline);
+    const head=el('span','customer-notice-head-v363'),headline=el('strong','',pilotOverview?overviewHeadlineV453(row.title):row.title||'Oznam');head.append(headline);
     const unread=!row.preview&&!rowsState.read.has(Number(row.id));
-    if(fromHistory&&unread)head.append(el('span','customer-bulletin-new-v229','Nové'));
-    if(!fromHistory)headline.title=String(row.title||'Oznam');
+    if(!pilotOverview&&unread)head.append(el('span','customer-bulletin-new-v229','Nové'));
+    if(pilotOverview)headline.title=String(row.title||'Oznam');
     // The full article remains unchanged; Overview only displays authored plain-text teaser.
     const excerpt=fromHistory?row.body||'':String(row.overview_text||'').trim();
-    if(fromHistory)content.append(head);
+    if(!pilotOverview)content.append(head);
     if(excerpt)content.append(el('span','customer-notice-excerpt-v363',excerpt));
     const action=el('span','customer-notice-action-v363','Otvoriť oznam ›');
-    if(fromHistory)content.append(action);else{const footer=el('span','customer-notice-footer-v453');footer.append(action);if(unread)footer.append(el('span','customer-bulletin-new-v229','Nové'));content.append(footer);}
-    const panel=el('span','customer-notice-panel-v383');if(!fromHistory)panel.append(head);panel.append(content,thumb);b.append(panel);b.addEventListener('click',()=>openArticle(row,fromHistory));return b;
+    if(!pilotOverview)content.append(action);else{const footer=el('span','customer-notice-footer-v453');footer.append(action);if(unread)footer.append(el('span','customer-bulletin-new-v229','Nové'));content.append(footer);}
+    const panel=el('span','customer-notice-panel-v383');if(pilotOverview)panel.append(head);panel.append(content,thumb);b.append(panel);b.addEventListener('click',()=>openArticle(row,fromHistory));return b;
   }
   function drawOverview(){
-    const anchor=$('customerInboxV363')||$('bookingDogProfile');let host=$('customerNoticeOverviewV376');
+    const pilot=window.customerBellaPilotEnabledV453?.()===true;
+    const anchor=pilot?$('customerInboxV363')||$('bookingDogProfile'):$('designNearest');let host=$('customerNoticeOverviewV376');
     const preview=new URLSearchParams(location.search).get('notice-carousel-preview')==='1';
     const selected=loggedIn()?rows().filter(row=>row.show_in_overview===true&&current(row)):[];
     if(preview&&loggedIn()){
-      if(!selected.length)selected.push({id:'preview-first',preview:true,title:'Oznam zo škôlky',body:'Takto bude vyzerať vybraný oznam nad permanentkou.',overview_text:'Pozrite si ukážku krátkej upútavky.'});
+      if(!selected.length)selected.push({id:'preview-first',preview:true,title:'Oznam zo škôlky',body:pilot?'Takto bude vyzerať vybraný oznam nad permanentkou.':'Takto bude vyzerať vybraný oznam pod vašimi rezerváciami.',overview_text:'Pozrite si ukážku krátkej upútavky.'});
       selected.push({id:'preview-extra',preview:true,title:'Skúšobný oznam',body:'Druhý oznam na ukážku karuselu. Potiahnite karty do strán alebo použite šípky. Tento oznam sa zákazníkom nepublikuje.',overview_text:'Potiahnite karty do strán alebo použite šípky.'});
     }
     if(!$('designNearest')||!anchor||!selected.length){host?.remove();return;}
     if(!host){host=el('section','customer-notice-overview-v376');host.id='customerNoticeOverviewV376';host.setAttribute('aria-label','Oznamy škôlky');}
     if(anchor.nextElementSibling!==host)anchor.after(host);
-    const key=JSON.stringify(selected.map(row=>[row.id,row.title,row.body,row.overview_text,row.image_path,rowsState.read.has(Number(row.id))]));
+    host.dataset.pilotV453=String(pilot);
+    const key=JSON.stringify([pilot,selected.map(row=>[row.id,row.title,row.body,row.overview_text,row.image_path,rowsState.read.has(Number(row.id))])]);
     if(host.dataset.contentKey===key)return;
     const oldTrack=host.querySelector('.customer-notice-carousel-v376');
     const oldIndex=oldTrack?Math.round(oldTrack.scrollLeft/Math.max(1,(oldTrack.firstElementChild?.offsetWidth||0)+12)):0;
     host.dataset.contentKey=key;
     const heading=el('h2','customer-notice-title-v381',preview?'Oznamy · ukážka':'Oznamy');
     const track=el('div','customer-notice-carousel-v376');track.dataset.multiple=String(selected.length>1);track.setAttribute('role','region');track.setAttribute('aria-label','Oznamy škôlky');track.tabIndex=0;
-    selected.forEach((row,index)=>{const card=noticeCard(row,false);card.setAttribute('aria-label',(index+1)+' z '+selected.length+': '+(row.title||'Oznam'));track.append(card)});
+    selected.forEach((row,index)=>{const card=noticeCard(row,false,false,pilot);card.setAttribute('aria-label',(index+1)+' z '+selected.length+': '+(row.title||'Oznam'));track.append(card)});
     const header=el('div','customer-notice-header-v382'),stage=el('div','customer-notice-stage-v382');stage.dataset.multiple=String(selected.length>1);header.append(heading);stage.append(track);host.replaceChildren(header,stage);
     if(selected.length>1){
       const controls=el('div','customer-notice-controls-v381');
