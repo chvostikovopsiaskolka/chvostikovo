@@ -1325,3 +1325,11 @@ html.customer-design #designTicket .design-pass-meter-v452>span{display:block;he
 html.customer-design #designTicket .design-pass-meter-v452::after{content:"";position:absolute;right:0;bottom:0;width:8px;height:12px;border-right:3px solid var(--pass-time-track);border-bottom:3px solid var(--pass-time-track);border-radius:0 0 5px 0;box-sizing:border-box}
 
 html.customer-design #designTicket .design-pass-meter-v452[data-complete=true]::after{border-color:var(--pass-time-color)}
+
+/* v453: a single-line overview title; history and full article keep full text. */
+#customerNoticeOverviewV376 .customer-notice-head-v363 strong{display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}
+.customer-bulletin-article-v229 :is(p,div,h1,h2,h3){margin:0 0 .45em;overflow-wrap:anywhere}
+.customer-bulletin-article-v229 :is(ul,ol){padding-inline-start:1.6em;margin:.4em 0;list-style-position:outside}
+.customer-bulletin-article-v229 h1{font-size:1.5em;line-height:1.25;font-weight:800}
+.customer-bulletin-article-v229 h2{font-size:1.25em;line-height:1.3}
+.customer-bulletin-article-v229 h3{font-size:1.1em;line-height:1.3}

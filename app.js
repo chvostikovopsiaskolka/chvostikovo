@@ -1,3 +1,88 @@
+/* Bulletin format v1: bounded data, never interpret stored HTML. */
+(function(root){
+'use strict';
+const allowed=new Set(['b','i','u','p','div','h1','h2','h3','ul','ol','li','br','span']);
+const blocks=new Set(['p','div','h1','h2','h3','ul','ol','li']);
+const alignment=new Set(['left','center','right','justify']);
+function validate(nodes){
+ let count=0,chars=0;
+ function visit(list,depth){
+  if(!Array.isArray(list)||depth>32)return false;
+  for(const n of list){
+   if(++count>2000)return false;
+   if(typeof n==='string'){chars+=n.length;if(chars>12000)return false;continue}
+   if(!n||typeof n!=='object'||Array.isArray(n)||!allowed.has(n.tag))return false;
+   if(n.align!==undefined&&(!blocks.has(n.tag)||!alignment.has(n.align)))return false;
+   if(n.tag==='br'){if(n.children!==undefined)return false}
+   else if(!visit(n.children,depth+1))return false;
+  }return true
+ }return visit(nodes,0)
+}
+function plain(nodes){
+ let out='';
+ const line=()=>{if(out&&!out.endsWith('\n'))out+='\n'};
+ function walk(list,parent){
+  let number=0;
+  for(const n of list){
+   if(typeof n==='string'){out+=n;continue}
+   if(n.tag==='br'){out+='\n';continue}
+   const block=blocks.has(n.tag);if(block)line();
+   if(n.tag==='li'&&(parent==='ul'||parent==='ol'))out+=parent==='ul'?'• ':(++number)+'. ';
+   walk(n.children,n.tag);
+   if(block)line();
+  }
+ }walk(nodes,'');return out.replace(/\u00a0/g,' ').trim()
+}
+function usable(value,body){
+ return !!value&&value.v===1&&typeof body==='string'&&value.plain===body&&validate(value.nodes)&&plain(value.nodes)===body
+}
+function render(target,body,value){
+ body=String(body||'');
+ target.replaceChildren();
+ if(!usable(value,body)){target.textContent=body;return false}
+ const doc=target.ownerDocument;
+ function append(parent,list){
+  for(const n of list){
+   if(typeof n==='string'){parent.append(doc.createTextNode(n));continue}
+   const child=doc.createElement(n.tag);
+   if(n.align)child.style.textAlign=n.align;
+   if(n.tag!=='br')append(child,n.children);
+   parent.append(child);
+  }
+ }append(target,value.nodes);return true
+}
+function collect(editor){
+ let visited=0;
+ function visit(node,depth){
+  if(depth>32||++visited>2000)throw Error('Text je príliš zložito formátovaný.');
+  if(node.nodeType===3)return [node.nodeValue||''];
+  if(node.nodeType!==1)return [];
+  let tag=node.tagName.toLowerCase();
+  if(['script','style','iframe','object','embed','img','svg','math','input','button','video','audio','template'].includes(tag))return [];
+  if(tag==='strong')tag='b';if(tag==='em')tag='i';
+  if(tag==='br')return [{tag}];
+  let children=Array.from(node.childNodes).flatMap(n=>visit(n,depth+1));
+  if(!allowed.has(tag))return children;
+  const weight=node.style?.fontWeight;
+  if(tag!=='b'&&(weight==='bold'||weight==='bolder'||Number(weight)>=600))children=[{tag:'b',children}];
+  if(tag!=='i'&&node.style?.fontStyle==='italic')children=[{tag:'i',children}];
+  if(tag!=='u'&&/underline/.test(node.style?.textDecorationLine||node.style?.textDecoration||''))children=[{tag:'u',children}];
+  const align=(node.style?.textAlign||node.getAttribute('align')||'').replace(/^-webkit-/,'');
+  if(tag==='span')return children;
+  const result={tag,children};
+  if(blocks.has(tag)&&alignment.has(align))result.align=align;
+  return [result]
+ }
+ const nodes=Array.from(editor.childNodes).flatMap(n=>visit(n,0));
+ if(!validate(nodes))throw Error('Text je príliš zložito formátovaný.');
+ const body=plain(nodes);
+ if(body.length>6000)throw Error('Text môže mať najviac 6000 znakov.');
+ const value={v:1,plain:body,nodes};
+ if(JSON.stringify(value).length>45000)throw Error('Text je príliš zložito formátovaný.');
+ return {body,format:body?value:null}
+}
+root.ChvoBulletinFormatV475={validate,plain,usable,render,collect};
+})(window);
 
 function createCompactChatLayout(modal,card,thread,input){
  let frame=0,preferred=0,baselineHeight=0,stickToBottom=true;
@@ -83,8 +168,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v452';
-const APP_VERSION='2.0.125';
+const APP_BUILD='v453';
+const APP_VERSION='2.0.126';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -4781,19 +4866,21 @@ function installVaccinationViewerZoomV244(modal){
   const rowsState={items:[],read:new Set(),at:0,loading:null,session:null,error:false};
   const select='id,active,title,body,valid_from,valid_until,created_at,paper_style,image_path,cta_enabled,cta_title,cta_body,cta_button_label,cta_url,show_in_overview';
   // Additive admin field; a pre-migration API must keep serving all notices.
-  let overviewTextRetryAtV451=0;
+  let overviewTextRetryAtV451=0,bodyFormatRetryAtV475=0;
   async function readPublishedNoticesV451(headers){
     const read=fields=>fetch(SUPABASE_URL+'/rest/v1/portal_announcements?active=eq.true&valid_from=lte.'+encodeURIComponent(new Date().toISOString())+'&select='+encodeURIComponent(fields)+'&order=created_at.desc&limit=1000',{headers,cache:'no-store'});
-    if(Date.now()<overviewTextRetryAtV451)return read(select);
-    const result=await read(select+',overview_text');
-    if(result.status===400){
+    // Optional columns are negotiated independently; missing schema metadata must not hide existing notices.
+    for(let attempt=0;attempt<3;attempt++){
+      const overview=Date.now()>=overviewTextRetryAtV451,format=Date.now()>=bodyFormatRetryAtV475;
+      const result=await read(select+(overview?',overview_text':'')+(format?',body_format':''));
+      if(result.status!==400)return result;
       const error=await result.json().catch(()=>null);
-      if(['42703','PGRST204'].includes(error?.code)&&/overview_text/i.test(error?.message||'')){
-        overviewTextRetryAtV451=Date.now()+5*60*1000;
-        return read(select);
-      }
+      if(!['42703','PGRST204'].includes(error?.code))return result;
+      if(format&&/body_format/i.test(error?.message||'')){bodyFormatRetryAtV475=Date.now()+5*60*1000;continue}
+      if(overview&&/overview_text/i.test(error?.message||'')){overviewTextRetryAtV451=Date.now()+5*60*1000;continue}
+      return result
     }
-    return result;
+    return read(select)
   }
   const photoCacheV358=new Map();
   let articleEpochV358=0;
@@ -4952,7 +5039,7 @@ function installVaccinationViewerZoomV244(modal){
     }
     if(!anchor||!selected.length){host?.remove();return;}
     if(!host){host=el('section','customer-notice-overview-v376');host.id='customerNoticeOverviewV376';host.setAttribute('aria-label','Oznamy škôlky');anchor.after(host);}
-    const key=JSON.stringify(selected.map(row=>[row.id,row.title,row.body,row.overview_text,row.image_path,rowsState.read.has(Number(row.id))]));
+    const key=JSON.stringify(selected.map(row=>[row.id,row.title,row.body,row.body_format,row.overview_text,row.image_path,rowsState.read.has(Number(row.id))]));
     if(host.dataset.contentKey===key)return;
     const oldTrack=host.querySelector('.customer-notice-carousel-v376');
     const oldIndex=oldTrack?Math.round(oldTrack.scrollLeft/Math.max(1,(oldTrack.firstElementChild?.offsetWidth||0)+12)):0;
@@ -5024,7 +5111,7 @@ function installVaccinationViewerZoomV244(modal){
     const generation=++articleEpochV358,userId=state.session?.user?.id;
     const photo=safePhoto(row.image_path);
     // Show the message and CTA immediately, even when image transfer takes seconds.
-    articleModal.scroll.append(el('div','customer-bulletin-article-v229',row.body||''));
+    const articleBody=el('div','customer-bulletin-article-v229');window.ChvoBulletinFormatV475.render(articleBody,row.body||'',row.body_format);articleModal.scroll.append(articleBody);
     let imageSlot=null;
     if(photo){
       imageSlot=el('div','customer-bulletin-photo-slot-v404');
