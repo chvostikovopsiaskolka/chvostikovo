@@ -2276,22 +2276,13 @@ async function assertPublicContent(browser,engine){
                   await questionMenu.locator('[data-aria-chat-question="taxi"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
                   if(!(await chat.locator('[data-aria-chat-turn="aria"]').last().innerText()).includes('5 € za jednu jazdu')||JSON.stringify(await ids())!==JSON.stringify(['first_visit','location','space']))throw new Error('Taxi answer and final three remaining choices must be correct');
-                  // Existing question flow: map appears only when the location reply is complete.
-                  const savedMapConsent=await page.evaluate(()=>localStorage.getItem('chvostikovo-cookies'));
-                  const changeFunctional=async allowed=>page.evaluate(value=>{const consent=JSON.parse(localStorage.getItem('chvostikovo-cookies')||'{}');Object.assign(consent,{version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,functional:value,analytics:false,marketing:false});localStorage.setItem('chvostikovo-cookies',JSON.stringify(consent));window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed',{detail:consent}));},allowed);
-                  await changeFunctional(false);
+                  // Location answer always exposes the canonical map link, without third-party requests.
                   await questionMenu.locator('[data-aria-chat-question="location"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
                   const locationMap=chat.locator('[data-aria-location-map]');
                   await locationMap.waitFor({state:'visible'});
                   const locationReply=await chat.locator('[data-aria-chat-turn="aria"]').last().innerText();
-                  if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationReply.includes(value))||await locationMap.locator('iframe').count()||await locationMap.locator('a').getAttribute('href')!==readPublicContent().MAP_LINK)throw new Error('Location answer or denied-consent map fallback');
-                  await changeFunctional(true);
-                  await locationMap.locator('iframe').waitFor({state:'attached'});
-                  if(!(await locationMap.locator('iframe').getAttribute('src')).includes('output=embed'))throw new Error('Location map must reuse the existing Google embed');
-                  await changeFunctional(false);
-                  await locationMap.locator('iframe').waitFor({state:'detached'});
-                  await page.evaluate(value=>{if(value===null)localStorage.removeItem('chvostikovo-cookies');else localStorage.setItem('chvostikovo-cookies',value);window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed'));},savedMapConsent);
+                  if(!['Poľskej 6','Rastislavova','autoumyvárke','bezplatné parkovisko','12 a 54'].every(value=>locationReply.includes(value))||await locationMap.locator('iframe').count()||await locationMap.locator('a').getAttribute('href')!==readPublicContent().MAP_LINK)throw new Error('Location answer or canonical map link');
                   await otherCta.click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
                   const other=chat.locator('[data-aria-chat-other]');
