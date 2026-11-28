@@ -51,7 +51,7 @@ export function AriaMosaicGallery({ paidLead = false }: { paidLead?: boolean }) 
             <FaqAnswer question={DAYCARE_LOCATION_QUESTION} answer={DAYCARE_LOCATION_WEB_COPY} compact />
           </div>
         )}
-        <div data-aria-location-chips className="mx-auto mt-4 grid max-w-md grid-cols-2 gap-2 sm:hidden">
+        <div data-aria-location-chips className={"mx-auto mt-4 grid max-w-md grid-cols-2 gap-2 sm:hidden " + (paidLead ? "lg:flex lg:w-fit lg:max-w-none" : "")}>
           <a href={MAP_LINK} target="_blank" rel="noopener noreferrer"
             onClick={() => void trackCookielessInteraction("nav_click", "lead_aria_location_poljska6", "sk")}
             className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-secondary px-2 py-2 text-center text-[11px] font-semibold text-forest">
