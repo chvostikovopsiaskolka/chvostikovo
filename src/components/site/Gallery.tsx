@@ -101,7 +101,7 @@ export function Gallery({ language = "sk", homeMosaic = false }: { language?: "s
         {localHomeMosaic && <div data-daycare-location-copy className="mt-3 w-full text-base leading-relaxed text-forest/80"><FaqAnswer question={DAYCARE_LOCATION_QUESTION} answer={DAYCARE_LOCATION_WEB_COPY} compact /></div>}
         {homeMosaic ? (
           <div data-home-spaces-mosaic className={(localHomeMosaic ? "mt-4 sm:mt-6" : "mt-8") + " grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4"}>
-            {localHomeMosaic && <DaycareArrivalMap className="col-span-2 mb-5 lg:order-last lg:col-span-1 lg:mb-0 lg:aspect-[5/4]" />}
+            {localHomeMosaic && <DaycareArrivalMap className="col-span-2 mb-5 lg:order-last lg:col-span-1 lg:mb-0 lg:aspect-[5/4] lg:[&>img]:object-cover lg:[&>img]:object-right" />}
             {photos.map((photo, i) => (
               <Fragment key={photo.src}>
                 <button data-home-space-photo type="button" onClick={() => setActive(i)}

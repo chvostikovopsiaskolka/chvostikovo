@@ -4577,8 +4577,9 @@ async function assertPublicContent(browser,engine){
             const homeArrival=productPage.locator('#priestory [data-daycare-arrival-map]');
             if(await homeArrival.getAttribute('href')!==readPublicContent().MAP_LINK||!await assertArrivalImage(homeArrival)||!await homeArrival.evaluate(el=>{
               const b=el.getBoundingClientRect(),gallery=el.parentElement,g=gallery.getBoundingClientRect(),photos=[...gallery.querySelectorAll('[data-home-space-photo]')].map(e=>e.getBoundingClientRect());
-              const last=photos.at(-1);
-              return gallery.hasAttribute('data-home-spaces-mosaic')&&b.width>0&&el.scrollWidth<=el.clientWidth+1&&(innerWidth>=1024?Math.abs(b.top-last.top)<2&&Math.abs(b.bottom-last.bottom)<2&&Math.abs(b.width-last.width)<2&&b.left>last.right&&Math.abs(b.right-g.right)<2:Math.abs(b.left-g.left)<2&&Math.abs(b.right-g.right)<2&&b.bottom<=photos[0].top);
+              const last=photos.at(-1),image=el.querySelector("img"),imgStyle=getComputedStyle(image),i=image.getBoundingClientRect();
+              const fills=innerWidth>=1024?imgStyle.objectFit==="cover"&&imgStyle.objectPosition==="100% 50%"&&Math.abs(i.width-b.width)<2&&Math.abs(i.height-b.height)<2:imgStyle.objectFit==="contain";
+              return fills&&gallery.hasAttribute('data-home-spaces-mosaic')&&b.width>0&&el.scrollWidth<=el.clientWidth+1&&(innerWidth>=1024?Math.abs(b.top-last.top)<2&&Math.abs(b.bottom-last.bottom)<2&&Math.abs(b.width-last.width)<2&&b.left>last.right&&Math.abs(b.right-g.right)<2:Math.abs(b.left-g.left)<2&&Math.abs(b.right-g.right)<2&&b.bottom<=photos[0].top);
             }))throw new Error('HOME arrival map responsive grid/link/asset');
              const mosaicShape=await productPage.locator('[data-home-spaces-mosaic]').evaluate(el=>({
               columns:getComputedStyle(el).gridTemplateColumns.split(' ').length,count:el.querySelectorAll('[data-home-space-photo]').length,
