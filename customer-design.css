@@ -1306,3 +1306,9 @@ html.bella-pilot-active-v450 #bookingPickerDaysV37 .booking-day-v37[data-capacit
 html.bella-pilot-active-v450 #bookingPickerDaysV37 .booking-day-v37[data-capacity-level=limited] .bella-capacity-v450>i{background:#694908}
 html.bella-pilot-active-v450 #bookingPickerDaysV37 .booking-day-v37.selected .bella-capacity-v450{background:#d6e8d9}
 html.bella-pilot-active-v450 #bookingPickerDaysV37 .booking-day-v37.selected .bella-capacity-v450>i{background:#21834e}
+
+/* v451: white featured notice only; preserve existing material shadow and archive/article styling. */
+#customerNoticeOverviewV376 .customer-notice-panel-v383{background:#fff}
+#customerNoticeOverviewV376 .customer-notice-panel-v383>.lg-v3-material{background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+#customerNoticeOverviewV376 .customer-notice-panel-v383>.lg-v3-material::after,#customerNoticeOverviewV376 .customer-notice-panel-v383 .lg-v3-output{display:none!important}
+#customerNoticeOverviewV376 .customer-notice-thumb-v363 img{box-sizing:border-box;border:1px solid rgba(0,0,0,.24);border-radius:14px}

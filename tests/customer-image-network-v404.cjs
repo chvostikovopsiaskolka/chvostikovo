@@ -44,6 +44,12 @@ const card=Function('el','safePhoto','noticePreviewPhotoV423','failedNoticePrevi
   photoUrl,preview.noticePreviewPhotoV423,preview.failedNoticePreviewsV423,{read:new Set()},()=>{}
 );
 const bulletin={id:1,title:'Synthetic notice',body:'Text',image_path:'img.png'};
+const teaser={...bulletin,overview_text:'One teaser sentence.'};
+assert.equal(card(teaser,false).querySelector('.customer-notice-excerpt-v363').textContent,teaser.overview_text);
+assert.equal(card(teaser,true,true).querySelector('.customer-notice-excerpt-v363').textContent,bulletin.body,'archive unchanged');
+assert.equal(card(bulletin,false).querySelector('.customer-notice-excerpt-v363'),null,'legacy notice must not leak its full body in Overview');
+assert.equal(card({...teaser,overview_text:'   '},false).querySelector('.customer-notice-excerpt-v363'),null,'empty teaser hides only excerpt');
+assert.equal(card({...teaser,overview_text:'<b>Plain text</b>'},false).querySelector('.customer-notice-excerpt-v363').textContent,'<b>Plain text</b>');
 const first=card(bulletin,true,true);
 assert.equal(first.querySelector('img').loading,'eager','first visible archive image must start promptly');
 assert.equal(first.querySelector('img').src,'https://example.invalid/img.png');
