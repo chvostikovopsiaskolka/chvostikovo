@@ -1340,19 +1340,19 @@ html:is(.design-reservations-open,.booking-picker-open-v37,.design-modal-open,.c
 /* v454: pilot only. One vertical scroll owner in portrait Overview; no shared dock changes. */
 html.bella-pilot-active-v450.customer-design #customerBellaPilotV450 .bella-bubble-v450{padding:7px 10px 4px}
 #customerBellaPilotV450 .bella-action-v450{margin-left:auto;text-align:right;font-weight:850;padding:0;min-height:44px}
-html.bella-pilot-active-v450.customer-design #bookingTab:has(#bellaOverviewScrollV454) #bookingDogProfile{flex:none}
+html.overview-pilot-active-v457.customer-design #bookingTab:has(#bellaOverviewScrollV454) #bookingDogProfile{flex:none}
 #bellaOverviewScrollV454{min-width:0;min-height:0;box-sizing:border-box}
 @media(min-height:541px){
- html.bella-pilot-active-v450.customer-design:has(#bookingTab:not(.hidden):not([inert])) #appView.app{height:100dvh!important;min-height:0!important;padding-bottom:0!important;box-sizing:border-box}
- html.bella-pilot-active-v450.customer-design #bookingTab:not(.hidden):has(#bellaOverviewScrollV454){display:flex!important;flex-direction:column;height:calc(100dvh - max(8px,env(safe-area-inset-top)) - max(8px,env(safe-area-inset-bottom)) - 68px - var(--bella-height-v453,118px) - 6px)!important;max-height:none!important;min-height:0!important;padding-bottom:0!important;overflow:visible!important}
- html.bella-pilot-active-v450 #bellaOverviewScrollV454{flex:1 1 0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;scrollbar-width:none;margin:0 -7px;padding:1px 7px 10px;scroll-padding-top:8px;touch-action:auto}
- html.bella-pilot-active-v450 #bellaOverviewScrollV454::-webkit-scrollbar{display:none}
+ html.overview-pilot-active-v457.customer-design:has(#bookingTab:not(.hidden):not([inert])) #appView.app{height:100dvh!important;min-height:0!important;padding-bottom:0!important;box-sizing:border-box}
+ html.overview-pilot-active-v457.customer-design #bookingTab:not(.hidden):has(#bellaOverviewScrollV454){display:flex!important;flex-direction:column;height:calc(100dvh - max(8px,env(safe-area-inset-top)) - max(8px,env(safe-area-inset-bottom)) - 68px - var(--bella-height-v453,118px) - 6px)!important;max-height:none!important;min-height:0!important;padding-bottom:0!important;overflow:visible!important}
+ html.overview-pilot-active-v457 #bellaOverviewScrollV454{flex:1 1 0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;scrollbar-width:none;margin:0 -7px;padding:1px 7px 10px;scroll-padding-top:8px;touch-action:auto}
+ html.overview-pilot-active-v457 #bellaOverviewScrollV454::-webkit-scrollbar{display:none}
 }
-@media(max-height:540px){html.bella-pilot-active-v450 #bellaOverviewScrollV454{overflow:visible}html.bella-pilot-active-v450.customer-design #bookingTab:not(.hidden):has(#customerBellaPilotV450){padding-bottom:calc(var(--bella-height-v453,118px) + 10px)!important}}
+@media(max-height:540px){html.overview-pilot-active-v457 #bellaOverviewScrollV454{overflow:visible}html.bella-pilot-active-v450.customer-design #bookingTab:not(.hidden):has(#customerBellaPilotV450){padding-bottom:calc(var(--bella-height-v453,118px) + 10px)!important}}
 /* Keep date badge physically joined via the outer pale track, with a visibly distinct inner fill. */
-html.bella-pilot-active-v450.customer-design #designTicket .design-pass-meter-v452{height:7px;box-sizing:border-box;border:1px solid var(--pass-time-track);background:#fff;border-radius:6px 0 6px 6px}
-html.bella-pilot-active-v450.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage .design-validity{padding-bottom:5px!important}
-html.bella-pilot-active-v450.customer-design #designTicket .design-pass-meter-v452>span{border-radius:4px}
+html.overview-pilot-active-v457.customer-design #designTicket .design-pass-meter-v452{height:7px;box-sizing:border-box;border:1px solid var(--pass-time-track);background:#fff;border-radius:6px 0 6px 6px}
+html.overview-pilot-active-v457.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage .design-validity{padding-bottom:5px!important}
+html.overview-pilot-active-v457.customer-design #designTicket .design-pass-meter-v452>span{border-radius:4px}
 /* Same outline/shadow as the existing pass and reservation cards. Full-width headline; emojis are never inside the clipping span. */
 #customerNoticeOverviewV376[data-pilot-v453=true]{background:#fff;border:1px solid #e8e3e8;border-radius:19px;box-shadow:0 7px 19px rgba(89,58,40,.16),0 2px 6px rgba(89,58,40,.10),0 0 0 1px rgba(173,138,112,.19),inset 0 1px 2px rgba(255,255,255,.82);padding:11px 12px;margin:10px 0;min-width:0}
 #customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-header-v382{padding:0 0 5px}
@@ -1375,9 +1375,9 @@ html.bella-pilot-active-v450.customer-design #designTicket .design-pass-meter-v4
 body:has(#notificationPopup:not(.hidden)) #customerBellaPilotV450{visibility:hidden!important}
 
 /* v455: visual refinements only on the existing authenticated Bella pilot. */
-html.bella-pilot-active-v450.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage{margin-bottom:2px}
-html.bella-pilot-active-v450.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage .design-validity{border:1px solid var(--pass-time-track)!important;border-color:color-mix(in srgb,var(--pass-time-color) 28%,transparent)!important;border-radius:8px 8px 3px 3px!important;padding:4px 7px!important}
-html.bella-pilot-active-v450.customer-design #designTicket .design-pass-meter-v452{border-color:color-mix(in srgb,var(--pass-time-color) 20%,var(--pass-time-track));border-radius:6px}
+html.overview-pilot-active-v457.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage{margin-bottom:2px}
+html.overview-pilot-active-v457.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage .design-validity{border:1px solid var(--pass-time-track)!important;border-color:color-mix(in srgb,var(--pass-time-color) 28%,transparent)!important;border-radius:8px 8px 3px 3px!important;padding:4px 7px!important}
+html.overview-pilot-active-v457.customer-design #designTicket .design-pass-meter-v452{border-color:color-mix(in srgb,var(--pass-time-color) 20%,var(--pass-time-track));border-radius:6px}
 html.bella-pilot-active-v450 #customerBellaPilotV450{width:min(420px,calc(100% - 32px));grid-template-columns:clamp(46px,14vw,55px) minmax(0,1fr);gap:7px;align-items:center}
 html.bella-pilot-active-v450 #customerBellaPilotV450>img{align-self:center;transform:translateY(-7px);filter:saturate(.88) hue-rotate(-6deg) drop-shadow(0 2px 3px #40331e26)}
 html.bella-pilot-active-v450.customer-design #customerBellaPilotV450 .bella-bubble-v450{padding:5px 9px 2px}
@@ -1407,17 +1407,17 @@ html.customer-design #customerNoticeOverviewV376[data-pilot-v453=true].lg-v3-hos
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){html.customer-design #customerNoticeOverviewV376[data-pilot-v453=true]{background:#fff!important}}
 
 /* v456: approved scope is the existing authenticated Bella pilot only. */
-html.bella-pilot-active-v450.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage{margin-bottom:0}
-html.bella-pilot-active-v450.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage .design-validity{border-bottom:0!important;border-radius:8px 8px 0 0!important}
-html.bella-pilot-active-v450.customer-design #designTicket .design-pass-meter-v452{position:relative;z-index:1;border-radius:6px 0 6px 6px}
-html.bella-pilot-active-v450.customer-design #customerNoticeOverviewV376[data-pilot-v453=true]{padding:9px 10px 7px;box-shadow:0 3px 12px rgba(89,58,40,.08)}
+html.overview-pilot-active-v457.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage{margin-bottom:0}
+html.overview-pilot-active-v457.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage .design-validity{border-bottom:0!important;border-radius:8px 8px 0 0!important}
+html.overview-pilot-active-v457.customer-design #designTicket .design-pass-meter-v452{position:relative;z-index:1;border-radius:6px 0 6px 6px}
+html.overview-pilot-active-v457.customer-design #customerNoticeOverviewV376[data-pilot-v453=true]{padding:9px 10px 7px;box-shadow:0 3px 12px rgba(89,58,40,.08)}
 #customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-header-v382{padding:0 4px 4px}
 #customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-title-v381{gap:5px;font-size:16px;line-height:1.3}
 #customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-megaphone-v454{width:21px;justify-content:center;flex:none}
 #customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-carousel-v376{padding:4px 5px 8px}
 #customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-panel-v383>.lg-v3-material{box-shadow:0 2px 6px rgba(113,59,32,.08),0 0 5px rgba(113,59,32,.045)}
 #customerNoticeOverviewV376[data-pilot-v453=true] .customer-notice-footer-v453{padding:0 3px 3px 0}
-@media(min-height:541px){html.bella-pilot-active-v450 #bellaOverviewScrollV454{margin-inline:-10px;padding-inline:10px;padding-bottom:13px}}
+@media(min-height:541px){html.overview-pilot-active-v457 #bellaOverviewScrollV454{margin-inline:-10px;padding-inline:10px;padding-bottom:13px}}
 html.bella-pilot-active-v450 #customerBellaPilotV450{align-items:center}
 #customerBellaPilotV450 .bella-identity-v456{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;gap:0;transform:translateY(-3px)}
 #customerBellaPilotV450 .bella-identity-v456>img{display:block;width:100%;height:clamp(43px,14vw,54px);object-fit:contain;object-position:center bottom;filter:saturate(.88) hue-rotate(-6deg) drop-shadow(0 2px 3px #40331e26)}
@@ -1427,4 +1427,8 @@ html.bella-pilot-active-v450.customer-design #customerBellaPilotV450 .bella-bubb
 #customerBellaPilotV450 .bella-action-v450{position:relative;align-self:flex-end;min-height:36px;margin:0 0 0 auto;padding:5px 10px;font-size:11.5px;line-height:1.2}
 #customerBellaPilotV450 .bella-action-v450:not([hidden])::after{content:'';position:absolute;inset:-4px 0;pointer-events:auto}
 #customerBellaPilotV450 .bella-action-v450[data-booking=true]{background:#c64c08;color:#fff;border:1px solid #c64c08;border-radius:9px;box-shadow:0 2px 5px #a7471524}
-html.customer-design.bella-pilot-active-v450 .bottom-nav #navBookAddV220:not(:disabled):not([aria-busy=true]){background:#fff!important;border:1px solid #ef8b37!important;color:#bd4d09!important;box-shadow:none!important}
+html.customer-design.overview-pilot-active-v457:not(.design-reservations-open) .bottom-nav #navBookAddV220:not(:disabled):not([aria-busy=true]){background:#fff!important;border:1px solid #ef8b37!important;color:#bd4d09!important;box-shadow:none!important}
+
+/* v457: no assistant means no reserved assistant space. Only the original reminder is visible. */
+@media(min-height:541px){html.overview-pilot-active-v457:not(.bella-pilot-active-v450).customer-design #bookingTab:not(.hidden):has(#bellaOverviewScrollV454){height:calc(100dvh - max(8px,env(safe-area-inset-top)) - max(8px,env(safe-area-inset-bottom)) - 68px - 6px)!important}}
+html.customer-design.overview-pilot-active-v457.design-reservations-open .bottom-nav #navBookAddV220:not(:disabled):not([aria-busy=true]){background:#ff7416!important;color:#fff!important;border:1px solid #ff7416!important;box-shadow:inset 0 1px 0 #ffffff35!important}
