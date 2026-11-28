@@ -78,7 +78,13 @@ const syntheticDesign=design.replace(/BELLA_PILOT_ACCOUNT_SHA256_V450='[a-f0-9]{
  assert.equal(await meter.count(),0,'switch removes private meter immediately');
  assert.equal(await page.locator('#designTicket .design-paws').evaluate(el=>getComputedStyle(el).borderTopStyle),'dashed');
  await page.evaluate(()=>{window.openBookingPickerV37();window.customerDesignRefreshCalendarV351()});
- assert.equal(await page.locator('.bella-capacity-v450').count(),3,'public bars survive account switch');
+ assert.equal(await page.locator('.bella-capacity-v450').count(),2,'unreserved public bars survive account switch');
+ assert.equal(await page.locator('.booking-day-v37[data-date="2026-11-30"] .bella-capacity-v450').count(),0,'already reserved day does not display capacity bar');
+ for(const [date,occupied] of [['2026-12-01',7],['2026-12-02',10]]){
+   const bar=page.locator('.booking-day-v37[data-date="'+date+'"] .bella-capacity-v450>i');
+   assert.equal(await bar.count(),1);
+   assert(Math.abs(parseFloat(await bar.evaluate(el=>el.style.width))-occupied/11*100)<.01,'public occupancy ratio after switch');
+ }
  await page.evaluate(()=>{window.closeBookingPickerV305();state.session.user.id='synthetic-bella-owner';renderAll();clearSession();});
  await page.waitForTimeout(100);
  assert.equal(await count(),0,'late digest must not remount after logout');
