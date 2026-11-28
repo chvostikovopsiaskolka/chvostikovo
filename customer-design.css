@@ -1299,16 +1299,27 @@ html.bella-pilot-active-v450 #customerBellaPilotV450{display:grid;grid-template-
 #customerBellaPilotV450 .bella-message-v450{font-size:13px;line-height:1.45;margin:0}
 #customerBellaPilotV450 .bella-action-v450{display:block;min-height:44px;background:transparent;border:0;padding:4px 0 0;color:#a8480b;font-size:12px;font-weight:800;text-align:left;cursor:pointer}
 #customerBellaPilotV450 .bella-action-v450[hidden]{display:none!important}
-html.bella-pilot-active-v450.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37:has(.bella-capacity-v450){gap:2px!important;padding:3px 1px!important}
-html.bella-pilot-active-v450 #bookingPickerDaysV37 .bella-capacity-v450{display:block;flex:0 0 4px;width:70%;height:4px;max-width:48px;overflow:hidden;border-radius:5px;background:#135a36;pointer-events:none}
-html.bella-pilot-active-v450 #bookingPickerDaysV37 .bella-capacity-v450>i{display:block;height:100%;width:0;border-radius:inherit;background:#fff}
-html.bella-pilot-active-v450 #bookingPickerDaysV37 .booking-day-v37[data-capacity-level=limited] .bella-capacity-v450{background:#c9a13b}
-html.bella-pilot-active-v450 #bookingPickerDaysV37 .booking-day-v37[data-capacity-level=limited] .bella-capacity-v450>i{background:#694908}
-html.bella-pilot-active-v450 #bookingPickerDaysV37 .booking-day-v37.selected .bella-capacity-v450{background:#d6e8d9}
-html.bella-pilot-active-v450 #bookingPickerDaysV37 .booking-day-v37.selected .bella-capacity-v450>i{background:#21834e}
+html.customer-design #bookingPickerV37 #bookingPickerDaysV37 .calendar-row-v438 .booking-day-v37:has(.bella-capacity-v450){gap:2px!important;padding:3px 1px!important}
+html.customer-design #bookingPickerDaysV37 .bella-capacity-v450{display:block;flex:0 0 4px;width:70%;height:4px;max-width:48px;overflow:hidden;border-radius:5px;background:#135a36;pointer-events:none}
+html.customer-design #bookingPickerDaysV37 .bella-capacity-v450>i{display:block;height:100%;width:0;border-radius:inherit;background:#fff}
+html.customer-design #bookingPickerDaysV37 .booking-day-v37[data-capacity-level=limited] .bella-capacity-v450{background:#c9a13b}
+html.customer-design #bookingPickerDaysV37 .booking-day-v37[data-capacity-level=limited] .bella-capacity-v450>i{background:#694908}
+html.customer-design #bookingPickerDaysV37 .booking-day-v37.selected .bella-capacity-v450{background:#d6e8d9}
+html.customer-design #bookingPickerDaysV37 .booking-day-v37.selected .bella-capacity-v450>i{background:#21834e}
 
 /* v451: white featured notice only; preserve existing material shadow and archive/article styling. */
 #customerNoticeOverviewV376 .customer-notice-panel-v383{background:#fff}
 #customerNoticeOverviewV376 .customer-notice-panel-v383>.lg-v3-material{background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 #customerNoticeOverviewV376 .customer-notice-panel-v383>.lg-v3-material::after,#customerNoticeOverviewV376 .customer-notice-panel-v383 .lg-v3-output{display:none!important}
 #customerNoticeOverviewV376 .customer-notice-thumb-v363 img{box-sizing:border-box;border:1px solid rgba(0,0,0,.24);border-radius:14px}
+
+/* v452: public capacity strips reuse v450; private time remaining replaces only the dashed ticket divider. */
+html.customer-design #designTicket.design-pass-validity-v452{--pass-time-color:#247646;--pass-time-track:#dcece1}
+html.customer-design #designTicket.design-pass-validity-v452[data-validity-level=yellow]{--pass-time-color:#a66b08;--pass-time-track:#f7e9bc}
+html.customer-design #designTicket.design-pass-validity-v452[data-validity-level=red]{--pass-time-color:#be3434;--pass-time-track:#f6dada}
+html.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage .design-validity{color:var(--pass-time-color)!important}
+html.customer-design #designTicket.design-pass-validity-v452 .design-ticket-usage{margin-bottom:10px}
+html.customer-design #designTicket.design-pass-validity-v452 .design-paws{border-top:0!important;margin-top:3px;padding-top:7px!important}
+html.customer-design #designTicket .design-pass-meter-v452{position:relative;display:block;height:5px;width:100%;border-radius:8px;background:var(--pass-time-track);pointer-events:none}
+html.customer-design #designTicket .design-pass-meter-v452>span{display:block;height:100%;border-radius:inherit;background:var(--pass-time-color)}
+html.customer-design #designTicket .design-pass-meter-v452::after{content:"";position:absolute;right:0;bottom:0;width:8px;height:12px;border-right:2px solid var(--pass-time-color);border-bottom:2px solid var(--pass-time-color);border-radius:0 0 5px 0;box-sizing:border-box}

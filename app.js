@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v451';
-const APP_VERSION='2.0.124';
+const APP_BUILD='v452';
+const APP_VERSION='2.0.125';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -759,10 +759,14 @@ function plannedPassSummaryV162(dogId){
   return {total,start,until};
 }
 function renderPassSummaryCore(){
+  const source=$('passSummary');
+  delete source.dataset.validityStartV452;delete source.dataset.validityEndV452;
   const d=selectedDog(),today=bratislavaToday();
   const completedToday=d?(state.data?.passes||[]).find(pass=>passAllowsDogV244(pass,d.id)&&Number(pass.used_entries)===Number(pass.total_entries)&&(state.data?.reservations||[]).some(r=>Number(r.dog_id)===Number(d.id)&&Number(r.pass_id)===Number(pass.id)&&r.status==='attended'&&r.reservation_date===today)):null;
   const p=completedToday||(d?activePassFor(d.id):null),planned=d?plannedPassSummaryV162(d.id):null;
   if(p){
+    // Use only the actual dates of the same active pass rendered below; never infer a private progress period.
+    if(p.status==='active'&&!p.no_expiry&&p.valid_from&&p.valid_until){source.dataset.validityStartV452=p.valid_from;source.dataset.validityEndV452=p.valid_until;}
     const firstBooked=Number(p.used_entries)===0?(state.data?.reservations||[]).filter(r=>Number(r.dog_id)===Number(d.id)&&Number(r.pass_id)===Number(p.id)&&r.status==='booked'&&r.reservation_date>=today).map(r=>r.reservation_date).sort()[0]:null;
     let start=p.valid_from||firstBooked,until=p.valid_until;
     if(start&&!until&&!p.no_expiry){const [year,month,day]=start.split('-').map(Number),endMonth=new Date(Date.UTC(year,month-1+2,1)),lastDay=new Date(Date.UTC(endMonth.getUTCFullYear(),endMonth.getUTCMonth()+1,0)).getUTCDate();endMonth.setUTCDate(Math.min(day,lastDay));until=endMonth.toISOString().slice(0,10)}
