@@ -1777,42 +1777,40 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 .lead-brand-live #aria-caretakers [data-safety-diplomas] { max-width: 40rem; }
 .lead-brand-live #aria-caretakers [data-safety-diplomas] img { max-width: 12rem; }
 
-/* Paid desktop hero: two alternating text/photo pairs; preserve mobile order. */
+/* Paid desktop hero: heading, two aligned portraits, benefits and CTA in normal flow.
+   Preserve mobile/tablet and the standalone iOS Safari crop. */
 @media (min-width: 1024px) {
   .lead-brand-live .hero-safe-top {
     min-height: 100svh;
     justify-content: center;
     padding-block-start: .5rem;
-    padding-block-end: 1rem;
+    padding-block-end: 6.5rem;
   }
   .lead-brand-live [data-aria-hero-content] > div:first-child { padding-block-start: .5rem; }
   .lead-brand-live [data-lead-hero-grid] {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: auto auto auto auto;
-    align-items: start;
-    grid-template-areas: "service photo-first" "title photo-first" "photo-second pills" "photo-second action";
-    column-gap: 3rem;
-    row-gap: 1rem;
-    text-align: left;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "service" "title" "photos" "pills" "action";
+    justify-items: center;
+    row-gap: .75rem;
+    text-align: center;
+    --lead-desktop-row-width: min(100%, 44rem, calc(68svh + 1rem));
   }
   .lead-brand-live [data-aria-hero-heading-spacer] { display: none; }
-  .lead-brand-live [data-lead-hero-grid] h1 { grid-area: title; align-self: start; position: relative; margin: 0; font-size: clamp(2.25rem, calc(7svh - 12px), 3.25rem); }
-  /* Keep the original heading flow box (and therefore the approved desktop fold).
-     Only paint the two-line version in that exact reserved space. */
-  .lead-brand-live [data-lead-title-flow] { display: block; opacity: 0; }
-  .lead-brand-live [data-lead-title-display] { display: block; position: absolute; inset: 0; font-size: min(1em, clamp(2rem, calc(2vw + .8rem), 2.375rem)); line-height: 1.05; }
-  .lead-brand-live [data-lead-title-display] > span:first-child { white-space: nowrap; }
-  .lead-brand-live [data-aria-service-group] { grid-area: service; align-self: end; margin: 0; }
-  .lead-brand-live [data-aria-service-badge] { font-size: 0.875rem; text-align: left; }
-  .lead-brand-live [data-lead-hero-pills] { grid-area: pills; align-self: end; width: 100%; margin: 0; max-width: none; flex-wrap: nowrap; justify-content: space-between; gap: 0.75rem; }
-  .lead-brand-live [data-lead-hero-pill] { flex: 1 1 auto; white-space: nowrap; text-align: center; font-size: 0.875rem; padding: 0.5rem 0.75rem; }
-  .lead-brand-live [data-lead-hero-photos] { display: contents; }
-  .lead-brand-live [data-lead-hero-photo] { position: relative; height: clamp(216px, calc(29svh - 8px), 264px); min-height: 0; }
-  .lead-brand-live [data-lead-hero-photo="1"] { grid-area: photo-first; }
-  .lead-brand-live [data-lead-hero-photo="2"] { grid-area: photo-second; }
-  .lead-brand-live [data-lead-hero-photo] img { position: absolute; inset: 0; }
-  .lead-brand-live [data-lead-hero-action] { grid-area: action; width: 100%; margin: 0; margin-block-start: .5rem; max-width: none; align-items: stretch; align-self: start; }
+  .lead-brand-live [data-lead-hero-grid] h1 { grid-area: title; margin: 0; font-size: clamp(2rem, 4.5svh, 3rem); }
+  .lead-brand-live [data-lead-title-flow] { display: block; opacity: 1; }
+  .lead-brand-live [data-lead-title-flow] > span { color: #b82e7f; }
+  .lead-brand-live [data-lead-title-display] { display: none; }
+  .lead-brand-live [data-aria-service-group] { grid-area: service; margin: 0; }
+  .lead-brand-live [data-aria-service-badge] { font-size: .875rem; text-align: center; }
+  .lead-brand-live [data-lead-hero-photos] { grid-area: photos; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; width: var(--lead-desktop-row-width); max-width: none; margin: 0; }
+  .lead-brand-live [data-lead-hero-photo] { position: relative; width: 100%; height: clamp(216px, 34svh, 320px); min-height: 0; }
+  /* Portrait originals: a near-square frame crops less than the old wide tiles.
+     Keep the original top edge in view; no desktop hover zoom. */
+  .lead-brand-live [data-lead-hero-photo] img { position: absolute; inset: 0; object-fit: cover; object-position: 50% 0%; }
+  .lead-brand-live [data-lead-hero-pills] { grid-area: pills; width: var(--lead-desktop-row-width); margin: 0; max-width: none; flex-wrap: nowrap; justify-content: space-between; gap: .75rem; }
+  .lead-brand-live [data-lead-hero-pill] { flex: 1 1 auto; white-space: nowrap; text-align: center; font-size: .875rem; padding: .5rem .75rem; }
+  .lead-brand-live [data-lead-hero-action] { grid-area: action; width: var(--lead-desktop-row-width); margin: 0; max-width: none; align-items: stretch; }
   .lead-brand-live [data-aria-lead-hero-cta] { font-size: 1rem; }
   .lead-brand-live [data-aria-lead-review-spacing] { margin-top: .75rem; }
 }
