@@ -49,6 +49,25 @@ const fixture=require('./liquid-v3-fixture.cjs');
    await page.waitForFunction(()=>document.querySelector('#navBooking')?.textContent?.includes('Prehľad'));
    assert.match(await page.locator('#bookingPickerTaxiByDayV91').innerText(),/Tam aj späť/);
    await page.locator('#bookingPickerCloseV37').click();
+   await page.route('**/storage/v1/object/public/chvostikovo-bulletin-public/**',route=>route.fulfill({body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j8WQAAAAASUVORK5CYII=','base64'),contentType:'image/png'}));
+   await page.evaluate(()=>{
+     window.__noticeFixture=[{id:12346,active:true,title:'Featured title',body:'Full article body, not the teaser.',overview_text:'Short teaser.',valid_from:'2026-01-01',valid_until:null,show_in_overview:true,image_path:'fixture/notice.png'}];
+     window.__noticeReads=[];
+     return loadAnnouncements(true);
+   });
+   const featured=page.locator('#customerNoticeOverviewV376 [data-announcement-id="12346"]');
+   await expect(featured).toBeVisible();
+   assert.equal(await featured.locator('.customer-notice-excerpt-v363').textContent(),'Short teaser.');
+   assert(!(await featured.textContent()).includes('Full article body'));
+   assert.equal(await featured.locator('.customer-notice-panel-v383').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
+   const thumb=featured.locator('img');
+   await expect(thumb).toHaveCSS('border-top-width','1px');
+   await expect(thumb).toHaveCSS('border-top-color','rgba(0, 0, 0, 0.24)');
+   assert.equal(await featured.locator('.customer-notice-panel-v383').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true);
+   assert.equal(await page.evaluate(()=>window.__noticeReads.length),0,'preview does not mark read');
+   await featured.click();
+   await expect(page.locator('#customerBulletinArticleV229 .customer-bulletin-article-v229')).toHaveText('Full article body, not the teaser.');
+   await page.locator('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();
    await page.evaluate(()=>{
      window.__noticeFixture=[{id:12345,active:true,title:'Súkromný titul oznamu',body:'Zostáva v slovenčine',
        valid_from:'2026-01-01',valid_until:null,show_in_overview:false,created_at:'2026-01-01',image_path:null}];
