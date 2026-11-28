@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v457';
-const APP_VERSION='2.0.130';
+const APP_BUILD='v458';
+const APP_VERSION='2.0.131';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -4993,9 +4993,13 @@ function installVaccinationViewerZoomV244(modal){
     if(!$('designNearest')||!anchor||!selected.length){host?.remove();return;}
     if(!host){host=el('section','customer-notice-overview-v376');host.id='customerNoticeOverviewV376';host.setAttribute('aria-label','Oznamy škôlky');}
     if(anchor.nextElementSibling!==host)anchor.after(host);
-    host.dataset.pilotV453=String(pilot);
+    const expectedMode=String(pilot),renderedMode=host.dataset.pilotV453;
     const key=JSON.stringify([pilot,selected.map(row=>[row.id,row.title,row.body,row.overview_text,row.image_path,rowsState.read.has(Number(row.id))])]);
-    if(host.dataset.contentKey===key)return;
+    // Do not accept a cached/legacy layout as the approved preview just because its announcement data is unchanged.
+    const panel=host.querySelector('.customer-notice-panel-v383');
+    const correctLayout=!!panel&&!!host.querySelector('.customer-notice-megaphone-v454')===pilot&&!!host.querySelector('.customer-notice-footer-v453')===pilot&&(panel.querySelector('.customer-notice-thumb-v363')?.nextElementSibling?.classList.contains('customer-notice-content-v363')===true)===pilot;
+    if(renderedMode===expectedMode&&host.dataset.contentKey===key&&correctLayout)return;
+    host.dataset.pilotV453=expectedMode;
     const oldTrack=host.querySelector('.customer-notice-carousel-v376');
     const oldIndex=oldTrack?Math.round(oldTrack.scrollLeft/Math.max(1,(oldTrack.firstElementChild?.offsetWidth||0)+(parseFloat(getComputedStyle(oldTrack).columnGap)||12))):0;
     host.dataset.contentKey=key;
