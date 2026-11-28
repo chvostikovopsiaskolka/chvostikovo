@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Car, MapPin } from "lucide-react";
-import { GALLERY, MAP_LINK, DAYCARE_LOCATION_ANSWER, DAYCARE_LOCATION_QUESTION } from "@/content/site";
+import { GALLERY, MAP_LINK, DAYCARE_LOCATION_WEB_COPY, DAYCARE_LOCATION_QUESTION } from "@/content/site";
 import { FaqAnswer } from "./ContextFaq";
 import { DaycareArrivalMap } from "./DaycareArrivalMap";
 import { PhotoLightbox } from "./PhotoLightbox";
@@ -48,7 +48,7 @@ export function AriaMosaicGallery({ paidLead = false }: { paidLead?: boolean }) 
         <h2 id="aria-mosaic-heading" className="section-title mt-2 text-center text-[clamp(22px,5.2vw,38px)]">{paidLead ? "Kde bude váš psík počas dňa?" : "Takto vyzerá Chvostíkovo"}</h2>
         {paidLead && (
           <div data-daycare-location-copy className="mx-auto mt-3 max-w-2xl space-y-2 text-center text-sm leading-relaxed text-forest/80 sm:text-base lg:max-w-none">
-            <FaqAnswer question={DAYCARE_LOCATION_QUESTION} answer={DAYCARE_LOCATION_ANSWER} compact />
+            <FaqAnswer question={DAYCARE_LOCATION_QUESTION} answer={DAYCARE_LOCATION_WEB_COPY} compact />
           </div>
         )}
         <div data-aria-location-chips className="mx-auto mt-4 grid max-w-md grid-cols-2 gap-2 sm:hidden">
@@ -61,11 +61,11 @@ export function AriaMosaicGallery({ paidLead = false }: { paidLead?: boolean }) 
             <Car className="size-4 shrink-0 text-coral" aria-hidden /> Bezplatné parkovanie
           </span>
         </div>
+        {paidLead && <DaycareArrivalMap className="mt-4 sm:mt-6" onOpen={() => void trackCookielessInteraction("nav_click", "lead_aria_location_poljska6", "sk")} />}
         <div className="mt-6 grid grid-cols-2 gap-2.5 sm:gap-4">
           <div className="grid gap-2.5 sm:gap-4">{left.map((photo, i) => tile(photo, i * 2, i))}</div>
           <div className="grid gap-2.5 pt-5 sm:gap-4 sm:pt-9">{right.map((photo, i) => tile(photo, i * 2 + 1, i))}</div>
         </div>
-        {paidLead && <DaycareArrivalMap className="mt-4 sm:mt-6" onOpen={() => void trackCookielessInteraction("nav_click", "lead_aria_location_poljska6", "sk")} />}
       </div>
       <PhotoLightbox photos={photos} active={selected} onChange={setSelected}
         onClose={() => setSelected(null)} />
